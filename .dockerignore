@@ -1,0 +1,9 @@
+*
+!package.json
+!bun.lock
+!bunfig.toml
+!next.config.mjs
+!tsconfig.json
+!public/**
+!src/**
+!postcss.config.cjs

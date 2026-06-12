@@ -1,0 +1,15 @@
+npm-debug.log*
+bun.lock
+README.md
+node_modules
+LICENSE
+.env
+
+.dockerignore
+.next
+dist
+.husky
+.eslintcache
+postcss.config.cjs
+Dockerfile
+scripts
