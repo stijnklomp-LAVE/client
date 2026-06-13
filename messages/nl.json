@@ -1,31 +1,65 @@
 {
 	"home": {
-		"title": "Location-Agnostic Video Editor",
-		"subtitle": "Bewerk video vanaf elk apparaat met media opgeslagen lokaal, op je NAS of in de cloud.",
+		"title": "Bewerk Video Vanaf Elke Locatie",
+		"subtitle": "Een locatie-onafhankelijke videobewerker die naadloos lokale, NAS- en cloudmedia combineert — met studio-kwaliteit controle zonder de opslagrekening.",
+		"heroCta": "Aan de Slag",
+		"heroSecondary": "Meer Informatie",
+		"stats": {
+			"editing": "Zero-Footprint Bewerken",
+			"editingDesc": "Bewerk hoge-resolutie footage zonder een byte naar de cloud te uploaden.",
+			"sync": "Multi-Device Synchronisatie",
+			"syncDesc": "Begin op je desktop, ga verder op je tablet — je bewerkingen volgen je.",
+			"storage": "Flexibele Opslag",
+			"storageDesc": "Lokaal, NAS of cloud — kies waar je media leeft.",
+			"fidelity": "Kwaliteitscontrole",
+			"fidelityDesc": "Proxy previews in de cloud, volledige resolutie wanneer nodig."
+		},
+		"features": {
+			"title": "Gebouwd voor een Gedistribueerde Wereld",
+			"subtitle": "Jouw media, jouw infrastructuur — bewerk vanaf elk apparaat zonder gebonden te zijn aan één machine.",
+			"local": {
+				"title": "Lokaal bewerken",
+				"description": "Importeer 4K-video van lokale opslag, knip, voeg overgangen toe en exporteer in volledige resolutie — zonder de cloud aan te raken."
+			},
+			"remote": {
+				"title": "Extern bewerken",
+				"description": "Werk met gecomprimeerde cloud proxies voor ruimte-efficiënt bewerken. Bekijk in lagere resolutie, render in volledige kwaliteit."
+			},
+			"crossDevice": {
+				"title": "Cross-device workflow",
+				"description": "Start een project op je desktop, ga verder op je tablet. Tijdlijnwijzigingen synchroniseren naadloos tussen apparaten."
+			},
+			"multiSource": {
+				"title": "Multi-bron import",
+				"description": "Importeer video van lokale opslag, afbeeldingen uit de cloud, clips van je NAS. Allemaal bijgehouden met brondata."
+			},
+			"privacy": {
+				"title": "Privacy eerst",
+				"description": "Je media blijft waar je het plaatst. Versleutelde overdrachten, rolgebaseerde toegang en nul onnodige cloud-uploads."
+			},
+			"metadata": {
+				"title": "Slimme metadata",
+				"description": "Elke bewerking wordt opgeslagen als metadata. Herstel elke vorige staat, werk veilig samen en render pas als alle data gereed is."
+			}
+		},
+		"workflow": {
+			"title": "Hoe Het Werkt",
+			"subtitle": "Een eenvoudige pijplijn in vier stappen van bronmateriaal naar eindresultaat.",
+			"step1": "Importeer of maak assets",
+			"step1Desc": "Maak media of voeg het toe vanuit elke bron — lokale schijven, netwerkopslag of clouddiensten.",
+			"step2": "Definieer segmenten",
+			"step2Desc": "Stel in/uit-punten in, splits en voeg clips samen met frameniveau-precisie.",
+			"step3": "Order tijdlijn",
+			"step3Desc": "Sleep segmenten naar de tijdlijn. Knip, laag en bekijk een voorbeeld.",
+			"step4": "Render uitvoer",
+			"step4Desc": "Render lokaal voor volledige kwaliteit of gebruik cloud processing voor snelheid."
+		},
+		"cta": {
+			"title": "Klaar om Zonder Grenzen te Bewerken?",
+			"subtitle": "Begin met bewerken op meerdere apparaten, locaties en opslag-backends — allemaal vanuit je browser.",
+			"primary": "Start een Project",
+			"secondary": "Bekijk op GitHub"
+		},
 		"footer": "Location-Agnostic Video Editor — Gebouwd met Next.js, TypeScript en Mantine"
-	},
-	"showcase": {
-		"notifications": {
-			"title": "Meldingen",
-			"success": "Toon succes",
-			"error": "Toon fout",
-			"withIcon": "Met icoon",
-			"asyncProgress": "Asynchroon"
-		},
-		"icons": {
-			"title": "Tabler Iconen",
-			"description": "Meer dan 5.000 iconen beschikbaar via @tabler/icons-react."
-		},
-		"motion": {
-			"title": "Beweging (Animatie)",
-			"fadeIn": "Invliegen",
-			"hoverMe": "Hover mij",
-			"spinning": "Draaiend"
-		}
-	},
-	"locale": {
-		"label": "Taal",
-		"en": "English",
-		"nl": "Nederlands"
 	}
 }

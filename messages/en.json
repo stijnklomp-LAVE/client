@@ -1,31 +1,65 @@
 {
 	"home": {
-		"title": "Location-Agnostic Video Editor",
-		"subtitle": "Edit video from any device using media stored locally, on your NAS, or in the cloud.",
+		"title": "Edit Video From Anywhere",
+		"subtitle": "A location-agnostic video editor that seamlessly combines local, NAS, and cloud media — giving you studio-grade control without the storage bill.",
+		"heroCta": "Get Started",
+		"heroSecondary": "Learn More",
+		"stats": {
+			"editing": "Zero-Footprint Editing",
+			"editingDesc": "Edit high-res footage without uploading a single byte to the cloud.",
+			"sync": "Multi-Device Sync",
+			"syncDesc": "Start on desktop, continue on tablet — your edits follow you.",
+			"storage": "Flexible Storage",
+			"storageDesc": "Local, NAS, or cloud — choose where your media lives.",
+			"fidelity": "Fidelity Control",
+			"fidelityDesc": "Proxy previews in the cloud, full-resolution when you need it."
+		},
+		"features": {
+			"title": "Built for a Distributed World",
+			"subtitle": "Your media, your infrastructure — edit from any device without being tied to a single machine.",
+			"local": {
+				"title": "Local editing",
+				"description": "Import 4K video from local storage, trim, add transitions, and export at full resolution — all without touching the cloud."
+			},
+			"remote": {
+				"title": "Remote editing",
+				"description": "Work with compressed cloud proxies for space-efficient editing. Preview with lower-resolution, render at full quality."
+			},
+			"crossDevice": {
+				"title": "Cross-device workflow",
+				"description": "Start a project on your desktop, continue on your tablet. Timeline changes sync seamlessly across devices."
+			},
+			"multiSource": {
+				"title": "Multi-source import",
+				"description": "Import video from local storage, images from the cloud, clips from your NAS. All tracked with source metadata."
+			},
+			"privacy": {
+				"title": "Privacy first",
+				"description": "Your media stays where you put it. Encrypted transfers, role-based access, and zero unnecessary cloud uploads."
+			},
+			"metadata": {
+				"title": "Smart metadata",
+				"description": "Every edit is stored as metadata. Restore any previous state, collaborate safely, and render only when all data is ready."
+			}
+		},
+		"workflow": {
+			"title": "How It Works",
+			"subtitle": "A simple four-stage pipeline from source media to final render.",
+			"step1": "Import or create Assets",
+			"step1Desc": "Create media or add it from any source — local drives, network storage, or cloud services.",
+			"step2": "Define segments",
+			"step2Desc": "Set in/out points, split and merge clips with frame-level precision.",
+			"step3": "Arrange timeline",
+			"step3Desc": "Drag and drop segments onto the timeline. Trim, layer, and preview.",
+			"step4": "Render output",
+			"step4Desc": "Render locally for full fidelity or use cloud processing for speed."
+		},
+		"cta": {
+			"title": "Ready to Edit Without Boundaries?",
+			"subtitle": "Start editing across devices, locations, and storage backends — all from your browser.",
+			"primary": "Start a Project",
+			"secondary": "View on GitHub"
+		},
 		"footer": "Location-Agnostic Video Editor — Built with Next.js, TypeScript, and Mantine"
-	},
-	"showcase": {
-		"notifications": {
-			"title": "Notifications",
-			"success": "Show success",
-			"error": "Show error",
-			"withIcon": "With icon",
-			"asyncProgress": "Async progress"
-		},
-		"icons": {
-			"title": "Tabler Icons",
-			"description": "Over 5,000 icons available from @tabler/icons-react."
-		},
-		"motion": {
-			"title": "Motion (Animation)",
-			"fadeIn": "Fade in",
-			"hoverMe": "Hover me",
-			"spinning": "Spinning"
-		}
-	},
-	"locale": {
-		"label": "Language",
-		"en": "English",
-		"nl": "Nederlands"
 	}
 }

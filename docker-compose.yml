@@ -4,11 +4,6 @@ x-acceptance: &acceptance
     - .:/src
   working_dir: /src
   tty: true
-  depends_on:
-    # rabbitmq:
-    #   condition: service_healthy
-    # db-migration:
-    #   condition: service_completed_successfully
   environment:
     RABBIT_HOST: rabbitmq
     DATABASE_URL: "postgresql://dev:admin123@db:5432/video-editor?schema=public"
@@ -19,11 +14,6 @@ x-acceptance: &acceptance
 
 x-app: &app
   tty: true
-  depends_on:
-    # rabbitmq:
-    #   condition: service_healthy
-    # db-migration:
-    #   condition: service_completed_successfully
   environment:
     RABBIT_HOST: rabbitmq
     DATABASE_URL: "postgresql://dev:admin123@db:5432/video-editor?schema=public"
