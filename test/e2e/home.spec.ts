@@ -6,7 +6,7 @@ test.describe("Home page", () => {
 
 		await expect(
 			page.getByRole("heading", {
-				name: /welcome to your next\.js template/i,
+				name: /location-agnostic video editor/i,
 			}),
 		).toBeVisible()
 	})

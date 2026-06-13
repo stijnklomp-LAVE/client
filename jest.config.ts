@@ -5,7 +5,7 @@ const createJestConfig = nextJest({ dir: "./" })
 
 const customJestConfig: Config = {
 	clearMocks: true,
-	displayName: "nextjs-template",
+	displayName: "video-editor-client",
 	setupFilesAfterEnv: ["<rootDir>/test/jest.setup.ts"],
 	testEnvironment: "jsdom",
 	testPathIgnorePatterns: ["<rootDir>/node_modules/", "<rootDir>/test/e2e/"],

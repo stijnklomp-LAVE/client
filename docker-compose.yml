@@ -11,13 +11,13 @@ x-acceptance: &acceptance
     #   condition: service_completed_successfully
   environment:
     RABBIT_HOST: rabbitmq
-    DATABASE_URL: "postgresql://dev:admin123@db:5432/nextjs?schema=template"
+    DATABASE_URL: "postgresql://dev:admin123@db:5432/video-editor?schema=public"
   env_file:
     - path: .env.development
   ports:
     - 3001:3001
 
-x-nextjs: &nextjs
+x-app: &app
   tty: true
   depends_on:
     # rabbitmq:
@@ -26,7 +26,7 @@ x-nextjs: &nextjs
     #   condition: service_completed_successfully
   environment:
     RABBIT_HOST: rabbitmq
-    DATABASE_URL: "postgresql://dev:admin123@db:5432/nextjs?schema=template"
+    DATABASE_URL: "postgresql://dev:admin123@db:5432/video-editor?schema=public"
   env_file:
     - path: .env.development
   ports:
@@ -34,7 +34,7 @@ x-nextjs: &nextjs
 
 services:
   local:
-    <<: *nextjs
+    <<: *app
     build:
       context: .
     profiles:
@@ -42,7 +42,7 @@ services:
       - test
 
   dev:
-    <<: *nextjs
+    <<: *app
     image: oven/bun:alpine
     volumes:
       - .:/src
@@ -91,7 +91,7 @@ services:
   #   environment:
   #     POSTGRES_USER: ${DATABASE_USERNAME:-dev}
   #     POSTGRES_PASSWORD: ${DATABASE_PASSWORD:-admin123}
-  #     POSTGRES_DB: ${DATABASE_DB:-nextjs}
+  #     POSTGRES_DB: ${DATABASE_DB:-video-editor}
   #   env_file:
   #     - path: .env.development
   #   ports:

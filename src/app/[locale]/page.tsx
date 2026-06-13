@@ -30,7 +30,7 @@ export default async function HomePage(): Promise<React.JSX.Element> {
 					alignItems: "center",
 				}}>
 				<Title order={3} style={{ color: "var(--color-text-primary)" }}>
-					nextjs-template
+					Video Editor
 				</Title>
 				<Group gap="sm">
 					<LocaleSwitcher />

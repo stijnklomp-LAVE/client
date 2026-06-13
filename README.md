@@ -1,43 +1,54 @@
-# Next.js template
+# Location-Agnostic Video Editor
 
-<p align="center">This project template serves as a starting point for building efficient and scalable web applications with <a href="https://nextjs.org/" target="_blank">Next.js</a>, <a href="https://www.typescriptlang.org/" target="_blank">TypeScript</a>, and best practices in place. It comes pre-configured with essential tools to ensure code quality, maintainability, and a streamlined development workflow.</p>
-<p align="center">
-<img src="https://img.shields.io/github/license/stijnklomp/nextjs-template?style=flat" alt="Package License" />
-</p>
+<p align="center">A web-based video editor that works with media from any location — local storage, home NAS, or cloud — minimizing remote storage costs while enabling editing from any device.</p>
 
 ## Features
 
-- Next.js: The React framework for production with server-side rendering and static site generation.
-- TypeScript: Static typing with TypeScript, enhancing code quality and developer productivity.
-- Mantine: React components library with PostCSS-based styling and dark/light mode theming.
-- Prettier & ESLint: Automatic code formatting and linting for consistent code style and adherence to best practices.
-- Bun: Runtime environment, bundler and unit, feature, and acceptance tests.
-- Husky: Git hooks for running linting and tests before commits, ensuring code quality standards are met.
-- TypeDoc: Automatic generation of TypeScript documentation for improved code clarity and collaboration.
-- i18n: Internationalization with next-intl, including locale detection, message files, and a locale switcher.
-- Tabler Icons: Over 5,000 open-source icons integrated with Mantine.
-- Motion: Declarative animations powered by the Motion library.
+- **Flexible storage** — Import media from local storage, home NAS, cloud services, and network APIs.
+- **Fidelity management** — Uses lossy compressed proxies in the cloud; high-fidelity frames available when working locally.
+- **Multi-device editing** — Sync projects across devices using edit metadata and video segment concepts.
+- **Frame-level editing** — Full precision when local or high-quality media is available.
+- **Cost-effective** — Minimize cloud storage by keeping high-res assets where it makes sense.
 
-## Installation
+## Architecture
+
+```
+Assets → Segments (Timelines) → Timeline → Render
+```
+
+- **Assets** — Media files located anywhere (local, NAS, cloud).
+- **Segments** — Video clips defined by in/out time ranges; can be split, merged, and rearranged.
+- **Timeline** — Full project timeline composed of segments.
+- **Render** — Final video output using local or cloud-based rendering.
+
+## Built with
+
+- [Next.js](https://nextjs.org/) — React framework with server-side rendering
+- [TypeScript](https://www.typescriptlang.org/) — Static typing
+- [Mantine](https://mantine.dev/) — Component library with PostCSS theming
+- [Motion](https://motion.dev/) — Declarative animations
+- [Tabler Icons](https://tabler.io/icons) — Open-source icon set
+- [next-intl](https://next-intl.dev/) — Internationalization
+- [Bun](https://bun.sh/) — Runtime, bundler, and test runner
+
+## Getting started
 
 ```sh
 bun install --frozen-lockfile
 ```
 
-## Running the app
-
 ```sh
-# Development in watch mode
+# Development
 bun run dev
 
-# Production mode
+# Production
 bun run build && bun run start
 ```
 
 ### With Docker
 
 ```sh
-docker build -t nextjs-template . && docker run --rm -p 3000:3000 nextjs-template
+docker build -t video-editor-client . && docker run --rm -p 3000:3000 video-editor-client
 ```
 
 ### With Docker Compose
@@ -126,4 +137,4 @@ bun run typecheck
 
 ## License
 
-This project is licensed under the MIT License. Feel free to customize and use it for your own projects.
+FSL-1.1-MIT

@@ -1,7 +1,7 @@
 {
-	"name": "Next.js Template",
-	"short_name": "Next.js",
-	"description": "Next.js template with Mantine, PostCSS theming, and TypeScript",
+	"name": "Location-Agnostic Video Editor",
+	"short_name": "Video Editor",
+	"description": "A web-based video editor that works with media from any location — local, NAS, or cloud",
 	"start_url": "/",
 	"display": "standalone",
 	"background_color": "#0a0a0a",
@@ -23,6 +23,6 @@
 		}
 	],
 	"screenshots": [],
-	"categories": ["development", "utilities"],
+	"categories": ["video", "productivity", "utilities"],
 	"prefer_related_applications": false
 }

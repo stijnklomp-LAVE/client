@@ -1,8 +1,8 @@
 {
 	"home": {
-		"title": "Welkom bij je Next.js Template",
-		"subtitle": "Gebouwd met Next.js 16, TypeScript, Mantine en een custom PostCSS thema-systeem.",
-		"footer": "Next.js Template — Gebouwd met TypeScript, Mantine en PostCSS"
+		"title": "Location-Agnostic Video Editor",
+		"subtitle": "Bewerk video vanaf elk apparaat met media opgeslagen lokaal, op je NAS of in de cloud.",
+		"footer": "Location-Agnostic Video Editor — Gebouwd met Next.js, TypeScript en Mantine"
 	},
 	"showcase": {
 		"notifications": {
