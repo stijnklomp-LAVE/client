@@ -48,7 +48,7 @@ bun run build && bun run start
 ### With Docker
 
 ```sh
-docker build -t video-editor-client . && docker run --rm -p 3000:3000 video-editor-client
+docker build -t client . && docker run --rm -p 3000:3000 client
 ```
 
 ### With Docker Compose
