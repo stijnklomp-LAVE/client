@@ -2,8 +2,8 @@
 
 import { SimpleGrid, Text, Title } from "@mantine/core"
 import {
-	IconDeviceDesktop,
 	IconCloudComputing,
+	IconDeviceDesktop,
 	IconDevices,
 	IconFileImport,
 	IconShieldLock,
@@ -70,7 +70,7 @@ export function FeaturesSection({
 						style={{
 							fontSize: "clamp(1.5rem, 3vw, 2rem)",
 							fontWeight: 700,
-							color: "var(--color-text-primary)",
+							color: "var(--text-primary)",
 							marginBottom: 12,
 						}}>
 						{translations.title}
@@ -78,7 +78,7 @@ export function FeaturesSection({
 					<Text
 						size="md"
 						style={{
-							color: "var(--color-text-secondary)",
+							color: "var(--text-secondary)",
 							maxWidth: 600,
 							margin: "0 auto",
 							lineHeight: 1.6,
@@ -106,9 +106,9 @@ export function FeaturesSection({
 										borderRadius: 16,
 										background: `
 											radial-gradient(ellipse 100% 60% at 50% 100%, ${feature.color}15, transparent),
-											var(--color-bg-primary)
+											var(--bg-primary)
 										`,
-										border: "1px solid var(--color-border-primary)",
+										border: "1px solid var(--border-primary)",
 										height: "100%",
 									}}>
 									<div
@@ -132,7 +132,7 @@ export function FeaturesSection({
 										style={{
 											fontSize: 16,
 											fontWeight: 600,
-											color: "var(--color-text-primary)",
+											color: "var(--text-primary)",
 											marginBottom: 8,
 										}}>
 										{translations[`${feature.key}.title`]}
@@ -140,7 +140,7 @@ export function FeaturesSection({
 									<Text
 										size="sm"
 										style={{
-											color: "var(--color-text-secondary)",
+											color: "var(--text-secondary)",
 											lineHeight: 1.6,
 										}}>
 										{

@@ -1,8 +1,5 @@
-import { Group, Title } from "@mantine/core"
 import { getTranslations } from "next-intl/server"
 
-import { ThemeToggle } from "@/components/ui/theme-toggle"
-import { LocaleSwitcher } from "@/components/ui/locale-switcher"
 import { HeroBanner } from "@/components/ui/hero-banner"
 import { StatsBanner } from "@/components/ui/stats-banner"
 import { FeaturesSection } from "@/components/ui/features-section"
@@ -59,62 +56,9 @@ export default async function HomePage(): Promise<React.JSX.Element> {
 				minHeight: "100vh",
 				display: "flex",
 				flexDirection: "column",
-				background: "var(--color-bg-primary)",
-				color: "var(--color-text-primary)",
+				background: "var(--bg-primary)",
+				color: "var(--text-primary)",
 			}}>
-			<header
-				style={{
-					position: "sticky",
-					top: 0,
-					zIndex: 100,
-					padding: "12px 24px",
-					background: "var(--color-bg-primary)",
-					borderBottom: "1px solid var(--color-border-primary)",
-					display: "flex",
-					justifyContent: "space-between",
-					alignItems: "center",
-				}}>
-				<Group gap="xs">
-					<div
-						style={{
-							width: 28,
-							height: 28,
-							borderRadius: 8,
-							background:
-								"linear-gradient(135deg, #228be6, #7950f2)",
-							display: "flex",
-							alignItems: "center",
-							justifyContent: "center",
-						}}>
-						<svg
-							width={16}
-							height={16}
-							viewBox="0 0 24 24"
-							fill="none"
-							stroke="white"
-							strokeWidth={2}
-							strokeLinecap="round"
-							strokeLinejoin="round">
-							<polygon points="5 3 19 12 5 21 5 3" />
-						</svg>
-					</div>
-					<Title
-						order={4}
-						style={{
-							color: "var(--color-text-primary)",
-							fontWeight: 700,
-							fontSize: 16,
-						}}>
-						Video Editor
-					</Title>
-				</Group>
-
-				<Group gap="sm">
-					<LocaleSwitcher />
-					<ThemeToggle />
-				</Group>
-			</header>
-
 			<main style={{ flex: 1 }}>
 				<HeroBanner
 					title={t("title")}
@@ -141,9 +85,9 @@ export default async function HomePage(): Promise<React.JSX.Element> {
 				style={{
 					padding: "20px 24px",
 					textAlign: "center",
-					borderTop: "1px solid var(--color-border-primary)",
-					background: "var(--color-bg-secondary)",
-					color: "var(--color-text-tertiary)",
+					borderTop: "1px solid var(--border-primary)",
+					background: "var(--bg-secondary)",
+					color: "var(--text-tertiary)",
 					fontSize: 13,
 				}}>
 				{t("footer")}

@@ -35,7 +35,8 @@
 			}
 		],
 		"paths": {
-			"@/*": ["./src/*"]
+			"@/*": ["./src/*"],
+			"@prisma": ["./generated/prisma/client.ts"]
 		}
 	},
 	"include": [
@@ -44,7 +45,8 @@
 		"**/*.tsx",
 		".next/types/**/*.ts",
 		".next/dev/types/**/*.ts",
-		"**/*.mts"
+		"**/*.mts",
+		"generated/**/*.ts"
 	],
 	"exclude": [
 		"node_modules",

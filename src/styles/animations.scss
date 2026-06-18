@@ -1,0 +1,42 @@
+// ==============================
+// Continuous CSS animations
+// (non-continuous entrance animations use motion)
+// ==============================
+
+@keyframes spin-cw {
+	to { transform: rotate(360deg); }
+}
+
+@keyframes spin-ccw {
+	to { transform: rotate(-360deg); }
+}
+
+@keyframes float {
+	0%, 100% { transform: translateY(0); }
+	50% { transform: translateY(-8px); }
+}
+
+@keyframes pulse {
+	0%, 100% { transform: scale(1); }
+	50% { transform: scale(1.05); }
+}
+
+// ==============================
+// Utility classes
+// ==============================
+
+.animate-spin-cw {
+	animation: spin-cw 20s linear infinite;
+}
+
+.animate-spin-ccw {
+	animation: spin-ccw 25s linear infinite;
+}
+
+.animate-float {
+	animation: float 3s ease-in-out infinite;
+}
+
+.animate-pulse {
+	animation: pulse 3s ease-in-out infinite;
+}

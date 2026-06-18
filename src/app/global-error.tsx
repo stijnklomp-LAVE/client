@@ -17,8 +17,8 @@ export default function GlobalError({
 		<html>
 			<body
 				style={{
-					color: "var(--color-text-primary)",
-					background: "var(--color-bg-primary)",
+					color: "var(--text-primary)",
+					background: "var(--bg-primary)",
 				}}>
 				<div
 					style={{
@@ -33,7 +33,7 @@ export default function GlobalError({
 					<h1 style={{ fontSize: "24px", fontWeight: 600 }}>
 						Something went wrong!
 					</h1>
-					<p style={{ color: "var(--color-text-secondary)" }}>
+					<p style={{ color: "var(--text-secondary)" }}>
 						{error.message ?? "An unexpected error occurred"}
 					</p>
 					<button
@@ -42,9 +42,9 @@ export default function GlobalError({
 						style={{
 							padding: "10px 20px",
 							borderRadius: "8px",
-							border: "1px solid var(--color-border-primary)",
-							background: "var(--color-bg-secondary)",
-							color: "var(--color-text-primary)",
+							border: "1px solid var(--border-primary)",
+							background: "var(--bg-secondary)",
+							color: "var(--text-primary)",
 							cursor: "pointer",
 							fontWeight: 500,
 						}}>

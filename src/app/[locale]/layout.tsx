@@ -9,6 +9,8 @@ import { Notifications } from "@mantine/notifications"
 
 import { ThemeProvider } from "@/lib/theme"
 import { RouterProgress } from "@/components/providers/router-progress"
+import { SessionProvider } from "@/components/auth/session-provider"
+import { auth } from "@/auth"
 
 export default async function LocaleLayout({
 	children,
@@ -19,16 +21,19 @@ export default async function LocaleLayout({
 }): Promise<React.JSX.Element> {
 	const { locale } = await params
 	const messages = await getMessages()
+	const session = await auth()
 
 	return (
 		<html lang={locale} suppressHydrationWarning>
 			<body>
 				<NextIntlClientProvider locale={locale} messages={messages}>
-					<ThemeProvider>
-						<RouterProgress />
-						<Notifications position="top-right" />
-						{children}
-					</ThemeProvider>
+					<SessionProvider session={session}>
+						<ThemeProvider>
+							<RouterProgress />
+							<Notifications position="top-right" />
+							{children}
+						</ThemeProvider>
+					</SessionProvider>
 				</NextIntlClientProvider>
 			</body>
 		</html>

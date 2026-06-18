@@ -4,10 +4,10 @@
 	justify-content: center;
 	width: 36px;
 	height: 36px;
-	border: 1px solid var(--color-border-primary);
+	border: 1px solid var(--border-primary);
 	border-radius: 10px;
-	background: var(--color-bg-secondary);
-	color: var(--color-text-secondary);
+	background: var(--bg-secondary);
+	color: var(--text-secondary);
 	cursor: pointer;
 	transition:
 		background-color 0.2s ease,
@@ -17,9 +17,9 @@
 }
 
 .toggle:hover {
-	background: var(--color-bg-tertiary);
-	border-color: var(--color-border-secondary);
-	color: var(--color-text-primary);
+	background: var(--bg-tertiary);
+	border-color: var(--border-secondary);
+	color: var(--text-primary);
 }
 
 .toggle:active {

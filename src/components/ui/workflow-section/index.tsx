@@ -45,9 +45,9 @@ export function WorkflowSection({
 		<div
 			style={{
 				padding: "80px 16px",
-				background: "var(--color-bg-secondary)",
-				borderTop: "1px solid var(--color-border-primary)",
-				borderBottom: "1px solid var(--color-border-primary)",
+				background: "var(--bg-secondary)",
+				borderTop: "1px solid var(--border-primary)",
+				borderBottom: "1px solid var(--border-primary)",
 			}}>
 			<div
 				style={{
@@ -65,7 +65,7 @@ export function WorkflowSection({
 						style={{
 							fontSize: "clamp(1.5rem, 3vw, 2rem)",
 							fontWeight: 700,
-							color: "var(--color-text-primary)",
+							color: "var(--text-primary)",
 							marginBottom: 12,
 						}}>
 						{translations.title}
@@ -73,7 +73,7 @@ export function WorkflowSection({
 					<Text
 						size="md"
 						style={{
-							color: "var(--color-text-secondary)",
+							color: "var(--text-secondary)",
 							maxWidth: 600,
 							margin: "0 auto",
 							lineHeight: 1.6,
@@ -82,6 +82,7 @@ export function WorkflowSection({
 					</Text>
 				</motion.div>
 
+				{/* Desktop layout */}
 				<Box visibleFrom="md" style={{ position: "relative" }}>
 					<motion.div
 						initial={{ opacity: 0, scaleX: 0 }}
@@ -131,7 +132,9 @@ export function WorkflowSection({
 					</SimpleGrid>
 				</Box>
 
-				<Box hiddenFrom="md" style={{ position: "relative" }}>
+				{/* Tablet layout */}
+				<Box hiddenFrom="md">
+					{/* SVG path line (tablet only) */}
 					<Box
 						visibleFrom="sm"
 						hiddenFrom="md"
@@ -183,6 +186,7 @@ export function WorkflowSection({
 						</motion.div>
 					</Box>
 
+					{/* Progress bar 1 (tablet) */}
 					<Box
 						visibleFrom="sm"
 						hiddenFrom="md"
@@ -215,6 +219,7 @@ export function WorkflowSection({
 						/>
 					</Box>
 
+					{/* Progress bar 2 (tablet) */}
 					<Box
 						visibleFrom="sm"
 						hiddenFrom="md"
@@ -247,6 +252,7 @@ export function WorkflowSection({
 						/>
 					</Box>
 
+					{/* Progress line (mobile) */}
 					<Box
 						hiddenFrom="sm"
 						style={{
@@ -278,6 +284,7 @@ export function WorkflowSection({
 						/>
 					</Box>
 
+					{/* Tablet & Mobile step cards */}
 					<SimpleGrid cols={{ base: 1, sm: 2 }} spacing={24}>
 						{steps.map((step, index) => {
 							const StepIcon = step.icon
@@ -337,9 +344,9 @@ function CenteredStep({
 				height: "100%",
 				background: `
 					radial-gradient(ellipse 100% 60% at 50% 0%, ${step.color}15, transparent),
-					color-mix(in srgb, var(--color-bg-primary) 90%, transparent)
+					color-mix(in srgb, var(--bg-primary) 90%, transparent)
 				`,
-				border: "1px solid var(--color-border-primary)",
+				border: "1px solid var(--border-primary)",
 			}}>
 			<div
 				style={{
@@ -371,14 +378,14 @@ function CenteredStep({
 				style={{
 					fontSize: 15,
 					fontWeight: 600,
-					color: "var(--color-text-primary)",
+					color: "var(--text-primary)",
 				}}>
 				{translations[step.title]}
 			</Title>
 			<Text
 				size="sm"
 				style={{
-					color: "var(--color-text-secondary)",
+					color: "var(--text-secondary)",
 					lineHeight: 1.5,
 				}}>
 				{translations[step.description]}
@@ -408,9 +415,9 @@ function CardStep({
 				borderRadius: 16,
 				background: `
 					radial-gradient(ellipse 100% 100% at 0% 50%, ${step.color}15, transparent),
-					color-mix(in srgb, var(--color-bg-primary) 90%, transparent)
+					color-mix(in srgb, var(--bg-primary) 90%, transparent)
 				`,
-				border: "1px solid var(--color-border-primary)",
+				border: "1px solid var(--border-primary)",
 				alignItems: "flex-start",
 				height: "100%",
 			}}>
@@ -454,14 +461,14 @@ function CardStep({
 					style={{
 						fontSize: 15,
 						fontWeight: 600,
-						color: "var(--color-text-primary)",
+						color: "var(--text-primary)",
 					}}>
 					{translations[step.title]}
 				</Title>
 				<Text
 					size="sm"
 					style={{
-						color: "var(--color-text-secondary)",
+						color: "var(--text-secondary)",
 						lineHeight: 1.5,
 					}}>
 					{translations[step.description]}

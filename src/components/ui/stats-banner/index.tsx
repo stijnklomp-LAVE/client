@@ -2,10 +2,10 @@
 
 import { SimpleGrid, Text, Title } from "@mantine/core"
 import {
-	IconCloudOff,
-	IconDeviceMobile,
-	IconDatabase,
 	IconAdjustmentsHorizontal,
+	IconCloudOff,
+	IconDatabase,
+	IconDeviceMobile,
 } from "@tabler/icons-react"
 import { motion } from "motion/react"
 
@@ -44,9 +44,9 @@ export function StatsBanner({
 	return (
 		<div
 			style={{
-				borderTop: "1px solid var(--color-border-primary)",
-				borderBottom: "1px solid var(--color-border-primary)",
-				background: "var(--color-bg-secondary)",
+				borderTop: "1px solid var(--border-primary)",
+				borderBottom: "1px solid var(--border-primary)",
+				background: "var(--bg-secondary)",
 			}}>
 			<div
 				style={{
@@ -96,7 +96,7 @@ export function StatsBanner({
 										style={{
 											fontSize: 14,
 											fontWeight: 700,
-											color: "var(--color-text-primary)",
+											color: "var(--text-primary)",
 											textTransform: "uppercase",
 											letterSpacing: "0.05em",
 										}}>
@@ -105,7 +105,7 @@ export function StatsBanner({
 									<Text
 										size="sm"
 										style={{
-											color: "var(--color-text-secondary)",
+											color: "var(--text-secondary)",
 											lineHeight: 1.5,
 										}}>
 										{translations[item.description]}

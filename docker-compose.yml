@@ -22,9 +22,66 @@ x-app: &app
   ports:
     - ${API_PORT:-3000}:3000
 
+x-app-dev: &app-dev
+  <<: *app
+  depends_on:
+    db-migration:
+      condition: service_completed_successfully
+
+x-app-shared: &app-shared
+  <<: *app
+  networks:
+    - platform
+
 services:
+  db:
+    image: postgres:latest
+    restart: always
+    shm_size: 128mb
+    volumes:
+      - postgres-data:/var/lib/postgresql
+    healthcheck:
+      test: pg_isready -d $$POSTGRES_DB -U $$POSTGRES_USER
+      interval: 20s
+      timeout: 5s
+      retries: 6
+    environment:
+      DATABASE_URL: "postgresql://dev:admin123@db:5432/video-editor?schema=public"
+      POSTGRES_USER: ${DATABASE_USERNAME:-dev}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD:-admin123}
+      POSTGRES_DB: ${DATABASE_DB:-video-editor}
+    env_file:
+      - path: .env.development
+    ports:
+      - ${DATABASE_PORT:-5432}:5432
+    profiles: [dev, local, test]
+
+  db-migration:
+    image: oven/bun:alpine
+    volumes:
+      - .:/src
+    working_dir: /src
+    command: |
+      sh -c "
+        echo 'Running db migration...'
+        export DATABASE_URL='postgresql://dev:admin123@db:5432/video-editor?schema=public'
+        bunx prisma migrate deploy
+      "
+    depends_on:
+      db:
+        condition: service_healthy
+    tty: true
+    environment:
+      DATABASE_URL: "postgresql://dev:admin123@db:5432/video-editor?schema=public"
+    env_file:
+      - path: .env.development
+    profiles:
+      - local
+      - dev
+      - test
+
   local:
-    <<: *app
+    <<: *app-dev
     build:
       context: .
     profiles:
@@ -32,7 +89,7 @@ services:
       - test
 
   dev:
-    <<: *app
+    <<: *app-dev
     image: oven/bun:alpine
     volumes:
       - .:/src
@@ -42,13 +99,15 @@ services:
         if [ ! -d node_modules ]; then
           bun install --frozen-lockfile --ignore-scripts
         fi
+        bun run prisma:generate
+        bun run migrate
         bun run dev
       "
     profiles:
       - dev
 
   shared:
-    <<: *app
+    <<: *app-shared
     image: oven/bun:alpine
     volumes:
       - .:/src
@@ -60,6 +119,10 @@ services:
         if [ ! -d node_modules ]; then
           bun install --frozen-lockfile --ignore-scripts
         fi
+        echo 'Waiting for database...'
+        until nc -z db 5432 2>/dev/null; do echo 'Waiting for db:5432...'; sleep 1; done
+        bun run prisma:generate
+        bun run migrate
         bun run dev
       "
     profiles:
@@ -70,7 +133,17 @@ services:
     volumes:
       - .:/src
     working_dir: /src
-    command: sh -c "bun install --frozen-lockfile --ignore-scripts --no-optional 2>/dev/null; bun run test"
+    command: |
+      sh -c "
+        if [ ! -d node_modules ]; then
+          bun install --frozen-lockfile --ignore-scripts --no-optional 2>/dev/null
+        fi
+        bun run prisma:generate
+        bun run test
+      "
+    depends_on:
+      db-migration:
+        condition: service_completed_successfully
     profiles:
       - test
 
@@ -79,7 +152,17 @@ services:
     volumes:
       - .:/src
     working_dir: /src
-    command: sh -c "bun install --frozen-lockfile --ignore-scripts --no-optional 2>/dev/null; bun run test:coverage"
+    command: |
+      sh -c "
+        if [ ! -d node_modules ]; then
+          bun install --frozen-lockfile --ignore-scripts --no-optional 2>/dev/null
+        fi
+        bun run prisma:generate
+        bun run test:coverage
+      "
+    depends_on:
+      db-migration:
+        condition: service_completed_successfully
     profiles:
       - test
 
@@ -88,7 +171,14 @@ services:
     volumes:
       - .:/src
     working_dir: /src
-    command: sh -c "bun install --frozen-lockfile --ignore-scripts --no-optional 2>/dev/null; bun run test:e2e"
+    command: |
+      sh -c "
+        if [ ! -d node_modules ]; then
+          bun install --frozen-lockfile --ignore-scripts --no-optional 2>/dev/null
+        fi
+        bun run prisma:generate
+        bun run test:e2e
+      "
     depends_on:
       - dev
     profiles:
@@ -96,6 +186,9 @@ services:
 
   acceptance:
     <<: *acceptance
+    depends_on:
+      db-migration:
+        condition: service_completed_successfully
     command: |
       sh -c "
         if [ ! -d node_modules ]; then
@@ -109,6 +202,9 @@ services:
 
   acceptance-once:
     <<: *acceptance
+    depends_on:
+      db-migration:
+        condition: service_completed_successfully
     command: |
       sh -c "
         if [ ! -d node_modules ]; then
@@ -118,6 +214,9 @@ services:
       "
     profiles:
       - test
+
+volumes:
+  postgres-data:
 
 networks:
   platform:

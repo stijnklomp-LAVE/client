@@ -1,0 +1,73 @@
+import NextAuth from "next-auth"
+import Credentials from "next-auth/providers/credentials"
+import { PrismaAdapter } from "@auth/prisma-adapter"
+import bcrypt from "bcryptjs"
+
+import { prisma } from "./lib/prisma"
+
+export const { handlers, auth, signIn, signOut } = NextAuth({
+	adapter: PrismaAdapter(prisma),
+	callbacks: {
+		jwt({ token, user }) {
+			// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+			if (user) {
+				token.id = user.id
+			}
+
+			return token
+		},
+		session({ session, token }) {
+			// eslint-disable-next-line @typescript-eslint/non-nullable-type-assertion-style
+			session.user.id = token.sub as string
+
+			return session
+		},
+	},
+	pages: {
+		signIn: "/login",
+	},
+	providers: [
+		Credentials({
+			async authorize(credentials) {
+				// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+				if (!credentials) {
+					return null
+				}
+
+				const email = credentials.email as string
+				const password = credentials.password as string
+
+				if (!email || !password) {
+					return null
+				}
+
+				const user = await prisma.user.findUnique({
+					where: { email },
+				})
+
+				if (!user?.password) {
+					return null
+				}
+
+				const isValid = await bcrypt.compare(password, user.password)
+
+				if (!isValid) {
+					return null
+				}
+
+				return {
+					email: user.email,
+					id: user.id,
+					image: user.image,
+					name: user.name,
+				}
+			},
+			credentials: {
+				email: { label: "Email", type: "email" },
+				password: { label: "Password", type: "password" },
+			},
+			name: "credentials",
+		}),
+	],
+	session: { strategy: "jwt" },
+})

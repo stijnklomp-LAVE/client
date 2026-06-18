@@ -53,5 +53,8 @@ next-env.d.ts
 # docs
 /docs/code/
 
+# prisma generated
+/generated/
+
 # cache
 cache

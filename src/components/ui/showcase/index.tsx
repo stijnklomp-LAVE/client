@@ -1,9 +1,6 @@
-"use client"
-
 import { Button, Group, Stack, Text, Title, Card } from "@mantine/core"
 import { notifications } from "@mantine/notifications"
-import { IconBrandTabler, IconBell, IconPlayerPlay } from "@tabler/icons-react"
-import { motion } from "motion/react"
+import { IconBell, IconBrandTabler, IconPlayerPlay } from "@tabler/icons-react"
 import { useTranslations } from "next-intl"
 
 export function Showcase(): React.JSX.Element {
@@ -85,35 +82,6 @@ export function Showcase(): React.JSX.Element {
 					{t("icons.description")}
 				</Text>
 			</Section>
-
-			<Section title={t("motion.title")}>
-				<Group gap="md">
-					<motion.div
-						initial={{ opacity: 0, scale: 0.8 }}
-						animate={{ opacity: 1, scale: 1 }}
-						transition={{ duration: 0.5 }}>
-						<Button variant="filled">{t("motion.fadeIn")}</Button>
-					</motion.div>
-
-					<motion.div
-						whileHover={{ scale: 1.1 }}
-						whileTap={{ scale: 0.95 }}>
-						<Button variant="outline">{t("motion.hoverMe")}</Button>
-					</motion.div>
-
-					<motion.div
-						animate={{ rotate: 360 }}
-						transition={{
-							duration: 2,
-							repeat: Number.POSITIVE_INFINITY,
-							ease: "linear",
-						}}>
-						<Button variant="light" radius="xl">
-							{t("motion.spinning")}
-						</Button>
-					</motion.div>
-				</Group>
-			</Section>
 		</Stack>
 	)
 }
@@ -131,11 +99,11 @@ function Section({
 			padding="lg"
 			radius="md"
 			style={{
-				background: "var(--color-bg-primary)",
-				border: "1px solid var(--color-border-primary)",
+				background: "var(--bg-primary)",
+				border: "1px solid var(--border-primary)",
 			}}>
 			<Stack gap="md">
-				<Title order={2} style={{ color: "var(--color-text-primary)" }}>
+				<Title order={2} style={{ color: "var(--text-primary)" }}>
 					{title}
 				</Title>
 				{children}

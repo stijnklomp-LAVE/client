@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { MantineProvider } from "@mantine/core"
 
 import { ThemeContext } from "./context"
@@ -9,28 +9,32 @@ import type { TThemeModel, TThemeModelInit } from "./types"
 
 const STORAGE_KEY = "video-editor-theme"
 
-function getInitialTheme(): TThemeModel {
-	if (typeof window === "undefined") return ThemeModel
-	try {
-		const stored = localStorage.getItem(STORAGE_KEY)
-		if (stored === "light" || stored === "dark") {
-			return { currentColourMode: stored }
-		}
-	} catch {
-		// localStorage not available
-	}
-	return ThemeModel
-}
-
 export function ThemeProvider({
 	children,
 }: {
 	children: React.ReactNode
 }): React.JSX.Element {
 	const [themeModelObj, setThemeModel]: TThemeModelInit =
-		useState<TThemeModel>(getInitialTheme)
+		useState<TThemeModel>(ThemeModel)
+	const isInitialMount = useRef(true)
 
 	useEffect(() => {
+		if (isInitialMount.current) {
+			isInitialMount.current = false
+
+			try {
+				const stored = localStorage.getItem(STORAGE_KEY)
+				if (stored === "light" || stored === "dark") {
+					// eslint-disable-next-line react-hooks/set-state-in-effect
+					setThemeModel({ currentColourMode: stored })
+				}
+			} catch {
+				// localStorage not available
+			}
+
+			return
+		}
+
 		try {
 			localStorage.setItem(STORAGE_KEY, themeModelObj.currentColourMode)
 		} catch {

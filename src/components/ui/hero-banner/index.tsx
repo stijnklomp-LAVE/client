@@ -99,7 +99,7 @@ export function HeroBanner({
 								fontWeight: 800,
 								lineHeight: 1.1,
 								letterSpacing: "-0.02em",
-								color: "var(--color-text-primary)",
+								color: "var(--text-primary)",
 								marginBottom: 20,
 							}}>
 							{title}
@@ -108,7 +108,7 @@ export function HeroBanner({
 						<Text
 							size="lg"
 							style={{
-								color: "var(--color-text-secondary)",
+								color: "var(--text-secondary)",
 								lineHeight: 1.6,
 								fontSize: "clamp(1rem, 2vw, 1.125rem)",
 								marginBottom: 32,
@@ -132,8 +132,8 @@ export function HeroBanner({
 								size="lg"
 								variant="outline"
 								style={{
-									color: "var(--color-text-primary)",
-									borderColor: "var(--color-border-primary)",
+									color: "var(--text-primary)",
+									borderColor: "var(--border-primary)",
 								}}>
 								{secondaryLabel}
 							</Button>
@@ -173,32 +173,22 @@ export function HeroBanner({
 								alignItems: "center",
 								justifyContent: "center",
 							}}>
-							<motion.div
-								animate={{ rotate: 360 }}
-								transition={{
-									duration: 20,
-									repeat: Number.POSITIVE_INFINITY,
-									ease: "linear",
-								}}
+							<div
+								className="animate-spin-cw"
 								style={{
 									position: "absolute",
 									inset: 0,
 									borderRadius: "50%",
-									border: "1px solid var(--color-border-primary)",
+									border: "1px solid var(--border-primary)",
 								}}
 							/>
-							<motion.div
-								animate={{ rotate: -360 }}
-								transition={{
-									duration: 25,
-									repeat: Number.POSITIVE_INFINITY,
-									ease: "linear",
-								}}
+							<div
+								className="animate-spin-ccw"
 								style={{
 									position: "absolute",
 									inset: 20,
 									borderRadius: "50%",
-									border: "1px dashed var(--color-border-secondary)",
+									border: "1px dashed var(--border-secondary)",
 									opacity: 0.5,
 								}}
 							/>
@@ -220,21 +210,14 @@ export function HeroBanner({
 											top: `calc(50% + ${item.y})`,
 											transform: "translate(-50%, -50%)",
 										}}>
-										<motion.div
-											animate={{
-												y: [0, -8, 0],
-											}}
-											transition={{
-												duration: 3 + item.delay,
-												repeat: Number.POSITIVE_INFINITY,
-												ease: "easeInOut",
-												delay: item.delay,
-											}}
+										<div
+											className="animate-float"
 											style={{
 												display: "flex",
 												flexDirection: "column",
 												alignItems: "center",
 												gap: 6,
+												animationDelay: `${item.delay}s`,
 											}}>
 											<div
 												style={{
@@ -242,13 +225,13 @@ export function HeroBanner({
 													height: 48,
 													borderRadius: 14,
 													background:
-														"var(--color-bg-primary)",
-													border: "1px solid var(--color-border-primary)",
+														"var(--bg-primary)",
+													border: "1px solid var(--border-primary)",
 													display: "flex",
 													alignItems: "center",
 													justifyContent: "center",
 													boxShadow:
-														"0 4px 20px var(--color-shadow)",
+														"0 4px 20px var(--shadow-md)",
 												}}>
 												<ItemIcon
 													size={20}
@@ -260,25 +243,18 @@ export function HeroBanner({
 											<Text
 												size="xs"
 												style={{
-													color: "var(--color-text-tertiary)",
+													color: "var(--text-tertiary)",
 													fontWeight: 500,
 												}}>
 												{item.label}
 											</Text>
-										</motion.div>
+										</div>
 									</motion.div>
 								)
 							})}
 
-							<motion.div
-								animate={{
-									scale: [1, 1.05, 1],
-								}}
-								transition={{
-									duration: 3,
-									repeat: Number.POSITIVE_INFINITY,
-									ease: "easeInOut",
-								}}
+							<div
+								className="animate-pulse"
 								style={{
 									width: 72,
 									height: 72,
@@ -292,7 +268,7 @@ export function HeroBanner({
 									zIndex: 2,
 								}}>
 								<IconPlayerPlayFilled size={28} color="white" />
-							</motion.div>
+							</div>
 						</div>
 					</motion.div>
 				</Grid.Col>
@@ -321,15 +297,17 @@ function Badge({
 				textTransform: "uppercase",
 				background: `
 					radial-gradient(ellipse 100% 60% at 50% 100%, rgba(0,112,243,0.08), transparent),
-					var(--color-bg-primary)
+					var(--bg-primary)
 				`,
-				border: "1px solid var(--color-border-primary)",
+				border: "1px solid var(--border-primary)",
 				...style,
 			}}>
 			<span
 				style={{
 					background: "linear-gradient(135deg, #228be6, #7950f2)",
+					// eslint-disable-next-line @typescript-eslint/naming-convention
 					WebkitBackgroundClip: "text",
+					// eslint-disable-next-line @typescript-eslint/naming-convention
 					WebkitTextFillColor: "transparent",
 				}}>
 				{children}

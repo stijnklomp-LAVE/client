@@ -23,13 +23,13 @@ export default function Error({
 				minHeight: "100vh",
 				gap: "16px",
 				padding: "24px",
-				color: "var(--color-text-primary)",
-				background: "var(--color-bg-primary)",
+				color: "var(--text-primary)",
+				background: "var(--bg-primary)",
 			}}>
 			<h2 style={{ fontSize: "24px", fontWeight: 600 }}>
 				Something went wrong
 			</h2>
-			<p style={{ color: "var(--color-text-secondary)" }}>
+			<p style={{ color: "var(--text-secondary)" }}>
 				{error.message ?? "An unexpected error occurred"}
 			</p>
 			<button
@@ -38,9 +38,9 @@ export default function Error({
 				style={{
 					padding: "8px 16px",
 					borderRadius: "8px",
-					border: "1px solid var(--color-border-primary)",
-					background: "var(--color-bg-secondary)",
-					color: "var(--color-text-primary)",
+					border: "1px solid var(--border-primary)",
+					background: "var(--bg-secondary)",
+					color: "var(--text-primary)",
 					cursor: "pointer",
 				}}>
 				Try again

@@ -1,0 +1,93 @@
+// ==============================
+// Background utilities
+// ==============================
+
+.bg-primary {
+	#light & { background-color: var(--bg-primary); }
+	#dark & { background-color: var(--bg-primary); }
+}
+
+.bg-secondary {
+	#light & { background-color: var(--bg-secondary); }
+	#dark & { background-color: var(--bg-secondary); }
+}
+
+.bg-tertiary {
+	#light & { background-color: var(--bg-tertiary); }
+	#dark & { background-color: var(--bg-tertiary); }
+}
+
+// ==============================
+// Text utilities
+// ==============================
+
+.text-primary {
+	#light & { color: var(--text-primary); }
+	#dark & { color: var(--text-primary); }
+}
+
+.text-secondary {
+	#light & { color: var(--text-secondary); }
+	#dark & { color: var(--text-secondary); }
+}
+
+.text-tertiary {
+	#light & { color: var(--text-tertiary); }
+	#dark & { color: var(--text-tertiary); }
+}
+
+.text-accent {
+	#light & { color: var(--accent); }
+	#dark & { color: var(--accent); }
+}
+
+// ==============================
+// Layout page wrapper
+// ==============================
+
+// ==============================
+// Mantine Tooltip overrides
+// ==============================
+
+.tooltip-custom {
+	#light & {
+		background: var(--bg-tertiary);
+		color: var(--text-primary);
+		border: 1px solid var(--border-primary);
+		font-size: 12px;
+	}
+	#dark & {
+		background: var(--bg-tertiary);
+		color: var(--text-primary);
+		border: 1px solid var(--border-primary);
+		font-size: 12px;
+	}
+}
+
+.tooltip-arrow-custom {
+	#light & {
+		background: var(--bg-tertiary);
+		border: 1px solid var(--border-primary);
+	}
+	#dark & {
+		background: var(--bg-tertiary);
+		border: 1px solid var(--border-primary);
+	}
+}
+
+.page-wrapper {
+	#light & {
+		min-height: 100vh;
+		display: flex;
+		flex-direction: column;
+		background: var(--bg-primary);
+		color: var(--text-primary);
+	}
+	#dark & {
+		min-height: 100vh;
+		display: flex;
+		flex-direction: column;
+		background: var(--bg-primary);
+		color: var(--text-primary);
+	}
+}

@@ -1,12 +1,12 @@
 "use client"
 
 import { useLocale } from "use-intl"
-import { Button, Group, Text } from "@mantine/core"
+import { Select } from "@mantine/core"
 import { usePathname, useRouter } from "@/i18n/navigation"
 
 const locales = [
-	{ code: "en", label: "EN" },
-	{ code: "nl", label: "NL" },
+	{ value: "en", label: "EN" },
+	{ value: "nl", label: "NL" },
 ] as const
 
 export function LocaleSwitcher(): React.JSX.Element {
@@ -14,26 +14,22 @@ export function LocaleSwitcher(): React.JSX.Element {
 	const pathname = usePathname()
 	const router = useRouter()
 
-	const handleChange = (nextLocale: string): void => {
-		router.replace(pathname, { locale: nextLocale })
+	const handleChange = (nextLocale: string | null): void => {
+		if (nextLocale) {
+			router.replace(pathname, { locale: nextLocale })
+		}
 	}
 
 	return (
-		<Group gap="xs">
-			<Text size="xs" c="dimmed">
-				|
-			</Text>
-			{locales.map((l) => (
-				<Button
-					key={l.code}
-					variant={locale === l.code ? "filled" : "subtle"}
-					size="compact-xs"
-					onClick={() => handleChange(l.code)}
-					aria-label={`Switch to ${l.code}`}>
-					{l.label}
-				</Button>
-			))}
-		</Group>
+		<Select
+			data={[...locales]}
+			value={locale}
+			onChange={handleChange}
+			size="xs"
+			w={80}
+			aria-label="Select language"
+			allowDeselect={false}
+		/>
 	)
 }
 

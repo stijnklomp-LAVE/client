@@ -1,10 +1,17 @@
-import type { Metadata } from "next"
+import type { Metadata, Viewport } from "next"
+
+import "@/styles/variables.scss"
+import "@/styles/utilities.scss"
+import "@/styles/animations.scss"
 
 export const metadata: Metadata = {
 	icons: {
 		apple: "/icon.svg",
 	},
 	manifest: "/manifest.json",
+}
+
+export const viewport: Viewport = {
 	themeColor: "#0a0a0a",
 }
 

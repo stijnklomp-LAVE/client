@@ -27,8 +27,8 @@ export function CTASection({
 					textAlign: "center",
 					padding: "48px 40px",
 					borderRadius: 24,
-					background: "var(--color-bg-primary)",
-					border: "1px solid var(--color-border-primary)",
+					background: "var(--bg-primary)",
+					border: "1px solid var(--border-primary)",
 					position: "relative",
 					overflow: "hidden",
 				}}>
@@ -48,7 +48,7 @@ export function CTASection({
 						style={{
 							fontSize: "clamp(1.5rem, 3vw, 2rem)",
 							fontWeight: 700,
-							color: "var(--color-text-primary)",
+							color: "var(--text-primary)",
 							marginBottom: 12,
 						}}>
 						{title}
@@ -56,7 +56,7 @@ export function CTASection({
 					<Text
 						size="md"
 						style={{
-							color: "var(--color-text-secondary)",
+							color: "var(--text-secondary)",
 							maxWidth: 500,
 							margin: "0 auto 32px",
 							lineHeight: 1.6,
@@ -90,8 +90,8 @@ export function CTASection({
 							target="_blank"
 							rel="noopener noreferrer"
 							style={{
-								color: "var(--color-text-primary)",
-								borderColor: "var(--color-border-primary)",
+								color: "var(--text-primary)",
+								borderColor: "var(--border-primary)",
 							}}>
 							{secondaryLabel}
 						</Button>
