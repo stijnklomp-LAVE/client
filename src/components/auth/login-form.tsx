@@ -1,98 +1,263 @@
 "use client"
 
-import { useState } from "react"
-import { useRouter } from "next/navigation"
+import { useMemo, useState } from "react"
+import { useRouter, useSearchParams } from "next/navigation"
+import { useDisclosure } from "@mantine/hooks"
+import { nprogress } from "@/components/providers/router-progress"
 import { signIn, useSession } from "next-auth/react"
 import {
 	Button,
 	Card,
+	Modal,
 	PasswordInput,
 	Text,
 	TextInput,
 	Title,
 } from "@mantine/core"
 import { useTranslations } from "next-intl"
+import Link from "next/link"
+import { FormMessage, type Message } from "@/components/ui/form-message"
+import { ClientOnly } from "@/components/ui/client-only"
 
 export function LoginForm() {
 	const t = useTranslations("auth")
 	const router = useRouter()
 	const { update } = useSession()
+	const searchParams = useSearchParams()
 	const [email, setEmail] = useState("")
 	const [password, setPassword] = useState("")
-	const [error, setError] = useState<string | null>(null)
+	const [message, setMessage] = useState<Message | null>(null)
+	const [messageKey, setMessageKey] = useState(0)
+	const [interacted, setInteracted] = useState(false)
 	const [loading, setLoading] = useState(false)
+
+	function updateMessage(msg: Message | null): void {
+		setMessage(msg)
+		if (msg) {
+			setMessageKey((k) => k + 1)
+		}
+	}
+
+	const urlMessage: Message | null = useMemo(() => {
+		if (searchParams.get("verified") === "true") {
+			return { text: t("emailVerified"), color: "green" }
+		}
+
+		if (searchParams.get("reset") === "true") {
+			return { text: t("resetSuccess"), color: "green" }
+		}
+
+		const errorParam = searchParams.get("error")
+
+		if (errorParam === "expired-token") {
+			return { text: t("verificationExpired"), color: "red" }
+		}
+
+		if (errorParam === "invalid-token") {
+			return { text: t("verificationInvalid"), color: "red" }
+		}
+
+		if (errorParam === "missing-token") {
+			return { text: t("verificationMissing"), color: "red" }
+		}
+
+		if (errorParam === "verification-failed") {
+			return { text: t("verificationFailed"), color: "red" }
+		}
+
+		return null
+	}, [searchParams, t])
+
+	const displayMessage = message ?? (interacted ? null : urlMessage)
+
+	const isUnverified =
+		displayMessage?.text === t("emailNotVerified") ||
+		displayMessage?.text === t("verificationExpired") ||
+		displayMessage?.text === t("verificationInvalid") ||
+		displayMessage?.text === t("verificationFailed")
+	const [resendOpened, resendHandlers] = useDisclosure(false)
+	const [resending, setResending] = useState(false)
+
+	async function handleResend(): Promise<void> {
+		setInteracted(true)
+		setResending(true)
+
+		try {
+			const res = await fetch("/api/resend-verification", {
+				method: "POST",
+				headers: { ["Content-Type"]: "application/json" },
+				body: JSON.stringify({ email }),
+			})
+
+			if (res.ok) {
+				resendHandlers.close()
+				updateMessage({ text: t("verificationResent"), color: "green" })
+			} else {
+				const data = await res.json()
+
+				updateMessage({
+					text: data.error ?? t("resendError"),
+					color: "red",
+				})
+			}
+		} catch {
+			updateMessage({ text: t("resendError"), color: "red" })
+		} finally {
+			setResending(false)
+		}
+	}
 
 	async function handleSubmit(e: React.FormEvent) {
 		e.preventDefault()
-		setError(null)
+		setInteracted(true)
 		setLoading(true)
 
-		const result = await signIn("credentials", {
-			email,
-			password,
-			redirect: false,
-		})
+		try {
+			const result = await signIn("credentials", {
+				email,
+				password,
+				redirect: false,
+			})
 
-		if (result?.error) {
-			setError(t("loginError"))
+			if (result?.error) {
+				const check = await fetch(
+					`/api/check-verification?email=${encodeURIComponent(email)}`,
+				)
+				const { exists, verified } = await check.json()
+
+				if (exists && !verified) {
+					updateMessage({
+						text: t("emailNotVerified"),
+						color: "red",
+					})
+				} else {
+					updateMessage({ text: t("loginError"), color: "red" })
+				}
+
+				setLoading(false)
+
+				return
+			}
+
+			await update()
+			nprogress.start()
+			router.replace("/")
+		} catch {
+			updateMessage({ text: t("loginError"), color: "red" })
 			setLoading(false)
-			return
 		}
-
-		await update()
-		router.replace("/")
 	}
 
 	return (
-		<Card
-			withBorder
-			shadow="sm"
-			padding="xl"
-			radius="md"
-			maw={420}
-			w="100%">
-			<form
-				onSubmit={handleSubmit}
-				onKeyDown={(e) => {
-					if (e.key === "Enter" && !e.repeat) {
-						e.currentTarget.requestSubmit()
-					}
-				}}>
-				<Title order={2} ta="center" mb="xs">
-					{t("login")}
-				</Title>
-				<Text c="dimmed" size="sm" ta="center" mb="lg">
-					{t("loginSubtitle")}
-				</Text>
-
-				{error && (
-					<Text c="red" size="sm" mb="md">
-						{error}
+		<ClientOnly
+			placeholder={
+				<div
+					style={{
+						width: 420,
+						maxWidth: "100%",
+						height: 400,
+					}}
+				/>
+			}>
+			<Card
+				withBorder
+				shadow="sm"
+				padding="xl"
+				radius="md"
+				maw={420}
+				w="100%">
+				<form
+					onSubmit={handleSubmit}
+					onKeyDown={(e) => {
+						if (e.key === "Enter" && !e.repeat) {
+							e.currentTarget.requestSubmit()
+						}
+					}}>
+					<Title order={2} ta="center" mb="xs">
+						{t("login")}
+					</Title>
+					<Text c="dimmed" size="sm" ta="center" mb="lg">
+						{t("loginSubtitle")}
 					</Text>
-				)}
 
-				<TextInput
-					label={t("email")}
-					placeholder="you@example.com"
-					value={email}
-					onChange={(e) => setEmail(e.currentTarget.value)}
-					required
-					mb="md"
-				/>
+					<FormMessage
+						message={displayMessage}
+						messageKey={messageKey}
+					/>
 
-				<PasswordInput
-					label={t("password")}
-					placeholder={t("passwordPlaceholder")}
-					value={password}
-					onChange={(e) => setPassword(e.currentTarget.value)}
-					required
-					mb="lg"
-				/>
+					{isUnverified && (
+						<Text ta="center" mb="md">
+							<Button
+								variant="subtle"
+								size="xs"
+								onClick={resendHandlers.open}>
+								{t("resendVerification")}
+							</Button>
+						</Text>
+					)}
 
-				<Button type="submit" fullWidth loading={loading}>
-					{t("signIn")}
-				</Button>
-			</form>
-		</Card>
+					<Modal
+						opened={resendOpened}
+						onClose={resendHandlers.close}
+						title={t("resendVerificationTitle")}
+						centered>
+						<Text size="sm" mb="lg">
+							{t("resendVerificationConfirm")}
+						</Text>
+						<Button
+							fullWidth
+							loading={resending}
+							onClick={handleResend}>
+							{t("resendVerificationButton")}
+						</Button>
+					</Modal>
+
+					<TextInput
+						label={t("email")}
+						placeholder="you@example.com"
+						value={email}
+						onChange={(e) => setEmail(e.currentTarget.value)}
+						required
+						mb="md"
+					/>
+
+					<PasswordInput
+						label={t("password")}
+						placeholder={t("passwordPlaceholder")}
+						value={password}
+						onChange={(e) => setPassword(e.currentTarget.value)}
+						required
+					/>
+
+					<Text ta="right" mb="lg">
+						<Link
+							href="/forgot-password"
+							style={{
+								color: "var(--text-secondary)",
+								fontSize: "14px",
+								fontWeight: 500,
+							}}>
+							{t("forgotPassword")}
+						</Link>
+					</Text>
+
+					<Button type="submit" fullWidth loading={loading}>
+						{t("signIn")}
+					</Button>
+
+					<Text c="dimmed" size="sm" ta="center" mt="lg">
+						{t("noAccount")}{" "}
+						<Link
+							href="/register"
+							style={{
+								color: "var(--text-primary)",
+								fontWeight: 600,
+							}}>
+							{t("createOne")}
+						</Link>
+					</Text>
+				</form>
+			</Card>
+		</ClientOnly>
 	)
 }

@@ -1,8 +1,13 @@
-import type { Metadata, Viewport } from "next"
+import "@mantine/core/styles.css"
+import "@mantine/notifications/styles.css"
+import "@mantine/nprogress/styles.css"
+import "./globals.scss"
 
 import "@/styles/variables.scss"
 import "@/styles/utilities.scss"
 import "@/styles/animations.scss"
+
+import type { Metadata, Viewport } from "next"
 
 export const metadata: Metadata = {
 	icons: {

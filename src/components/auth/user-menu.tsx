@@ -3,11 +3,14 @@
 import { ActionIcon, Menu } from "@mantine/core"
 import { IconLogout, IconUserCircle } from "@tabler/icons-react"
 import { signOut, useSession } from "next-auth/react"
+import { useLocale } from "use-intl"
 import { useRouter } from "next/navigation"
+import { nprogress } from "@/components/providers/router-progress"
 
 export function UserMenu(): React.JSX.Element | null {
 	const { data: session } = useSession()
 	const router = useRouter()
+	const locale = useLocale()
 
 	if (!session?.user) {
 		return null
@@ -24,7 +27,10 @@ export function UserMenu(): React.JSX.Element | null {
 			<Menu.Dropdown>
 				<Menu.Item
 					leftSection={<IconUserCircle size={16} />}
-					onClick={() => router.push("/profile")}>
+					onClick={() => {
+						nprogress.start()
+						router.push("/profile")
+					}}>
 					Profile
 				</Menu.Item>
 
@@ -32,7 +38,10 @@ export function UserMenu(): React.JSX.Element | null {
 
 				<Menu.Item
 					leftSection={<IconLogout size={16} />}
-					onClick={() => signOut({ callbackUrl: "/" })}
+					onClick={() => {
+						nprogress.start()
+						signOut({ callbackUrl: `/${locale}` })
+					}}
 					color="red">
 					Sign Out
 				</Menu.Item>

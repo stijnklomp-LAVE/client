@@ -1,3 +1,5 @@
+export const STORAGE_KEY = "video-editor-theme"
+
 export type TTheme = "dark" | "light"
 
 export type TThemeModel = {

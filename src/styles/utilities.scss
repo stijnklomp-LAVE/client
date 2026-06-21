@@ -3,18 +3,30 @@
 // ==============================
 
 .bg-primary {
-	#light & { background-color: var(--bg-primary); }
-	#dark & { background-color: var(--bg-primary); }
+	#light & {
+		background-color: var(--bg-primary);
+	}
+	#dark & {
+		background-color: var(--bg-primary);
+	}
 }
 
 .bg-secondary {
-	#light & { background-color: var(--bg-secondary); }
-	#dark & { background-color: var(--bg-secondary); }
+	#light & {
+		background-color: var(--bg-secondary);
+	}
+	#dark & {
+		background-color: var(--bg-secondary);
+	}
 }
 
 .bg-tertiary {
-	#light & { background-color: var(--bg-tertiary); }
-	#dark & { background-color: var(--bg-tertiary); }
+	#light & {
+		background-color: var(--bg-tertiary);
+	}
+	#dark & {
+		background-color: var(--bg-tertiary);
+	}
 }
 
 // ==============================
@@ -22,23 +34,39 @@
 // ==============================
 
 .text-primary {
-	#light & { color: var(--text-primary); }
-	#dark & { color: var(--text-primary); }
+	#light & {
+		color: var(--text-primary);
+	}
+	#dark & {
+		color: var(--text-primary);
+	}
 }
 
 .text-secondary {
-	#light & { color: var(--text-secondary); }
-	#dark & { color: var(--text-secondary); }
+	#light & {
+		color: var(--text-secondary);
+	}
+	#dark & {
+		color: var(--text-secondary);
+	}
 }
 
 .text-tertiary {
-	#light & { color: var(--text-tertiary); }
-	#dark & { color: var(--text-tertiary); }
+	#light & {
+		color: var(--text-tertiary);
+	}
+	#dark & {
+		color: var(--text-tertiary);
+	}
 }
 
 .text-accent {
-	#light & { color: var(--accent); }
-	#dark & { color: var(--accent); }
+	#light & {
+		color: var(--accent);
+	}
+	#dark & {
+		color: var(--accent);
+	}
 }
 
 // ==============================

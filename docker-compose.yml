@@ -31,7 +31,9 @@ x-app-dev: &app-dev
 x-app-shared: &app-shared
   <<: *app
   networks:
-    - platform
+    platform:
+      aliases:
+        - client
 
 services:
   db:

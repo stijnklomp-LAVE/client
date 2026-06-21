@@ -133,7 +133,7 @@ export function WorkflowSection({
 				</Box>
 
 				{/* Tablet layout */}
-				<Box hiddenFrom="md">
+				<Box hiddenFrom="md" style={{ position: "relative" }}>
 					{/* SVG path line (tablet only) */}
 					<Box
 						visibleFrom="sm"

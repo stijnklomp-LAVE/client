@@ -1,44 +1,34 @@
 "use client"
 
-import { useEffect, useRef, useState } from "react"
-import { MantineProvider } from "@mantine/core"
+import { createTheme, MantineProvider } from "@mantine/core"
+import { useEffect, useState } from "react"
 
 import { ThemeContext } from "./context"
-import { ThemeModel } from "./types"
-import type { TThemeModel, TThemeModelInit } from "./types"
+import { ThemeModel, STORAGE_KEY } from "./types"
+import type { TTheme, TThemeModel, TThemeModelInit } from "./types"
 
-const STORAGE_KEY = "video-editor-theme"
+const theme = createTheme({
+	defaultRadius: "md",
+})
 
 export function ThemeProvider({
 	children,
+	initialTheme,
 }: {
 	children: React.ReactNode
+	initialTheme?: TTheme
 }): React.JSX.Element {
 	const [themeModelObj, setThemeModel]: TThemeModelInit =
-		useState<TThemeModel>(ThemeModel)
-	const isInitialMount = useRef(true)
+		useState<TThemeModel>({
+			currentColourMode: initialTheme ?? ThemeModel.currentColourMode,
+		})
 
 	useEffect(() => {
-		if (isInitialMount.current) {
-			isInitialMount.current = false
-
-			try {
-				const stored = localStorage.getItem(STORAGE_KEY)
-				if (stored === "light" || stored === "dark") {
-					// eslint-disable-next-line react-hooks/set-state-in-effect
-					setThemeModel({ currentColourMode: stored })
-				}
-			} catch {
-				// localStorage not available
-			}
-
-			return
-		}
-
 		try {
 			localStorage.setItem(STORAGE_KEY, themeModelObj.currentColourMode)
+			document.cookie = `${STORAGE_KEY}=${themeModelObj.currentColourMode};path=/;max-age=31536000`
 		} catch {
-			// localStorage not available
+			// storage not available
 		}
 	}, [themeModelObj.currentColourMode])
 
@@ -50,7 +40,8 @@ export function ThemeProvider({
 			}}>
 			<div id={themeModelObj.currentColourMode}>
 				<MantineProvider
-					forceColorScheme={themeModelObj.currentColourMode}>
+					forceColorScheme={themeModelObj.currentColourMode}
+					theme={theme}>
 					{children}
 				</MantineProvider>
 			</div>

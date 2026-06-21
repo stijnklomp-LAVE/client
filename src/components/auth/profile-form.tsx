@@ -1,29 +1,49 @@
 "use client"
 
 import { useState } from "react"
-import { Button, Card, Divider, Text, TextInput, Title } from "@mantine/core"
+import {
+	Button,
+	Card,
+	Divider,
+	Modal,
+	Text,
+	TextInput,
+	Title,
+} from "@mantine/core"
+import { useDisclosure } from "@mantine/hooks"
 import { IconLogout } from "@tabler/icons-react"
 import { signOut, useSession } from "next-auth/react"
-import { useTranslations } from "next-intl"
+import { useLocale, useTranslations } from "next-intl"
+import { FormMessage, type Message } from "@/components/ui/form-message"
 
 export function ProfileForm(): React.JSX.Element | null {
 	const t = useTranslations("auth")
+	const locale = useLocale()
 	const { data: session, update } = useSession()
 
 	const [name, setName] = useState(session?.user?.name ?? "")
 	const [email, setEmail] = useState(session?.user?.email ?? "")
-	const [error, setError] = useState<string | null>(null)
-	const [success, setSuccess] = useState<string | null>(null)
+	const [message, setMessage] = useState<Message | null>(null)
+	const [messageKey, setMessageKey] = useState(0)
 	const [loading, setLoading] = useState(false)
+	const [resetOpened, resetHandlers] = useDisclosure(false)
+	const [resetSending, setResetSending] = useState(false)
+
+	function updateMessage(msg: Message | null): void {
+		setMessage(msg)
+		if (msg) {
+			setMessageKey((k) => k + 1)
+		}
+	}
 
 	if (!session?.user) {
 		return null
 	}
 
+	const currentSession = session
+
 	async function handleSubmit(e: React.FormEvent) {
 		e.preventDefault()
-		setError(null)
-		setSuccess(null)
 		setLoading(true)
 
 		const res = await fetch("/api/profile", {
@@ -35,14 +55,45 @@ export function ProfileForm(): React.JSX.Element | null {
 		const data = await res.json()
 
 		if (!res.ok) {
-			setError(data.error ?? t("updateError"))
+			updateMessage({
+				text: data.error ?? t("updateError"),
+				color: "red",
+			})
 			setLoading(false)
 			return
 		}
 
-		setSuccess(t("updateSuccess"))
+		updateMessage({ text: t("updateSuccess"), color: "green" })
 		setLoading(false)
 		await update()
+	}
+
+	async function handleResetPassword(): Promise<void> {
+		setResetSending(true)
+
+		try {
+			const res = await fetch("/api/forgot-password", {
+				method: "POST",
+				headers: { ["Content-Type"]: "application/json" },
+				body: JSON.stringify({ email: currentSession.user.email }),
+			})
+
+			if (res.ok) {
+				resetHandlers.close()
+				updateMessage({ text: t("resetPasswordSent"), color: "green" })
+			} else {
+				const data = await res.json()
+
+				updateMessage({
+					text: data.error ?? t("resetError"),
+					color: "red",
+				})
+			}
+		} catch {
+			updateMessage({ text: t("resetError"), color: "red" })
+		} finally {
+			setResetSending(false)
+		}
 	}
 
 	return (
@@ -61,17 +112,7 @@ export function ProfileForm(): React.JSX.Element | null {
 					{t("profileSubtitle")}
 				</Text>
 
-				{error && (
-					<Text c="red" size="sm" mb="md">
-						{error}
-					</Text>
-				)}
-
-				{success && (
-					<Text c="green" size="sm" mb="md">
-						{success}
-					</Text>
-				)}
+				<FormMessage message={message} messageKey={messageKey} />
 
 				<TextInput
 					label={t("name")}
@@ -95,6 +136,30 @@ export function ProfileForm(): React.JSX.Element | null {
 				</Button>
 			</form>
 
+			<Button
+				fullWidth
+				variant="subtle"
+				mb="md"
+				onClick={resetHandlers.open}>
+				{t("resetPasswordOnProfile")}
+			</Button>
+
+			<Modal
+				opened={resetOpened}
+				onClose={resetHandlers.close}
+				title={t("resetPasswordTitleProfile")}
+				centered>
+				<Text size="sm" mb="lg">
+					{t("resetPasswordConfirmProfile")}
+				</Text>
+				<Button
+					fullWidth
+					loading={resetSending}
+					onClick={handleResetPassword}>
+					{t("sendResetLink")}
+				</Button>
+			</Modal>
+
 			<Divider my="lg" />
 
 			<Button
@@ -102,7 +167,7 @@ export function ProfileForm(): React.JSX.Element | null {
 				variant="outline"
 				color="red"
 				leftSection={<IconLogout size={16} />}
-				onClick={() => signOut({ callbackUrl: "/" })}>
+				onClick={() => signOut({ callbackUrl: `/${locale}` })}>
 				{t("signOut")}
 			</Button>
 		</Card>

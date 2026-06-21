@@ -1,3 +1,5 @@
+import crypto from "node:crypto"
+
 import { NextResponse } from "next/server"
 import bcrypt from "bcryptjs"
 
@@ -39,18 +41,35 @@ export async function POST(request: Request) {
 
 		const hashedPassword = await bcrypt.hash(password, 12)
 
-		const user = await prisma.user.create({
+		await prisma.user.create({
 			data: {
 				email,
+				emailVerified: null,
 				name: name ?? null,
 				password: hashedPassword,
 			},
 		})
 
+		const verificationToken = crypto.randomUUID()
+		const origin = new URL(request.url).origin
+
+		await prisma.verificationToken.create({
+			data: {
+				expires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7),
+				identifier: email,
+				token: verificationToken,
+			},
+		})
+
+		const verifyUrl = `${origin}/api/verify-email?token=${verificationToken}`
+
+		console.warn(`[DEV] Verification link for ${email}: ${verifyUrl}`)
+
 		return NextResponse.json(
 			{
-				message: "Account created successfully",
-				user: { email: user.email, id: user.id, name: user.name },
+				message:
+					"Account created. Check your email to verify your account.",
+				verifyUrl,
 			},
 			{ status: 201 },
 		)

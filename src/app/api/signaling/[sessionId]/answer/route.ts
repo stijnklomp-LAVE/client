@@ -1,0 +1,45 @@
+import { NextResponse } from "next/server"
+
+import { auth } from "@/auth"
+import { signJwt } from "@/lib/jwt"
+import { proxyToFragmentComposer } from "@/lib/fragment-composer"
+
+export async function PUT(
+	request: Request,
+	{ params }: { params: Promise<{ sessionId: string }> },
+) {
+	const session = await auth()
+
+	if (!session?.user.id) {
+		return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+	}
+
+	const { sessionId } = await params
+	const token = await signJwt(session.user.id)
+	const res = await proxyToFragmentComposer(
+		`/v1/signaling/${sessionId}/answer`,
+		{ body: await request.json(), method: "PUT", token },
+	)
+
+	return NextResponse.json(await res.json(), { status: res.status })
+}
+
+export async function GET(
+	_request: Request,
+	{ params }: { params: Promise<{ sessionId: string }> },
+) {
+	const session = await auth()
+
+	if (!session?.user.id) {
+		return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+	}
+
+	const { sessionId } = await params
+	const token = await signJwt(session.user.id)
+	const res = await proxyToFragmentComposer(
+		`/v1/signaling/${sessionId}/answer`,
+		{ token },
+	)
+
+	return NextResponse.json(await res.json(), { status: res.status })
+}

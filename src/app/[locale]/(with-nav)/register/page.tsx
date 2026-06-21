@@ -1,6 +1,6 @@
-import { getTranslations } from "next-intl/server"
-import Link from "next/link"
+import { redirect } from "next/navigation"
 
+import { auth } from "@/auth"
 import { RegisterForm } from "@/components/auth/register-form"
 
 export default async function RegisterPage({
@@ -9,12 +9,16 @@ export default async function RegisterPage({
 	params: Promise<{ locale: string }>
 }): Promise<React.JSX.Element> {
 	const { locale } = await params
-	const t = await getTranslations({ locale, namespace: "auth" })
+	const session = await auth()
+
+	if (session?.user) {
+		redirect(`/${locale}/profile`)
+	}
 
 	return (
 		<div
 			style={{
-				minHeight: "100vh",
+				height: "100%",
 				display: "flex",
 				flexDirection: "column",
 				background: "var(--bg-primary)",
@@ -30,24 +34,6 @@ export default async function RegisterPage({
 				}}>
 				<RegisterForm />
 			</main>
-
-			<footer
-				style={{
-					padding: "20px 24px",
-					textAlign: "center",
-					borderTop: "1px solid var(--border-primary)",
-					fontSize: 13,
-				}}>
-				{t("hasAccount")}{" "}
-				<Link
-					href="/login"
-					style={{
-						color: "var(--text-primary)",
-						fontWeight: 600,
-					}}>
-					{t("signIn")}
-				</Link>
-			</footer>
 		</div>
 	)
 }

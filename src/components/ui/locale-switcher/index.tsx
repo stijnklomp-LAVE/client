@@ -3,6 +3,8 @@
 import { useLocale } from "use-intl"
 import { Select } from "@mantine/core"
 import { usePathname, useRouter } from "@/i18n/navigation"
+import { nprogress } from "@/components/providers/router-progress"
+import { ClientOnly } from "@/components/ui/client-only"
 
 const locales = [
 	{ value: "en", label: "EN" },
@@ -16,20 +18,23 @@ export function LocaleSwitcher(): React.JSX.Element {
 
 	const handleChange = (nextLocale: string | null): void => {
 		if (nextLocale) {
+			nprogress.start()
 			router.replace(pathname, { locale: nextLocale })
 		}
 	}
 
 	return (
-		<Select
-			data={[...locales]}
-			value={locale}
-			onChange={handleChange}
-			size="xs"
-			w={80}
-			aria-label="Select language"
-			allowDeselect={false}
-		/>
+		<ClientOnly>
+			<Select
+				data={[...locales]}
+				value={locale}
+				onChange={handleChange}
+				size="xs"
+				w={80}
+				aria-label="Select language"
+				allowDeselect={false}
+			/>
+		</ClientOnly>
 	)
 }
 
