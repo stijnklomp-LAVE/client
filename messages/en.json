@@ -170,8 +170,7 @@
 		"registerDevice": "Register Device",
 		"tabs": {
 			"devices": "Devices",
-			"send": "Send Fragments",
-			"receive": "Receive Fragments",
+			"send": "Share Fragments",
 			"requests": "Requests"
 		},
 		"connectedDevices": "Connected Devices",
@@ -187,23 +186,36 @@
 			"offline": "offline"
 		},
 		"send": {
-			"title": "Send Fragments to a Device",
-			"selectSource": "Select Source Device (You)",
+			"title": "Share Fragments with a Device",
+			"selectSource": "Source Devices",
+			"selectSourceDescription": "Devices that have the fragments and will send them",
+			"selectTargetDescription": "Devices that will receive the fragments",
 			"noDevices": "No devices registered. Register one first.",
-			"selectProject": "Select Project",
+			"selectProject": "Project",
 			"noProjects": "No projects available",
 			"fragments": "fragments",
-			"selectTarget": "Select Target Device",
+			"selectTarget": "Target Devices",
 			"messageLabel": "Message (optional)",
 			"messagePlaceholder": "Add a note about what you're sending...",
 			"sendButton": "Send Transfer Request",
-			"incomplete": "Select your source device, target device, project, and at least one fragment"
+			"incomplete": "Select your source device, target device, project, and at least one fragment",
+			"noDevicesForProject": "No devices have fragments from the selected projects",
+			"duplicateWarning": "Some fragments also exist on other selected source devices",
+			"noSourceDevices": "No source devices with matching fragments",
+			"selectSourcesButton": "Select source devices",
+			"sendCount": "Send {fragments} fragments to {targets} devices",
+			"alreadyOnTarget": "{count} already on target",
+			"fragmentCount": "{have} of {total} fragments",
+			"alsoOnAnotherSource": " — also on another source",
+			"thisDevice": " (this)",
+			"resolveDuplicate": "Use this device",
+			"resolveAllDuplicates": "Use this device for all fragments",
+			"duplicateResolved": "Resolved — will send from {device}",
+			"updatedAt": "Last updated {time}",
+			"duplicatesResolved": "Duplicate issues resolved",
+			"unresolvedDuplicates": "Unresolved duplicates"
 		},
-		"receive": {
-			"title": "Available Content from Other Devices",
-			"description": "The following projects and fragments are available on connected devices. Select fragments to request from a device.",
-			"noOnlineDevices": "No online devices with available content"
-		},
+
 		"requests": {
 			"title": "All Transfer Requests",
 			"empty": "No transfer requests yet",

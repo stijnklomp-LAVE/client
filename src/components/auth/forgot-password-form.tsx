@@ -1,12 +1,13 @@
 "use client"
 
 import { useState } from "react"
-import { Button, Card, Text, TextInput, Title } from "@mantine/core"
+import { AuthCard } from "@/components/ui/auth-card"
+import { Button, Text, TextInput, Title } from "@mantine/core"
 import { useTranslations } from "next-intl"
 import Link from "next/link"
 import { FormMessage, type Message } from "@/components/ui/form-message"
 
-export function ForgotPasswordForm(): React.JSX.Element {
+export const ForgotPasswordForm = (): React.JSX.Element => {
 	const t = useTranslations("auth")
 	const [email, setEmail] = useState("")
 	const [message, setMessage] = useState<Message | null>(null)
@@ -14,14 +15,14 @@ export function ForgotPasswordForm(): React.JSX.Element {
 	const [sent, setSent] = useState(false)
 	const [loading, setLoading] = useState(false)
 
-	function updateMessage(msg: Message | null): void {
+	const updateMessage = (msg: Message | null): void => {
 		setMessage(msg)
 		if (msg) {
 			setMessageKey((k) => k + 1)
 		}
 	}
 
-	async function handleSubmit(e: React.FormEvent) {
+	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault()
 		setLoading(true)
 
@@ -53,13 +54,7 @@ export function ForgotPasswordForm(): React.JSX.Element {
 
 	if (sent) {
 		return (
-			<Card
-				withBorder
-				shadow="sm"
-				padding="xl"
-				radius="md"
-				maw={420}
-				w="100%">
+			<AuthCard>
 				<Title order={2} ta="center" mb="xs">
 					{t("checkEmail")}
 				</Title>
@@ -70,18 +65,12 @@ export function ForgotPasswordForm(): React.JSX.Element {
 				<Button component="a" href="/login" fullWidth variant="outline">
 					{t("backToLogin")}
 				</Button>
-			</Card>
+			</AuthCard>
 		)
 	}
 
 	return (
-		<Card
-			withBorder
-			shadow="sm"
-			padding="xl"
-			radius="md"
-			maw={420}
-			w="100%">
+		<AuthCard>
 			<form onSubmit={handleSubmit}>
 				<Title order={2} ta="center" mb="xs">
 					{t("forgotPassword")}
@@ -117,6 +106,6 @@ export function ForgotPasswordForm(): React.JSX.Element {
 					</Link>
 				</Text>
 			</form>
-		</Card>
+		</AuthCard>
 	)
 }

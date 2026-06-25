@@ -13,7 +13,7 @@ import { UserMenu } from "@/components/auth/user-menu"
 import { LoginButton } from "@/components/auth/login-button"
 import { nprogress } from "@/components/providers/router-progress"
 
-export function Header(): React.JSX.Element {
+export const Header = (): React.JSX.Element => {
 	const { data: session } = useSession()
 	const pathname = usePathname()
 	const t = useTranslations("nav")

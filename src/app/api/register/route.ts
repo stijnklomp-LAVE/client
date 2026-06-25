@@ -3,7 +3,7 @@ import crypto from "node:crypto"
 import { NextResponse } from "next/server"
 import bcrypt from "bcryptjs"
 
-import { prisma } from "@/lib/prisma"
+import { prismaClient } from "@/lib/db/prisma"
 
 type RegisterBody = {
 	name?: string
@@ -11,7 +11,7 @@ type RegisterBody = {
 	password: string
 }
 
-export async function POST(request: Request) {
+export const POST = async (request: Request) => {
 	try {
 		const body = (await request.json()) as RegisterBody
 		const { email, name, password } = body
@@ -30,7 +30,9 @@ export async function POST(request: Request) {
 			)
 		}
 
-		const existing = await prisma.user.findUnique({ where: { email } })
+		const existing = await prismaClient.user.findUnique({
+			where: { email },
+		})
 
 		if (existing) {
 			return NextResponse.json(
@@ -41,7 +43,7 @@ export async function POST(request: Request) {
 
 		const hashedPassword = await bcrypt.hash(password, 12)
 
-		await prisma.user.create({
+		await prismaClient.user.create({
 			data: {
 				email,
 				emailVerified: null,
@@ -53,7 +55,7 @@ export async function POST(request: Request) {
 		const verificationToken = crypto.randomUUID()
 		const origin = new URL(request.url).origin
 
-		await prisma.verificationToken.create({
+		await prismaClient.verificationToken.create({
 			data: {
 				expires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7),
 				identifier: email,

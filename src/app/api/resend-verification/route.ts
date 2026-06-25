@@ -2,9 +2,9 @@ import crypto from "node:crypto"
 
 import { NextResponse } from "next/server"
 
-import { prisma } from "@/lib/prisma"
+import { prismaClient } from "@/lib/db/prisma"
 
-export async function POST(request: Request) {
+export const POST = async (request: Request) => {
 	try {
 		const { email } = (await request.json()) as { email: string }
 
@@ -15,7 +15,7 @@ export async function POST(request: Request) {
 			)
 		}
 
-		const user = await prisma.user.findUnique({
+		const user = await prismaClient.user.findUnique({
 			select: { emailVerified: true },
 			where: { email },
 		})
@@ -34,14 +34,14 @@ export async function POST(request: Request) {
 			)
 		}
 
-		await prisma.verificationToken.deleteMany({
+		await prismaClient.verificationToken.deleteMany({
 			where: { identifier: email },
 		})
 
 		const verificationToken = crypto.randomUUID()
 		const origin = new URL(request.url).origin
 
-		await prisma.verificationToken.create({
+		await prismaClient.verificationToken.create({
 			data: {
 				expires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7),
 				identifier: email,

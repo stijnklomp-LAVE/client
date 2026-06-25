@@ -170,8 +170,7 @@
 		"registerDevice": "Apparaat Registreren",
 		"tabs": {
 			"devices": "Apparaten",
-			"send": "Fragmenten Verzenden",
-			"receive": "Fragmenten Ontvangen",
+			"send": "Fragmenten delen",
 			"requests": "Verzoeken"
 		},
 		"connectedDevices": "Verbonden Apparaten",
@@ -187,23 +186,36 @@
 			"offline": "offline"
 		},
 		"send": {
-			"title": "Fragmenten Verzenden naar een Apparaat",
-			"selectSource": "Selecteer Bronapparaat (Jij)",
+			"title": "Fragmenten delen met een Apparaat",
+			"selectSource": "Bronapparaten",
+			"selectSourceDescription": "Apparaten die de fragmenten hebben en zullen verzenden",
+			"selectTargetDescription": "Apparaten die de fragmenten zullen ontvangen",
 			"noDevices": "Geen apparaten geregistreerd. Registreer er eerst een.",
-			"selectProject": "Selecteer Project",
+			"selectProject": "Project",
 			"noProjects": "Geen projecten beschikbaar",
 			"fragments": "fragmenten",
-			"selectTarget": "Selecteer Doelapparaat",
+			"selectTarget": "Doelapparaten",
 			"messageLabel": "Bericht (optioneel)",
 			"messagePlaceholder": "Voeg een notitie toe over wat je verzendt...",
 			"sendButton": "Verzend Overdrachtsverzoek",
-			"incomplete": "Selecteer je bronapparaat, doelapparaat, project en ten minste één fragment"
+			"incomplete": "Selecteer je bronapparaat, doelapparaat, project en ten minste één fragment",
+			"noDevicesForProject": "Geen apparaten met fragmenten uit de geselecteerde projecten",
+			"duplicateWarning": "Sommige fragmenten bestaan ook op andere geselecteerde bronapparaten",
+			"noSourceDevices": "Geen bronapparaten met bijpassende fragmenten",
+			"selectSourcesButton": "Selecteer bronapparaten",
+			"sendCount": "Verzend {fragments} fragmenten naar {targets} apparaten",
+			"alreadyOnTarget": "{count} al op doelapparaat",
+			"fragmentCount": "{have} van {total} fragmenten",
+			"alsoOnAnotherSource": " — ook op een andere bron",
+			"thisDevice": " (dit)",
+			"resolveDuplicate": "Gebruik dit apparaat",
+			"resolveAllDuplicates": "Gebruik dit apparaat voor alle fragmenten",
+			"duplicateResolved": "Opgelost — zal verzenden vanaf {device}",
+			"updatedAt": "Laatst bijgewerkt {time}",
+			"duplicatesResolved": "Dubbele fragmenten opgelost",
+			"unresolvedDuplicates": "Niet-opgeloste dubbele fragmenten"
 		},
-		"receive": {
-			"title": "Beschikbare Inhoud van Andere Apparaten",
-			"description": "De volgende projecten en fragmenten zijn beschikbaar op verbonden apparaten. Selecteer fragmenten om aan te vragen van een apparaat.",
-			"noOnlineDevices": "Geen online apparaten met beschikbare inhoud"
-		},
+
 		"requests": {
 			"title": "Alle Overdrachtsverzoeken",
 			"empty": "Nog geen overdrachtsverzoeken",

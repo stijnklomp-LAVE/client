@@ -11,13 +11,13 @@ const theme = createTheme({
 	defaultRadius: "md",
 })
 
-export function ThemeProvider({
+export const ThemeProvider = ({
 	children,
 	initialTheme,
 }: {
 	children: React.ReactNode
 	initialTheme?: TTheme
-}): React.JSX.Element {
+}): React.JSX.Element => {
 	const [themeModelObj, setThemeModel]: TThemeModelInit =
 		useState<TThemeModel>({
 			currentColourMode: initialTheme ?? ThemeModel.currentColourMode,

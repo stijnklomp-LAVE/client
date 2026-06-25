@@ -3,12 +3,13 @@
 import { useState } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { nprogress } from "@/components/providers/router-progress"
-import { Button, Card, PasswordInput, Text, Title } from "@mantine/core"
+import { AuthCard } from "@/components/ui/auth-card"
+import { Button, PasswordInput, Text, Title } from "@mantine/core"
 import { useTranslations } from "next-intl"
 import Link from "next/link"
 import { FormMessage, type Message } from "@/components/ui/form-message"
 
-export function ResetPasswordForm(): React.JSX.Element {
+export const ResetPasswordForm = (): React.JSX.Element => {
 	const t = useTranslations("auth")
 	const router = useRouter()
 	const searchParams = useSearchParams()
@@ -19,14 +20,14 @@ export function ResetPasswordForm(): React.JSX.Element {
 	const [messageKey, setMessageKey] = useState(0)
 	const [loading, setLoading] = useState(false)
 
-	function updateMessage(msg: Message | null): void {
+	const updateMessage = (msg: Message | null): void => {
 		setMessage(msg)
 		if (msg) {
 			setMessageKey((k) => k + 1)
 		}
 	}
 
-	async function handleSubmit(e: React.FormEvent) {
+	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault()
 
 		if (password !== confirmPassword) {
@@ -72,13 +73,7 @@ export function ResetPasswordForm(): React.JSX.Element {
 
 	if (!token) {
 		return (
-			<Card
-				withBorder
-				shadow="sm"
-				padding="xl"
-				radius="md"
-				maw={420}
-				w="100%">
+			<AuthCard>
 				<Title order={2} ta="center" mb="xs">
 					{t("resetPassword")}
 				</Title>
@@ -88,18 +83,12 @@ export function ResetPasswordForm(): React.JSX.Element {
 				<Button component="a" href="/login" fullWidth variant="outline">
 					{t("backToLogin")}
 				</Button>
-			</Card>
+			</AuthCard>
 		)
 	}
 
 	return (
-		<Card
-			withBorder
-			shadow="sm"
-			padding="xl"
-			radius="md"
-			maw={420}
-			w="100%">
+		<AuthCard>
 			<form onSubmit={handleSubmit}>
 				<Title order={2} ta="center" mb="xs">
 					{t("resetPassword")}
@@ -143,6 +132,6 @@ export function ResetPasswordForm(): React.JSX.Element {
 					</Link>
 				</Text>
 			</form>
-		</Card>
+		</AuthCard>
 	)
 }

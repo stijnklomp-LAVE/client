@@ -18,9 +18,9 @@ export default async function LoginPage({
 	return (
 		<div
 			style={{
-				height: "100%",
 				display: "flex",
 				flexDirection: "column",
+				minHeight: "100%",
 				background: "var(--bg-primary)",
 				color: "var(--text-primary)",
 			}}>

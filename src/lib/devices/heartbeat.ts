@@ -4,7 +4,7 @@ import { useEffect, useRef } from "react"
 
 const HEARTBEAT_INTERVAL_MS = 30_000
 
-export function useDeviceHeartbeat(deviceId: string | null): void {
+export const useHeartbeat = (deviceId: string | null): void => {
 	const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
 	useEffect(() => {
@@ -12,7 +12,7 @@ export function useDeviceHeartbeat(deviceId: string | null): void {
 
 		const id = deviceId
 
-		async function beat(status: "online" | "offline") {
+		const beat = async (status: "online" | "offline") => {
 			try {
 				await fetch(`/api/devices/${id}/heartbeat`, {
 					body: JSON.stringify({ status }),

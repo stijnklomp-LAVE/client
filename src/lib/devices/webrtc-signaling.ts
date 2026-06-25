@@ -7,17 +7,17 @@ export type FileProgress = {
 	fileName: string
 	bytesReceived: number
 	bytesTotal: number
-	status: "pending" | "transferring" | "done" | "error"
+	status: "pending" | "fetching" | "transferring" | "done" | "error"
 }
 
-export async function pollForPendingOffer(
+export const pollForPendingOffer = async (
 	deviceId: string,
 	abortSignal: AbortSignal,
 ): Promise<{
 	sessionId: string
 	sourceDeviceId: string
 	offer: string
-} | null> {
+} | null> => {
 	while (!abortSignal.aborted) {
 		const res = await fetch(
 			`/api/signaling/pending?deviceId=${encodeURIComponent(deviceId)}`,
@@ -51,10 +51,10 @@ export async function pollForPendingOffer(
 	return null
 }
 
-export async function waitForAnswer(
+export const waitForAnswer = async (
 	sessionId: string,
 	abortSignal: AbortSignal,
-): Promise<string | null> {
+): Promise<string | null> => {
 	while (!abortSignal.aborted) {
 		const res = await fetch(`/api/signaling/${sessionId}/answer`)
 
@@ -72,7 +72,7 @@ export async function waitForAnswer(
 	return null
 }
 
-function waitForIceGathering(pc: RTCPeerConnection): Promise<void> {
+const waitForIceGathering = (pc: RTCPeerConnection): Promise<void> => {
 	if (pc.iceGatheringState === "complete") return Promise.resolve()
 
 	return new Promise((resolve) => {
@@ -82,14 +82,14 @@ function waitForIceGathering(pc: RTCPeerConnection): Promise<void> {
 	})
 }
 
-export async function createOfferAndSubmit(
+export const createOfferAndSubmit = async (
 	sourceDeviceId: string,
 	targetDeviceId: string,
 ): Promise<{
 	sessionId: string
 	pc: RTCPeerConnection
 	channel: RTCDataChannel
-}> {
+}> => {
 	const pc = new RTCPeerConnection({ iceServers: ICE_SERVERS })
 	const channel = pc.createDataChannel("fileTransfer")
 
@@ -122,10 +122,10 @@ export async function createOfferAndSubmit(
 	return { channel, pc, sessionId: data.sessionId }
 }
 
-export async function createAnswerAndSubmit(
+export const createAnswerAndSubmit = async (
 	sessionId: string,
 	offerSdp: string,
-): Promise<{ pc: RTCPeerConnection }> {
+): Promise<{ pc: RTCPeerConnection }> => {
 	const pc = new RTCPeerConnection({ iceServers: ICE_SERVERS })
 
 	await pc.setRemoteDescription({ sdp: offerSdp, type: "offer" })
@@ -153,11 +153,11 @@ export async function createAnswerAndSubmit(
 	return { pc }
 }
 
-export async function submitIceCandidate(
+export const submitIceCandidate = async (
 	sessionId: string,
 	fromDeviceId: string,
 	candidate: RTCIceCandidateInit,
-): Promise<void> {
+): Promise<void> => {
 	if (!candidate.candidate) return
 
 	await fetch(`/api/signaling/${sessionId}/ice`, {
@@ -173,13 +173,13 @@ export async function submitIceCandidate(
 	})
 }
 
-export function startIceCandidateExchange(
+export const startIceCandidateExchange = (
 	sessionId: string,
 	deviceId: string,
 	remoteDeviceId: string,
 	pc: RTCPeerConnection,
 	abortSignal: AbortSignal,
-): void {
+): void => {
 	pc.onicecandidate = (event) => {
 		if (event.candidate && !abortSignal.aborted) {
 			void submitIceCandidate(

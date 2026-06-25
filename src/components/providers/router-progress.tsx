@@ -6,7 +6,7 @@ import { NavigationProgress, nprogress } from "@mantine/nprogress"
 
 export { nprogress }
 
-export function RouterProgress(): React.JSX.Element {
+export const RouterProgress = (): React.JSX.Element => {
 	const pathname = usePathname()
 	const searchParams = useSearchParams()
 

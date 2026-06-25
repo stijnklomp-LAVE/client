@@ -7,7 +7,7 @@ import { useLocale } from "use-intl"
 import { useRouter } from "next/navigation"
 import { nprogress } from "@/components/providers/router-progress"
 
-export function UserMenu(): React.JSX.Element | null {
+export const UserMenu = (): React.JSX.Element | null => {
 	const { data: session } = useSession()
 	const router = useRouter()
 	const locale = useLocale()

@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server"
 
-import { prisma } from "@/lib/prisma"
+import { prismaClient } from "@/lib/db/prisma"
 import { routing } from "@/i18n/routing"
 
-function localeFromRequest(request: Request): string {
+const localeFromRequest = (request: Request): string => {
 	const acceptLanguage = request.headers.get("Accept-Language")
 
 	if (acceptLanguage) {
@@ -18,7 +18,7 @@ function localeFromRequest(request: Request): string {
 	return routing.defaultLocale
 }
 
-function redirectToLogin(request: Request, params: string): NextResponse {
+const redirectToLogin = (request: Request, params: string): NextResponse => {
 	const locale = localeFromRequest(request)
 
 	return NextResponse.redirect(
@@ -26,7 +26,7 @@ function redirectToLogin(request: Request, params: string): NextResponse {
 	)
 }
 
-export async function GET(request: Request) {
+export const GET = async (request: Request) => {
 	try {
 		const { searchParams } = new URL(request.url)
 		const token = searchParams.get("token")
@@ -35,7 +35,7 @@ export async function GET(request: Request) {
 			return redirectToLogin(request, "error=missing-token")
 		}
 
-		const record = await prisma.verificationToken.findUnique({
+		const record = await prismaClient.verificationToken.findUnique({
 			where: { token },
 		})
 
@@ -44,17 +44,17 @@ export async function GET(request: Request) {
 		}
 
 		if (record.expires < new Date()) {
-			await prisma.verificationToken.delete({ where: { token } })
+			await prismaClient.verificationToken.delete({ where: { token } })
 
 			return redirectToLogin(request, "error=expired-token")
 		}
 
-		await prisma.user.update({
+		await prismaClient.user.update({
 			data: { emailVerified: new Date() },
 			where: { email: record.identifier },
 		})
 
-		await prisma.verificationToken.delete({ where: { token } })
+		await prismaClient.verificationToken.delete({ where: { token } })
 
 		return redirectToLogin(request, "verified=true")
 	} catch (error) {

@@ -9,7 +9,7 @@ import {
 	startIceCandidateExchange,
 	pollForPendingOffer,
 	waitForAnswer,
-} from "@/lib/webrtc-signaling"
+} from "@/lib/devices/webrtc-signaling"
 
 type TransferRequestBase = {
 	id: string
@@ -37,12 +37,7 @@ type Props = {
 	requests: TransferRequestBase[]
 }
 
-const MOCK_FILES: { name: string; size: number }[] = [
-	{ name: "frame-001.png", size: 2_345_000 },
-	{ name: "frame-002.png", size: 1_890_000 },
-]
-
-function downloadBlob(blob: Blob, fileName: string): void {
+const downloadBlob = (blob: Blob, fileName: string): void => {
 	const url = URL.createObjectURL(blob)
 	const a = document.createElement("a")
 	a.href = url
@@ -54,10 +49,13 @@ function downloadBlob(blob: Blob, fileName: string): void {
 	URL.revokeObjectURL(url)
 }
 
-export function useP2PTransfer({ deviceId, requests }: Props): {
+export const useP2PTransfer = ({
+	deviceId,
+	requests,
+}: Props): {
 	activeTransfers: Map<string, ActiveTransfer>
 	cancelTransfer: (requestId: string) => void
-} {
+} => {
 	const [activeTransfers, setActiveTransfers] = useState<
 		Map<string, ActiveTransfer>
 	>(new Map())
@@ -173,10 +171,10 @@ export function useP2PTransfer({ deviceId, requests }: Props): {
 
 					updateTransfer(req.id, {
 						direction: req.direction,
-						progress: MOCK_FILES.map((f) => ({
+						progress: req.fragmentNames.map((name) => ({
 							bytesReceived: 0,
-							bytesTotal: f.size,
-							fileName: f.name,
+							bytesTotal: 0,
+							fileName: name,
 							status: "pending",
 						})),
 					})
@@ -187,6 +185,8 @@ export function useP2PTransfer({ deviceId, requests }: Props): {
 						abort.signal,
 						updateTransfer,
 						req.id,
+						req.fragmentIds,
+						req.fragmentNames,
 					)
 				}
 
@@ -222,13 +222,15 @@ export function useP2PTransfer({ deviceId, requests }: Props): {
 	return { activeTransfers, cancelTransfer }
 }
 
-async function startSendFlow(
+const startSendFlow = async (
 	deviceId: string,
 	targetDeviceId: string,
 	abortSignal: AbortSignal,
 	updateTransfer: (id: string, partial: Partial<ActiveTransfer>) => void,
 	requestId: string,
-): Promise<void> {
+	fragmentIds: string[],
+	fragmentNames: string[],
+): Promise<void> => {
 	const iceAbort = new AbortController()
 
 	try {
@@ -251,7 +253,13 @@ async function startSendFlow(
 
 		channel.onopen = () => {
 			updateTransfer(requestId, { channelState: "open" })
-			sendFiles(channel, updateTransfer, requestId)
+			void sendFiles(
+				channel,
+				updateTransfer,
+				requestId,
+				fragmentIds,
+				fragmentNames,
+			)
 			channel.close()
 		}
 
@@ -306,12 +314,12 @@ async function startSendFlow(
 	}
 }
 
-async function startReceiveFlow(
+const startReceiveFlow = async (
 	deviceId: string,
 	abortSignal: AbortSignal,
 	updateTransfer: (id: string, partial: Partial<ActiveTransfer>) => void,
 	requestId: string,
-): Promise<void> {
+): Promise<void> => {
 	const iceAbort = new AbortController()
 
 	try {
@@ -389,49 +397,70 @@ async function startReceiveFlow(
 	}
 }
 
-function sendFiles(
+const sendFiles = async (
 	channel: RTCDataChannel,
 	updateTransfer: (id: string, partial: Partial<ActiveTransfer>) => void,
 	requestId: string,
-): void {
+	fragmentIds: string[],
+	fragmentNames: string[],
+): Promise<void> => {
 	try {
-		for (const file of MOCK_FILES) {
+		const chunkSize = 16_384
+
+		for (let i = 0; i < fragmentIds.length; i++) {
+			const fragmentId = fragmentIds[i]
+			const fileName = fragmentNames[i] ?? "unknown"
+
 			updateTransfer(requestId, {
 				progress: [
 					{
 						bytesReceived: 0,
-						bytesTotal: file.size,
-						fileName: file.name,
-						status: "transferring",
+						bytesTotal: 0,
+						fileName,
+						status: "fetching",
 					},
 				],
 			})
 
-			channel.send(
-				JSON.stringify({ fileName: file.name, fileSize: file.size }),
+			const res = await fetch(
+				`/api/mock-files?fragmentId=${String(fragmentId)}`,
 			)
 
-			const chunkSize = 16_384
-			const totalChunks = Math.ceil(file.size / chunkSize)
+			if (!res.ok) {
+				updateTransfer(requestId, {
+					error: `Failed to fetch ${fileName}`,
+				})
 
-			for (let chunk = 0; chunk < totalChunks; chunk++) {
-				const offset = chunk * chunkSize
-				const size = Math.min(chunkSize, file.size - offset)
-				channel.send(new Uint8Array(size).buffer)
+				return
+			}
+
+			const buffer = await res.arrayBuffer()
+			const fileSize = buffer.byteLength
+
+			channel.send(JSON.stringify({ fileName, fileSize }))
+			await new Promise((r) => setTimeout(r, 0))
+
+			for (let offset = 0; offset < fileSize; offset += chunkSize) {
+				const chunk = buffer.slice(offset, offset + chunkSize)
+				channel.send(chunk)
+
+				const received = Math.min(offset + chunkSize, fileSize)
 
 				updateTransfer(requestId, {
 					progress: [
 						{
-							bytesReceived: (chunk + 1) * chunkSize,
-							bytesTotal: file.size,
-							fileName: file.name,
+							bytesReceived: received,
+							bytesTotal: fileSize,
+							fileName,
 							status:
-								chunk === totalChunks - 1
-									? "done"
-									: "transferring",
+								received >= fileSize ? "done" : "transferring",
 						},
 					],
 				})
+
+				if (channel.bufferedAmount > 1_000_000) {
+					await new Promise((r) => setTimeout(r, 100))
+				}
 			}
 		}
 	} catch (err) {
@@ -441,11 +470,11 @@ function sendFiles(
 	}
 }
 
-function receiveFiles(
+const receiveFiles = (
 	channel: RTCDataChannel,
 	updateTransfer: (id: string, partial: Partial<ActiveTransfer>) => void,
 	requestId: string,
-): void {
+): void => {
 	let buffer = ""
 	let currentFile: {
 		fileName: string

@@ -36,11 +36,11 @@ const steps = [
 	},
 ]
 
-export function WorkflowSection({
+export const WorkflowSection = ({
 	translations,
 }: {
 	translations: Record<string, string>
-}): React.JSX.Element {
+}): React.JSX.Element => {
 	return (
 		<div
 			style={{
@@ -319,7 +319,7 @@ export function WorkflowSection({
 	)
 }
 
-function CenteredStep({
+const CenteredStep = ({
 	step,
 	icon: iconComponent,
 	index,
@@ -329,7 +329,7 @@ function CenteredStep({
 	icon: (typeof steps)[number]["icon"]
 	index: number
 	translations: Record<string, string>
-}): React.JSX.Element {
+}): React.JSX.Element => {
 	const Icon = iconComponent
 	return (
 		<div
@@ -394,7 +394,7 @@ function CenteredStep({
 	)
 }
 
-function CardStep({
+const CardStep = ({
 	step,
 	icon: iconComponent,
 	index,
@@ -404,7 +404,7 @@ function CardStep({
 	icon: (typeof steps)[number]["icon"]
 	index: number
 	translations: Record<string, string>
-}): React.JSX.Element {
+}): React.JSX.Element => {
 	const Icon = iconComponent
 	return (
 		<div

@@ -3,9 +3,9 @@ import { notifications, type NotificationData } from "@mantine/notifications"
 const shownKeys = new Map<string, number>()
 const DEFAULT_COOLDOWN_MS = 30_000
 
-export function showThrottledNotification(
+export const showThrottledNotification = (
 	data: NotificationData & { throttleKey?: string },
-): void {
+): void => {
 	const key =
 		data.throttleKey ??
 		(typeof data.message === "string" ? data.message : "default")

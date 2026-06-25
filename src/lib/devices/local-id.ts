@@ -2,7 +2,7 @@
 
 const STORAGE_KEY = "video-editor-device-id"
 
-export function getLocalDeviceId(): string | null {
+export const getLocalId = (): string | null => {
 	if (typeof globalThis === "undefined") return null
 
 	try {
@@ -12,7 +12,7 @@ export function getLocalDeviceId(): string | null {
 	}
 }
 
-export function setLocalDeviceId(deviceId: string): void {
+export const setLocalId = (deviceId: string): void => {
 	if (typeof globalThis === "undefined") return
 
 	try {

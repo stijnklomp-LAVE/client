@@ -3,7 +3,7 @@ import { notifications } from "@mantine/notifications"
 import { IconBell, IconBrandTabler, IconPlayerPlay } from "@tabler/icons-react"
 import { useTranslations } from "next-intl"
 
-export function Showcase(): React.JSX.Element {
+export const Showcase = (): React.JSX.Element => {
 	const t = useTranslations("showcase")
 
 	return (
@@ -86,13 +86,13 @@ export function Showcase(): React.JSX.Element {
 	)
 }
 
-function Section({
+const Section = ({
 	title,
 	children,
 }: {
 	title: string
 	children: React.ReactNode
-}): React.JSX.Element {
+}): React.JSX.Element => {
 	return (
 		<Card
 			shadow="sm"

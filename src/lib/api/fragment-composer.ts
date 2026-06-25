@@ -10,7 +10,7 @@ const getBaseUrl = () => {
 	return url
 }
 
-export async function proxyToFragmentComposer(
+export const proxyToFragmentComposer = async (
 	path: string,
 	options: {
 		body?: unknown
@@ -18,7 +18,7 @@ export async function proxyToFragmentComposer(
 		method?: string
 		token: string
 	},
-): Promise<Response> {
+): Promise<Response> => {
 	const { body, headers, method, token } = options
 
 	return fetch(`${getBaseUrl()}${path}`, {

@@ -1,16 +1,16 @@
 import { NextResponse } from "next/server"
 
 import { auth } from "@/auth"
-import { prisma } from "@/lib/prisma"
+import { prismaClient } from "@/lib/db/prisma"
 
-export async function GET() {
+export const GET = async () => {
 	const session = await auth()
 
 	if (!session?.user.id) {
 		return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 	}
 
-	const user = await prisma.user.findUnique({
+	const user = await prismaClient.user.findUnique({
 		select: { email: true, id: true, name: true },
 		where: { id: session.user.id },
 	})
@@ -22,7 +22,7 @@ export async function GET() {
 	return NextResponse.json({ user })
 }
 
-export async function PUT(request: Request) {
+export const PUT = async (request: Request) => {
 	const session = await auth()
 
 	if (!session?.user.id) {
@@ -37,7 +37,7 @@ export async function PUT(request: Request) {
 		const { email, name } = body
 
 		if (email) {
-			const existing = await prisma.user.findUnique({
+			const existing = await prismaClient.user.findUnique({
 				where: { email },
 			})
 
@@ -49,7 +49,7 @@ export async function PUT(request: Request) {
 			}
 		}
 
-		const user = await prisma.user.update({
+		const user = await prismaClient.user.update({
 			data: {
 				...(email !== undefined && { email }),
 				...(name !== undefined && { name: name || null }),

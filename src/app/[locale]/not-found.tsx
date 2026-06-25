@@ -1,6 +1,6 @@
 import { Link } from "@/i18n/navigation"
 
-export default function NotFound(): React.JSX.Element {
+const NotFound = (): React.JSX.Element => {
 	return (
 		<div
 			style={{
@@ -45,3 +45,5 @@ export default function NotFound(): React.JSX.Element {
 		</div>
 	)
 }
+
+export default NotFound

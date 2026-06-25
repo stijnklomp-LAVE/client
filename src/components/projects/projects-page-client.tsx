@@ -33,7 +33,7 @@ type Project = {
 	name: string
 }
 
-export function ProjectsPageClient(): React.JSX.Element {
+export const ProjectsPageClient = (): React.JSX.Element => {
 	const t = useTranslations("projects")
 	const router = useRouter()
 	const [projects, setProjects] = useState<Project[]>([])
@@ -67,7 +67,7 @@ export function ProjectsPageClient(): React.JSX.Element {
 	}, [t])
 
 	useEffect(() => {
-		async function load() {
+		const load = async () => {
 			setLoading(true)
 			await fetchProjects()
 			setLoading(false)
@@ -76,7 +76,7 @@ export function ProjectsPageClient(): React.JSX.Element {
 		void load()
 	}, [fetchProjects])
 
-	function nextProjectName(): string {
+	const nextProjectName = (): string => {
 		let max = 0
 
 		for (const p of projects) {
@@ -92,7 +92,7 @@ export function ProjectsPageClient(): React.JSX.Element {
 		return `Project ${max + 1}`
 	}
 
-	async function handleCreate() {
+	const handleCreate = async () => {
 		const name = newName.trim() || nextProjectName()
 
 		setCreating(true)
@@ -136,7 +136,7 @@ export function ProjectsPageClient(): React.JSX.Element {
 		}
 	}
 
-	async function handleRename(projectId: string) {
+	const handleRename = async (projectId: string) => {
 		const trimmed = editValue.trim()
 
 		if (!trimmed) {
@@ -173,7 +173,7 @@ export function ProjectsPageClient(): React.JSX.Element {
 		}
 	}
 
-	async function handleDeleteConfirm() {
+	const handleDeleteConfirm = async () => {
 		if (!deleteTarget) return
 
 		setDeleting(true)
@@ -213,7 +213,7 @@ export function ProjectsPageClient(): React.JSX.Element {
 		}
 	}
 
-	function formatDate(iso: string): string {
+	const formatDate = (iso: string): string => {
 		const date = new Date(iso)
 		const now = new Date()
 		const diffMs = now.getTime() - date.getTime()

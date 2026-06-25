@@ -1,13 +1,13 @@
 import { NextResponse } from "next/server"
 
 import { auth } from "@/auth"
-import { signJwt } from "@/lib/jwt"
-import { proxyToFragmentComposer } from "@/lib/fragment-composer"
+import { signJwt } from "@/lib/api/jwt"
+import { proxyToFragmentComposer } from "@/lib/api/fragment-composer"
 
-export async function DELETE(
+export const DELETE = async (
 	_request: Request,
 	{ params }: { params: Promise<{ id: string }> },
-) {
+) => {
 	const session = await auth()
 
 	if (!session?.user.id) {

@@ -1,15 +1,19 @@
 import "@testing-library/jest-dom"
-import { render, screen } from "@testing-library/react"
+import { cleanup, render, screen } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 
 import { ThemeProvider } from "@/lib/theme"
 import { ThemeToggle } from "@/components/ui/theme-toggle"
 
-function renderWithProviders(
+const renderWithProviders = (
 	ui: React.ReactElement,
-): ReturnType<typeof render> {
+): ReturnType<typeof render> => {
 	return render(<ThemeProvider>{ui}</ThemeProvider>)
 }
+
+afterEach(() => {
+	cleanup()
+})
 
 describe("ThemeToggle", () => {
 	it("renders the toggle button with current mode label", () => {

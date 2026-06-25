@@ -1,9 +1,10 @@
 "use client"
 
 import { Button, Text, Title } from "@mantine/core"
+import { CtaButton } from "@/components/ui/cta-button"
 import { motion } from "motion/react"
 
-export function CTASection({
+export const CTASection = ({
 	title,
 	subtitle,
 	primaryLabel,
@@ -13,7 +14,7 @@ export function CTASection({
 	subtitle: string
 	primaryLabel: string
 	secondaryLabel: string
-}): React.JSX.Element {
+}): React.JSX.Element => {
 	return (
 		<div style={{ padding: "80px 24px" }}>
 			<motion.div
@@ -71,17 +72,7 @@ export function CTASection({
 							justifyContent: "center",
 							flexWrap: "wrap",
 						}}>
-						<Button
-							size="lg"
-							variant="filled"
-							style={{
-								background:
-									"linear-gradient(135deg, #228be6, #7950f2)",
-								border: "none",
-								fontWeight: 600,
-							}}>
-							{primaryLabel}
-						</Button>
+						<CtaButton>{primaryLabel}</CtaButton>
 						<Button
 							size="lg"
 							variant="outline"

@@ -1,6 +1,7 @@
 "use client"
 
 import { Box, Button, Grid, Group, Text, Title } from "@mantine/core"
+import { CtaButton } from "@/components/ui/cta-button"
 import {
 	IconCloud,
 	IconDeviceLaptop,
@@ -36,7 +37,7 @@ const floatingIcons = [
 	},
 ]
 
-export function HeroBanner({
+export const HeroBanner = ({
 	title,
 	subtitle,
 	ctaLabel,
@@ -46,7 +47,7 @@ export function HeroBanner({
 	subtitle: string
 	ctaLabel: string
 	secondaryLabel: string
-}): React.JSX.Element {
+}): React.JSX.Element => {
 	return (
 		<Box
 			style={{
@@ -117,17 +118,7 @@ export function HeroBanner({
 						</Text>
 
 						<Group gap="md">
-							<Button
-								size="lg"
-								variant="filled"
-								style={{
-									background:
-										"linear-gradient(135deg, #228be6, #7950f2)",
-									border: "none",
-									fontWeight: 600,
-								}}>
-								{ctaLabel}
-							</Button>
+							<CtaButton>{ctaLabel}</CtaButton>
 							<Button
 								size="lg"
 								variant="outline"
@@ -277,13 +268,13 @@ export function HeroBanner({
 	)
 }
 
-function Badge({
+const Badge = ({
 	children,
 	style,
 }: {
 	children: React.ReactNode
 	style?: React.CSSProperties
-}): React.JSX.Element {
+}): React.JSX.Element => {
 	return (
 		<span
 			style={{

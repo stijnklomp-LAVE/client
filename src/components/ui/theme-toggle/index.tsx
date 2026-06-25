@@ -6,7 +6,7 @@ import { Tooltip } from "@mantine/core"
 import { useTheme } from "@/lib/theme"
 import styles from "./styles.module.scss"
 
-export function ThemeToggle(): React.JSX.Element {
+export const ThemeToggle = (): React.JSX.Element => {
 	const { data, setThemeModel } = useTheme()
 
 	const toggleTheme = (): void => {

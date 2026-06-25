@@ -20,10 +20,12 @@ export const viewport: Viewport = {
 	themeColor: "#0a0a0a",
 }
 
-export default function RootLayout({
+const RootLayout = ({
 	children,
 }: Readonly<{
 	children: React.ReactNode
-}>): React.JSX.Element {
+}>): React.JSX.Element => {
 	return <>{children}</>
 }
+
+export default RootLayout

@@ -36,11 +36,11 @@ const items = [
 	},
 ]
 
-export function StatsBanner({
+export const StatsBanner = ({
 	translations,
 }: {
 	translations: Record<string, string>
-}): React.JSX.Element {
+}): React.JSX.Element => {
 	return (
 		<div
 			style={{

@@ -10,13 +10,13 @@ export type Message = {
 	color: MessageColor
 }
 
-export function FormMessage({
+export const FormMessage = ({
 	message,
 	messageKey,
 }: {
 	message: Message | null
 	messageKey: number
-}): React.JSX.Element | null {
+}): React.JSX.Element | null => {
 	if (!message) return null
 
 	return (

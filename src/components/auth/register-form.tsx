@@ -2,9 +2,9 @@
 
 import { useState } from "react"
 import { useDisclosure } from "@mantine/hooks"
+import { AuthCard } from "@/components/ui/auth-card"
 import {
 	Button,
-	Card,
 	Modal,
 	PasswordInput,
 	Text,
@@ -16,7 +16,7 @@ import Link from "next/link"
 import { FormMessage, type Message } from "@/components/ui/form-message"
 import { ClientOnly } from "@/components/ui/client-only"
 
-export function RegisterForm() {
+export const RegisterForm = () => {
 	const t = useTranslations("auth")
 	const [name, setName] = useState("")
 	const [email, setEmail] = useState("")
@@ -29,14 +29,14 @@ export function RegisterForm() {
 	const [resendOpened, resendHandlers] = useDisclosure(false)
 	const [resending, setResending] = useState(false)
 
-	function updateMessage(msg: Message | null): void {
+	const updateMessage = (msg: Message | null): void => {
 		setMessage(msg)
 		if (msg) {
 			setMessageKey((k) => k + 1)
 		}
 	}
 
-	async function handleSubmit(e: React.FormEvent) {
+	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault()
 
 		if (password !== confirmPassword) {
@@ -71,7 +71,7 @@ export function RegisterForm() {
 		setVerifyUrl(data.verifyUrl)
 	}
 
-	async function handleResend(): Promise<void> {
+	const handleResend = async (): Promise<void> => {
 		setResending(true)
 
 		try {
@@ -110,13 +110,7 @@ export function RegisterForm() {
 					}}
 				/>
 			}>
-			<Card
-				withBorder
-				shadow="sm"
-				padding="xl"
-				radius="md"
-				maw={420}
-				w="100%">
+			<AuthCard>
 				{verifyUrl ? (
 					<>
 						<Title order={2} ta="center" mb="xs">
@@ -243,7 +237,7 @@ export function RegisterForm() {
 						{t("resendVerificationButton")}
 					</Button>
 				</Modal>
-			</Card>
+			</AuthCard>
 		</ClientOnly>
 	)
 }

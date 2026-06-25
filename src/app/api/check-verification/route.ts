@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server"
 
-import { prisma } from "@/lib/prisma"
+import { prismaClient } from "@/lib/db/prisma"
 
-export async function GET(request: Request) {
+export const GET = async (request: Request) => {
 	const { searchParams } = new URL(request.url)
 	const email = searchParams.get("email")
 
@@ -10,7 +10,7 @@ export async function GET(request: Request) {
 		return NextResponse.json({ exists: false, verified: false })
 	}
 
-	const user = await prisma.user.findUnique({
+	const user = await prismaClient.user.findUnique({
 		select: { emailVerified: true },
 		where: { email },
 	})

@@ -27,7 +27,7 @@
 		"esModuleInterop": true,
 		"allowSyntheticDefaultImports": true,
 		"resolveJsonModule": true,
-		"types": ["jest", "node", "react", "react-dom"],
+		"types": ["bun", "node", "react", "react-dom"],
 
 		"plugins": [
 			{
@@ -36,7 +36,7 @@
 		],
 		"paths": {
 			"@/*": ["./src/*"],
-			"@prisma": ["./generated/prisma/client.ts"]
+			"@/prismaClient": ["./generated/prisma/client.ts"]
 		}
 	},
 	"include": [

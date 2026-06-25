@@ -44,11 +44,11 @@ const features = [
 	},
 ]
 
-export function FeaturesSection({
+export const FeaturesSection = ({
 	translations,
 }: {
 	translations: Record<string, string>
-}): React.JSX.Element {
+}): React.JSX.Element => {
 	return (
 		<div
 			style={{

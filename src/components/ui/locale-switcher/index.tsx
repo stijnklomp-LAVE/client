@@ -11,7 +11,7 @@ const locales = [
 	{ value: "nl", label: "NL" },
 ] as const
 
-export function LocaleSwitcher(): React.JSX.Element {
+export const LocaleSwitcher = (): React.JSX.Element => {
 	const locale = useLocale()
 	const pathname = usePathname()
 	const router = useRouter()
@@ -24,7 +24,25 @@ export function LocaleSwitcher(): React.JSX.Element {
 	}
 
 	return (
-		<ClientOnly>
+		<ClientOnly
+			placeholder={
+				<div
+					style={{
+						width: 80,
+						height: 30,
+						borderRadius: "var(--mantine-radius-default)",
+						border: "1px solid var(--mantine-color-default-border)",
+						background: "var(--mantine-color-default)",
+						color: "var(--mantine-color-text)",
+						fontSize: "var(--mantine-font-size-xs)",
+						display: "flex",
+						alignItems: "center",
+						paddingInline: "var(--mantine-spacing-xs)",
+					}}
+					aria-hidden="true">
+					{locale.toUpperCase()}
+				</div>
+			}>
 			<Select
 				data={[...locales]}
 				value={locale}

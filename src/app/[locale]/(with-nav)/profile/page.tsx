@@ -18,9 +18,9 @@ export default async function ProfilePage({
 	return (
 		<div
 			style={{
-				minHeight: "100vh",
 				display: "flex",
 				flexDirection: "column",
+				minHeight: "100%",
 				background: "var(--bg-primary)",
 				color: "var(--text-primary)",
 			}}>

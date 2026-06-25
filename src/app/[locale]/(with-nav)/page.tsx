@@ -53,9 +53,9 @@ export default async function HomePage(): Promise<React.JSX.Element> {
 	return (
 		<div
 			style={{
-				minHeight: "100vh",
 				display: "flex",
 				flexDirection: "column",
+				minHeight: "100%",
 				background: "var(--bg-primary)",
 				color: "var(--text-primary)",
 			}}>

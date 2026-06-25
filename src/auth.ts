@@ -3,10 +3,10 @@ import Credentials from "next-auth/providers/credentials"
 import { PrismaAdapter } from "@auth/prisma-adapter"
 import bcrypt from "bcryptjs"
 
-import { prisma } from "./lib/prisma"
+import { prismaClient } from "./lib/db/prisma"
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
-	adapter: PrismaAdapter(prisma),
+	adapter: PrismaAdapter(prismaClient),
 	callbacks: {
 		jwt({ token, user }) {
 			// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
@@ -41,7 +41,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 					return null
 				}
 
-				const user = await prisma.user.findUnique({
+				const user = await prismaClient.user.findUnique({
 					where: { email },
 				})
 
@@ -73,5 +73,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 			name: "credentials",
 		}),
 	],
+	secret: process.env.AUTH_SECRET,
 	session: { strategy: "jwt" },
+	trustHost: true,
 })

@@ -1,22 +1,15 @@
 "use client"
 
 import { useState } from "react"
-import {
-	Button,
-	Card,
-	Divider,
-	Modal,
-	Text,
-	TextInput,
-	Title,
-} from "@mantine/core"
+import { AuthCard } from "@/components/ui/auth-card"
+import { Button, Divider, Modal, Text, TextInput, Title } from "@mantine/core"
 import { useDisclosure } from "@mantine/hooks"
 import { IconLogout } from "@tabler/icons-react"
 import { signOut, useSession } from "next-auth/react"
 import { useLocale, useTranslations } from "next-intl"
 import { FormMessage, type Message } from "@/components/ui/form-message"
 
-export function ProfileForm(): React.JSX.Element | null {
+export const ProfileForm = (): React.JSX.Element | null => {
 	const t = useTranslations("auth")
 	const locale = useLocale()
 	const { data: session, update } = useSession()
@@ -29,7 +22,7 @@ export function ProfileForm(): React.JSX.Element | null {
 	const [resetOpened, resetHandlers] = useDisclosure(false)
 	const [resetSending, setResetSending] = useState(false)
 
-	function updateMessage(msg: Message | null): void {
+	const updateMessage = (msg: Message | null): void => {
 		setMessage(msg)
 		if (msg) {
 			setMessageKey((k) => k + 1)
@@ -42,7 +35,7 @@ export function ProfileForm(): React.JSX.Element | null {
 
 	const currentSession = session
 
-	async function handleSubmit(e: React.FormEvent) {
+	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault()
 		setLoading(true)
 
@@ -68,7 +61,7 @@ export function ProfileForm(): React.JSX.Element | null {
 		await update()
 	}
 
-	async function handleResetPassword(): Promise<void> {
+	const handleResetPassword = async (): Promise<void> => {
 		setResetSending(true)
 
 		try {
@@ -97,13 +90,7 @@ export function ProfileForm(): React.JSX.Element | null {
 	}
 
 	return (
-		<Card
-			withBorder
-			shadow="sm"
-			padding="xl"
-			radius="md"
-			maw={480}
-			w="100%">
+		<AuthCard maxWidth={480}>
 			<form onSubmit={handleSubmit}>
 				<Title order={2} mb="xs">
 					{t("profile")}
@@ -170,7 +157,7 @@ export function ProfileForm(): React.JSX.Element | null {
 				onClick={() => signOut({ callbackUrl: `/${locale}` })}>
 				{t("signOut")}
 			</Button>
-		</Card>
+		</AuthCard>
 	)
 }
 

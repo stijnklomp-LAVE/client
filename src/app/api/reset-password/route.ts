@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server"
 import bcrypt from "bcryptjs"
 
-import { prisma } from "@/lib/prisma"
+import { prismaClient } from "@/lib/db/prisma"
 
-export async function POST(request: Request) {
+export const POST = async (request: Request) => {
 	try {
 		const { token, password } = (await request.json()) as {
 			token: string
@@ -24,7 +24,7 @@ export async function POST(request: Request) {
 			)
 		}
 
-		const record = await prisma.verificationToken.findUnique({
+		const record = await prismaClient.verificationToken.findUnique({
 			where: { token },
 		})
 
@@ -36,7 +36,7 @@ export async function POST(request: Request) {
 		}
 
 		if (record.expires < new Date()) {
-			await prisma.verificationToken.delete({ where: { token } })
+			await prismaClient.verificationToken.delete({ where: { token } })
 
 			return NextResponse.json(
 				{ error: "Reset link has expired" },
@@ -46,12 +46,12 @@ export async function POST(request: Request) {
 
 		const hashedPassword = await bcrypt.hash(password, 12)
 
-		await prisma.user.update({
+		await prismaClient.user.update({
 			data: { password: hashedPassword },
 			where: { email: record.identifier },
 		})
 
-		await prisma.verificationToken.delete({ where: { token } })
+		await prismaClient.verificationToken.delete({ where: { token } })
 
 		return NextResponse.json({ message: "Password reset successfully" })
 	} catch (error) {

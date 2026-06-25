@@ -10,6 +10,6 @@ export const ThemeContext = createContext<TThemeModelUse>({
 	setThemeModel: () => {},
 })
 
-export function useTheme(): TThemeModelUse {
+export const useTheme = (): TThemeModelUse => {
 	return useContext(ThemeContext)
 }

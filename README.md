@@ -35,6 +35,7 @@ Assets → Segments (Timelines) → Timeline → Render
 
 ```sh
 bun install --frozen-lockfile
+bun run prisma:generate
 ```
 
 ```sh

@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server"
 
 import { auth } from "@/auth"
-import { signJwt } from "@/lib/jwt"
-import { proxyToFragmentComposer } from "@/lib/fragment-composer"
+import { signJwt } from "@/lib/api/jwt"
+import { proxyToFragmentComposer } from "@/lib/api/fragment-composer"
 
-export async function GET() {
+export const GET = async () => {
 	const session = await auth()
 
 	if (!session?.user.id) {

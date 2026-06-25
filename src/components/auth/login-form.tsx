@@ -5,9 +5,9 @@ import { useRouter, useSearchParams } from "next/navigation"
 import { useDisclosure } from "@mantine/hooks"
 import { nprogress } from "@/components/providers/router-progress"
 import { signIn, useSession } from "next-auth/react"
+import { AuthCard } from "@/components/ui/auth-card"
 import {
 	Button,
-	Card,
 	Modal,
 	PasswordInput,
 	Text,
@@ -19,19 +19,27 @@ import Link from "next/link"
 import { FormMessage, type Message } from "@/components/ui/form-message"
 import { ClientOnly } from "@/components/ui/client-only"
 
-export function LoginForm() {
+export const LoginForm = () => {
 	const t = useTranslations("auth")
 	const router = useRouter()
 	const { update } = useSession()
 	const searchParams = useSearchParams()
-	const [email, setEmail] = useState("")
-	const [password, setPassword] = useState("")
+
+	// START dev-only auto-login: pre-fills credentials.
+	// Safe to remove — without it, users must type their credentials manually.
+	const [email, setEmail] = useState(
+		process.env.NODE_ENV === "development" ? "stijnklomp1@hotmail.com" : "",
+	)
+	const [password, setPassword] = useState(
+		process.env.NODE_ENV === "development" ? "test1234" : "",
+	)
+	// END dev-only auto-login
 	const [message, setMessage] = useState<Message | null>(null)
 	const [messageKey, setMessageKey] = useState(0)
 	const [interacted, setInteracted] = useState(false)
 	const [loading, setLoading] = useState(false)
 
-	function updateMessage(msg: Message | null): void {
+	const updateMessage = (msg: Message | null): void => {
 		setMessage(msg)
 		if (msg) {
 			setMessageKey((k) => k + 1)
@@ -78,7 +86,7 @@ export function LoginForm() {
 	const [resendOpened, resendHandlers] = useDisclosure(false)
 	const [resending, setResending] = useState(false)
 
-	async function handleResend(): Promise<void> {
+	const handleResend = async (): Promise<void> => {
 		setInteracted(true)
 		setResending(true)
 
@@ -107,7 +115,7 @@ export function LoginForm() {
 		}
 	}
 
-	async function handleSubmit(e: React.FormEvent) {
+	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault()
 		setInteracted(true)
 		setLoading(true)
@@ -159,13 +167,7 @@ export function LoginForm() {
 					}}
 				/>
 			}>
-			<Card
-				withBorder
-				shadow="sm"
-				padding="xl"
-				radius="md"
-				maw={420}
-				w="100%">
+			<AuthCard>
 				<form
 					onSubmit={handleSubmit}
 					onKeyDown={(e) => {
@@ -257,7 +259,7 @@ export function LoginForm() {
 						</Link>
 					</Text>
 				</form>
-			</Card>
+			</AuthCard>
 		</ClientOnly>
 	)
 }

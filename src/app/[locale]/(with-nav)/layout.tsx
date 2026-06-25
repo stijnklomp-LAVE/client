@@ -1,10 +1,10 @@
 import { Header } from "@/components/ui/header"
 
-export default function WithNavLayout({
+const WithNavLayout = ({
 	children,
 }: {
 	children: React.ReactNode
-}): React.JSX.Element {
+}): React.JSX.Element => {
 	return (
 		<div
 			style={{
@@ -18,3 +18,5 @@ export default function WithNavLayout({
 		</div>
 	)
 }
+
+export default WithNavLayout

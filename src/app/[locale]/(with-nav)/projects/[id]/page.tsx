@@ -17,9 +17,9 @@ export default async function ProjectDetailPage({
 	return (
 		<div
 			style={{
-				minHeight: "100vh",
 				display: "flex",
 				flexDirection: "column",
+				minHeight: "100%",
 				background: "var(--bg-primary)",
 				color: "var(--text-primary)",
 			}}>

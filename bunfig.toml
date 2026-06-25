@@ -3,3 +3,22 @@ minimumReleaseAge = 259200 # 3 days
 
 [resolve]
 alias = { "@" = "./src" }
+
+[test]
+preload = ["./test/setup.ts"]
+coverageDir = "test/unit/coverage"
+coverageSkipTestFiles = true
+coverageThreshold = 0
+coveragePathIgnorePatterns = [
+	"test/**",
+	"dist/**",
+	"prisma/*.",
+	"generated/**"
+]
+
+[test.ci]
+smol = true
+timeout = 30000
+
+[test.reporter]
+junit = "test/reports/junit.xml"

@@ -129,12 +129,28 @@ ESLint uses `stijnklomp-linting-formatting-config` with strict TypeScript and Re
 
 ### Testing
 
-**This project currently has no test suite configured.** The `package.json` has no test scripts.
+**Preferred — Docker Compose:**
 
-If you want to add tests, consider:
+```bash
+# Unit tests
+docker compose --profile dev run --rm dev bun run test
+docker compose --profile dev run --rm dev bun run test:unit
 
-- **Bun test runner** (`bun:test`) for unit tests
-- **Playwright** for E2E tests (a commented-out service exists in `docker-compose.yml`)
+# Feature tests
+docker compose --profile dev run --rm dev bun run test:feature
+```
+
+**Fallback — only if no Docker configuration exists:**
+
+```bash
+# Unit tests
+bun run test
+bun run test:unit
+bun run test:coverage
+
+# Feature tests
+bun run test:feature
+```
 
 ### Documentation
 
@@ -153,16 +169,32 @@ bun run doc
 
 This generates TypeDoc documentation into `docs/code/` from the `src/` directory.
 
-### Database
+### Prisma & Database
 
-The project includes PostgreSQL and a `db-migration` service in Docker Compose, but **no ORM is configured yet**. The migration script (`scripts/dockerComposeMigrate.sh`) is a placeholder:
+Inside a Docker Compose container (migrations run automatically via the `db-migration` service):
 
 ```bash
-# The migration script runs automatically when using Docker Compose profiles
-# It waits for PostgreSQL and then runs a placeholder command
+# Generate Prisma client
+docker compose --profile dev run --rm dev bun run prisma:generate
+
+# Deploy migrations
+docker compose --profile dev run --rm dev bun run migrate
+
+# Create a new migration (development)
+docker compose --profile dev run --rm dev bunx --bun prisma migrate dev --name <migration_name>
 ```
 
-If you add Prisma or another ORM later, update the migration script.
+**Fallback — only if no Docker configuration exists:**
+
+```bash
+# Generate Prisma client
+bun run prisma:generate
+
+# Deploy migrations
+bun run migrate
+
+# Create a new migration (development)
+bunx --bun prisma migrate dev --name <migration_name>
 
 ## Docker Compose Workflows
 

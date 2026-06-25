@@ -4,7 +4,7 @@ import { Button } from "@mantine/core"
 import { Link } from "@/i18n/navigation"
 import { useSession } from "next-auth/react"
 
-export function LoginButton(): React.JSX.Element | null {
+export const LoginButton = (): React.JSX.Element | null => {
 	const { data: session } = useSession()
 
 	if (session?.user) {

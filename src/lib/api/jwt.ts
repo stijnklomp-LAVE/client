@@ -10,7 +10,7 @@ const getSecret = () => {
 	return new TextEncoder().encode(secret)
 }
 
-export async function signJwt(userId: string): Promise<string> {
+export const signJwt = async (userId: string): Promise<string> => {
 	return new SignJWT({ sub: userId })
 		.setProtectedHeader({ alg: "HS256" })
 		.setExpirationTime("5m")
