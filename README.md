@@ -49,7 +49,7 @@ bun run build && bun run start
 ### With Docker
 
 ```sh
-docker build -t client . && docker run --rm -p 3000:3000 client
+docker build -t stijnklomp/client . && docker run --rm -p 3000:3000 stijnklomp/client
 ```
 
 ### With Docker Compose
