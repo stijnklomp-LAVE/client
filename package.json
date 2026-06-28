@@ -34,6 +34,7 @@
 		"@types/bcryptjs": "^3.0.0",
 		"bcryptjs": "^3.0.3",
 		"jose": "^6.0.10",
+		"mediabunny": "^1.49.0",
 		"motion": "^12.40.0",
 		"next": "16.2.7",
 		"next-auth": "5.0.0-beta.31",

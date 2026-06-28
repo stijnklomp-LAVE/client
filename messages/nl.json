@@ -208,6 +208,20 @@
 			"selectCamera": "Selecteer een camera",
 			"noCamera": "Geen camera gevonden",
 			"none": "Geen"
+		},
+		"recording": {
+			"recordNew": "Nieuw fragment opnemen...",
+			"recording": "Opnemen",
+			"stop": "Stop",
+			"pause": "Pauze",
+			"resume": "Hervat",
+			"framesCaptured": "{count} frames",
+			"directory": "Raw Frames Map",
+			"chooseDirectory": "Kies Map",
+			"remove": "Verwijderen",
+			"fps": "Framerate (fps)",
+			"format": "Afbeeldingsformaat",
+			"quality": "JPEG-kwaliteit"
 		}
 	},
 	"nav": {

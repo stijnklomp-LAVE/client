@@ -3,6 +3,7 @@
 import { EditorProvider, type ProjectFragment } from "./editor-context"
 import { EditorTopBar } from "./editor-top-bar"
 import { VideoViewer } from "./video-viewer"
+import { RecordingControls } from "./recording-controls"
 import { SidePane } from "./side-pane"
 import { TimelinePanel } from "./timeline-panel"
 import type { TimelineLayer } from "@/lib/editor/types"
@@ -31,6 +32,7 @@ export const EditorShell = ({
 
 				<div className={styles.mainArea}>
 					<VideoViewer />
+					<RecordingControls />
 				</div>
 
 				<div className={styles.sidebarArea}>

@@ -4,11 +4,13 @@ import {
 	createContext,
 	useCallback,
 	useContext,
+	useRef,
 	useState,
 	type ReactNode,
 } from "react"
 import { useDisclosure } from "@mantine/hooks"
 import type { TimelineLayer, TimelineSegment } from "@/lib/editor/types"
+import { useRecording, type RecordingConfig } from "@/lib/editor/use-recording"
 
 export type EditorMode = "capture" | "editing"
 
@@ -42,9 +44,26 @@ interface EditorContextValue {
 	layers: TimelineLayer[]
 	setLayers: (layers: TimelineLayer[]) => void
 	fragments: ProjectFragment[]
+	setFragments: (fragments: ProjectFragment[]) => void
 	projectId: string
 	addLayer: () => Promise<void>
 	addSegment: (layerId: string, fragmentId: string) => Promise<void>
+	isRecording: boolean
+	recordingLayerId: string | null
+	isPaused: boolean
+	recordingElapsedMs: number
+	recordingFrameCount: number
+	recordingError: string | null
+	recordingDurationSec: number
+	rawFramesDirectoryHandle: FileSystemDirectoryHandle | null
+	rawFramesDirectoryName: string | null
+	setRawFramesDirectory: (handle: FileSystemDirectoryHandle | null) => void
+	startRecording: (layerId: string) => Promise<void>
+	stopRecording: () => Promise<void>
+	pauseRecording: () => void
+	resumeRecording: () => void
+	recordingConfig: RecordingConfig
+	updateRecordingConfig: (config: Partial<RecordingConfig>) => void
 }
 
 export const EditorContext = createContext<EditorContextValue | null>(null)
@@ -71,6 +90,21 @@ export const EditorProvider = ({
 	)
 	const [cameraError, setCameraError] = useState<string | null>(null)
 	const [layers, setLayers] = useState<TimelineLayer[]>(initialLayers)
+	const [fragments, setFragments] =
+		useState<ProjectFragment[]>(initialFragments)
+	const [rawFramesDirectoryHandle, setRawFramesDirectoryHandle] =
+		useState<FileSystemDirectoryHandle | null>(null)
+	const [rawFramesDirectoryName, setRawFramesDirectoryName] = useState<
+		string | null
+	>(null)
+	const [recordingLayerId, setRecordingLayerId] = useState<string | null>(
+		null,
+	)
+	const [isPaused, setIsPaused] = useState(false)
+
+	const recording = useRecording()
+	const streamRef = useRef<MediaStream | null>(null)
+	const videoRef = useRef<HTMLVideoElement | null>(null)
 
 	const addLayer = useCallback(async () => {
 		const res = await fetch(`/api/projects/${projectId}/layers`, {
@@ -128,6 +162,131 @@ export const EditorProvider = ({
 		[activeTab],
 	)
 
+	const setRawFramesDirectory = useCallback(
+		(handle: FileSystemDirectoryHandle | null) => {
+			setRawFramesDirectoryHandle(handle)
+			setRawFramesDirectoryName(handle?.name ?? null)
+		},
+		[],
+	)
+
+	const startRecording = useCallback(
+		async (layerId: string) => {
+			try {
+				const stream = await navigator.mediaDevices.getUserMedia({
+					video: {
+						deviceId: selectedCameraId
+							? { exact: selectedCameraId }
+							: undefined,
+					},
+					audio: false,
+				})
+
+				streamRef.current = stream
+
+				const video = document.createElement("video")
+				video.srcObject = stream
+				video.muted = true
+				video.playsInline = true
+				await video.play()
+				videoRef.current = video
+
+				setRecordingLayerId(layerId)
+
+				if (!rawFramesDirectoryHandle) {
+					throw new Error("No raw frames directory configured")
+				}
+
+				setModeState("capture")
+
+				await recording.startRecording(
+					stream,
+					rawFramesDirectoryHandle,
+					video,
+				)
+			} catch (err) {
+				setCameraError(
+					err instanceof Error
+						? err.message
+						: "Failed to start recording",
+				)
+			}
+		},
+		[selectedCameraId, rawFramesDirectoryHandle, recording, setModeState],
+	)
+
+	const stopRecording = useCallback(async () => {
+		if (streamRef.current) {
+			streamRef.current.getTracks().forEach((track) => track.stop())
+			streamRef.current = null
+		}
+
+		if (videoRef.current) {
+			videoRef.current.pause()
+			videoRef.current.srcObject = null
+			videoRef.current = null
+		}
+
+		const videoBuffer = await recording.stopRecording()
+
+		const layerId = recordingLayerId
+		setRecordingLayerId(null)
+		setModeState("editing")
+
+		if (videoBuffer && layerId) {
+			try {
+				const fragmentName = `Recording ${new Date().toLocaleTimeString()}`
+				const res = await fetch(
+					`/api/projects/${projectId}/fragments`,
+					{
+						body: JSON.stringify({
+							duration: recording.recordingDurationSec,
+							filePath: `recording-${Date.now()}.webm`,
+							name: fragmentName,
+							size: videoBuffer.byteLength,
+						}),
+						// eslint-disable-next-line @typescript-eslint/naming-convention
+						headers: { "Content-Type": "application/json" },
+						method: "POST",
+					},
+				)
+
+				if (!res.ok) {
+					console.error("Failed to create fragment")
+					return
+				}
+
+				const { fragment } = (await res.json()) as {
+					fragment: ProjectFragment
+				}
+
+				setFragments((prev) => [...prev, fragment])
+
+				await addSegment(layerId, fragment.id)
+			} catch (err) {
+				console.error("Failed to save recording", err)
+			}
+		}
+	}, [recording, recordingLayerId, projectId, addSegment, setModeState])
+
+	const pauseRecording = useCallback(() => {
+		if (streamRef.current) {
+			streamRef.current.getVideoTracks().forEach((track) => {
+				track.enabled = false
+			})
+		}
+		setIsPaused(true)
+	}, [])
+
+	const resumeRecording = useCallback(() => {
+		if (streamRef.current) {
+			streamRef.current.getVideoTracks().forEach((track) => {
+				track.enabled = true
+			})
+		}
+		setIsPaused(false)
+	}, [])
+
 	return (
 		<EditorContext.Provider
 			value={{
@@ -148,10 +307,31 @@ export const EditorProvider = ({
 				setCameraError,
 				layers,
 				setLayers,
-				fragments: initialFragments,
+				fragments,
+				setFragments,
 				projectId,
 				addLayer,
 				addSegment,
+				isRecording: recording.isRecording,
+				recordingLayerId,
+				isPaused,
+				recordingElapsedMs: recording.elapsedMs,
+				recordingFrameCount: recording.frameCount,
+				recordingError: recording.error,
+				recordingDurationSec: recording.recordingDurationSec,
+				rawFramesDirectoryHandle,
+				rawFramesDirectoryName,
+				setRawFramesDirectory,
+				startRecording,
+				stopRecording,
+				pauseRecording,
+				resumeRecording,
+				recordingConfig: {
+					fps: 1,
+					format: "jpeg",
+					jpegQuality: 80,
+				},
+				updateRecordingConfig: recording.updateConfig,
 			}}>
 			{children}
 		</EditorContext.Provider>

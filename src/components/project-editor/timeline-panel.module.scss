@@ -231,3 +231,51 @@
 	font-size: 11px;
 	color: var(--text-tertiary);
 }
+
+.pickerDivider {
+	height: 1px;
+	background: var(--border-primary);
+	margin: 8px 0;
+}
+
+.recordButton {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	padding: 10px 12px;
+	border: 1px dashed var(--accent-color, #2b6aff);
+	border-radius: var(--border-radius);
+	background: transparent;
+	cursor: pointer;
+	font-size: 13px;
+	font-weight: 500;
+	color: var(--accent-color, #2b6aff);
+	transition:
+		background-color 0.15s ease,
+		color 0.15s ease;
+
+	&:hover {
+		background: var(--accent-bg, #2b6aff33);
+	}
+}
+
+.recordingIndicator {
+	height: 28px;
+	min-width: 40px;
+	background: rgba(224, 49, 49, 0.2);
+	border: 1px solid #e03131;
+	border-radius: 4px;
+	display: flex;
+	align-items: center;
+	padding: 0 6px;
+	flex-shrink: 0;
+}
+
+.recordingLabel {
+	font-size: 10px;
+	font-weight: 600;
+	color: #e03131;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}

@@ -208,6 +208,20 @@
 			"selectCamera": "Select a camera",
 			"noCamera": "No camera detected",
 			"none": "None"
+		},
+		"recording": {
+			"recordNew": "Record new fragment...",
+			"recording": "Recording",
+			"stop": "Stop",
+			"pause": "Pause",
+			"resume": "Resume",
+			"framesCaptured": "{count} frames",
+			"directory": "Raw Frames Directory",
+			"chooseDirectory": "Choose Directory",
+			"remove": "Remove",
+			"fps": "Frame rate (fps)",
+			"format": "Image format",
+			"quality": "JPEG quality"
 		}
 	},
 	"nav": {

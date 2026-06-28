@@ -1,0 +1,108 @@
+.overlay {
+	position: absolute;
+	bottom: 24px;
+	left: 50%;
+	transform: translateX(-50%);
+	z-index: 100;
+	pointer-events: none;
+}
+
+.bar {
+	display: flex;
+	align-items: center;
+	gap: 16px;
+	background: rgba(0, 0, 0, 0.8);
+	border: 1px solid rgba(255, 255, 255, 0.15);
+	border-radius: 8px;
+	padding: 8px 16px;
+	pointer-events: auto;
+	backdrop-filter: blur(8px);
+}
+
+.indicator {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+
+.dot {
+	width: 10px;
+	height: 10px;
+	border-radius: 50%;
+	background: #e03131;
+	animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+	0%,
+	100% {
+		opacity: 1;
+	}
+	50% {
+		opacity: 0.4;
+	}
+}
+
+.label {
+	color: #e03131;
+	font-size: 12px;
+	font-weight: 600;
+	text-transform: uppercase;
+	letter-spacing: 0.05em;
+}
+
+.timer {
+	color: #fff;
+	font-size: 14px;
+	font-weight: 600;
+	font-variant-numeric: tabular-nums;
+	min-width: 48px;
+}
+
+.frameCount {
+	color: rgba(255, 255, 255, 0.6);
+	font-size: 12px;
+}
+
+.actions {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin-left: 8px;
+	padding-left: 16px;
+	border-left: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.iconButton {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 32px;
+	height: 32px;
+	border: none;
+	border-radius: 6px;
+	background: rgba(255, 255, 255, 0.1);
+	color: #fff;
+	cursor: pointer;
+
+	&:hover {
+		background: rgba(255, 255, 255, 0.2);
+	}
+}
+
+.stopButton {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 32px;
+	height: 32px;
+	border: none;
+	border-radius: 6px;
+	background: #e03131;
+	color: #fff;
+	cursor: pointer;
+
+	&:hover {
+		background: #c92a2a;
+	}
+}

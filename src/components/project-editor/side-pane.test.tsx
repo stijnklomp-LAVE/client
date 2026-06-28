@@ -41,6 +41,13 @@ const mockCameras = [
 
 const mockAddLayer = vi.fn()
 const mockAddSegment = vi.fn()
+const mockSetFragments = vi.fn()
+const mockStartRecording = vi.fn()
+const mockStopRecording = vi.fn()
+const mockPauseRecording = vi.fn()
+const mockResumeRecording = vi.fn()
+const mockSetRawFramesDirectory = vi.fn()
+const mockUpdateRecordingConfig = vi.fn()
 
 const defaultContextValue = {
 	mode: "capture" as EditorMode,
@@ -61,9 +68,26 @@ const defaultContextValue = {
 	layers: [],
 	setLayers: vi.fn(),
 	fragments: [],
+	setFragments: mockSetFragments,
 	projectId: "test-project",
 	addLayer: mockAddLayer,
 	addSegment: mockAddSegment,
+	isRecording: false,
+	recordingLayerId: null,
+	isPaused: false,
+	recordingElapsedMs: 0,
+	recordingFrameCount: 0,
+	recordingError: null,
+	recordingDurationSec: 0,
+	rawFramesDirectoryHandle: null,
+	rawFramesDirectoryName: null,
+	setRawFramesDirectory: mockSetRawFramesDirectory,
+	startRecording: mockStartRecording,
+	stopRecording: mockStopRecording,
+	pauseRecording: mockPauseRecording,
+	resumeRecording: mockResumeRecording,
+	recordingConfig: { fps: 1, format: "jpeg" as const, jpegQuality: 80 },
+	updateRecordingConfig: mockUpdateRecordingConfig,
 }
 
 const renderWithContext = (

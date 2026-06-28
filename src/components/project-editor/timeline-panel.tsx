@@ -21,6 +21,10 @@ export const TimelinePanel = (): React.JSX.Element => {
 		addLayer,
 		addSegment,
 		fragments,
+		isRecording,
+		recordingLayerId,
+		recordingDurationSec,
+		startRecording,
 	} = useEditorContext()
 	const [pickerLayerId, setPickerLayerId] = useState<string | null>(null)
 
@@ -133,42 +137,77 @@ export const TimelinePanel = (): React.JSX.Element => {
 						</div>
 					) : (
 						<div className={styles.layers}>
-							{layers.map((layer) => (
-								<div key={layer.id} className={styles.track}>
-									<div className={styles.trackLabel}>
-										{layer.name}
+							{layers.map((layer) => {
+								const isRecordingOnThisLayer =
+									isRecording && recordingLayerId === layer.id
+
+								return (
+									<div
+										key={layer.id}
+										className={styles.track}>
+										<div className={styles.trackLabel}>
+											{layer.name}
+										</div>
+										<div className={styles.trackContent}>
+											{layer.segments.map((seg) => (
+												<div
+													key={seg.id}
+													className={styles.segment}
+													style={{
+														width: `${Math.max(
+															(seg.outPoint -
+																seg.inPoint) *
+																3,
+															60,
+														)}px`,
+													}}>
+													<span
+														className={
+															styles.segName
+														}>
+														{seg.name}
+													</span>
+												</div>
+											))}
+											{isRecordingOnThisLayer && (
+												<div
+													className={
+														styles.recordingIndicator
+													}
+													style={{
+														width: `${Math.max(
+															recordingDurationSec *
+																3,
+															40,
+														)}px`,
+													}}>
+													<span
+														className={
+															styles.recordingLabel
+														}>
+														REC{" "}
+														{Math.round(
+															recordingDurationSec,
+														)}
+														s
+													</span>
+												</div>
+											)}
+											<button
+												className={
+													styles.addSegmentButton
+												}
+												onClick={() =>
+													setPickerLayerId(layer.id)
+												}
+												type="button">
+												<IconPlus size={12} />
+												Fragment
+											</button>
+										</div>
 									</div>
-									<div className={styles.trackContent}>
-										{layer.segments.map((seg) => (
-											<div
-												key={seg.id}
-												className={styles.segment}
-												style={{
-													width: `${Math.max(
-														(seg.outPoint -
-															seg.inPoint) *
-															3,
-														60,
-													)}px`,
-												}}>
-												<span
-													className={styles.segName}>
-													{seg.name}
-												</span>
-											</div>
-										))}
-										<button
-											className={styles.addSegmentButton}
-											onClick={() =>
-												setPickerLayerId(layer.id)
-											}
-											type="button">
-											<IconPlus size={12} />
-											Fragment
-										</button>
-									</div>
-								</div>
-							))}
+								)
+							})}
 							<button
 								className={styles.addLayerButton}
 								onClick={addLayer}
@@ -213,6 +252,20 @@ export const TimelinePanel = (): React.JSX.Element => {
 							</button>
 						))
 					)}
+					<div className={styles.pickerDivider} />
+					<button
+						className={styles.recordButton}
+						onClick={() => {
+							const layerId = pickerLayerId
+							setPickerLayerId(null)
+							if (layerId) {
+								startRecording(layerId)
+							}
+						}}
+						type="button">
+						<IconPlus size={14} />
+						Record new fragment...
+					</button>
 				</div>
 			</Modal>
 		</div>
