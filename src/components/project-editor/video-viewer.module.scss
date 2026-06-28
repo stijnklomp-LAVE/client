@@ -13,7 +13,7 @@
 	width: 100%;
 	max-width: 100%;
 	height: 0;
-	padding-bottom: 56.25%; /* 16:9 aspect ratio */
+	padding-bottom: 56.25%;
 	background: #000;
 	border-radius: var(--border-radius);
 	overflow: hidden;
@@ -38,4 +38,69 @@
 	width: 100%;
 	height: 100%;
 	object-fit: contain;
+}
+
+.recordOverlay {
+	position: absolute;
+	bottom: 24px;
+	left: 50%;
+	transform: translateX(-50%);
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 8px;
+	z-index: 10;
+}
+
+.recordButton {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	padding: 10px 20px;
+	border: none;
+	border-radius: 8px;
+	background: #e53935;
+	color: #fff;
+	font-size: 15px;
+	font-weight: 600;
+	cursor: pointer;
+	transition: background 0.15s ease;
+	box-shadow: 0 2px 12px rgba(229, 57, 53, 0.5);
+
+	&:hover {
+		background: #c62828;
+	}
+
+	&:active {
+		background: #b71c1c;
+	}
+}
+
+.layerPicker {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+	background: #1e1e1e;
+	border: 1px solid rgba(255, 255, 255, 0.15);
+	border-radius: 8px;
+	padding: 6px;
+	min-width: 180px;
+	box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+}
+
+.layerOption {
+	padding: 8px 12px;
+	border: none;
+	border-radius: 6px;
+	background: transparent;
+	color: rgba(255, 255, 255, 0.85);
+	font-size: 13px;
+	cursor: pointer;
+	text-align: left;
+	transition: background 0.1s ease;
+
+	&:hover {
+		background: rgba(255, 255, 255, 0.1);
+		color: #fff;
+	}
 }

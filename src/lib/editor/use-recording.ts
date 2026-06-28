@@ -46,11 +46,13 @@ export const useRecording = () => {
 	const lastFrameTimeRef = useRef<number>(0)
 	const canvasRef = useRef<OffscreenCanvas | null>(null)
 	const videoRef = useRef<HTMLVideoElement | null>(null)
+	const isRecordingRef = useRef(false)
+	const isPausedRef = useRef(false)
 
-	const frameLoop = useCallback(
-		(timestamp: number) => {
-			if (!state.isRecording) return
+	const frameLoop = useCallback((timestamp: number) => {
+		if (!isRecordingRef.current) return
 
+		if (!isPausedRef.current) {
 			const elapsed = timestamp - startTimeRef.current
 			const frameInterval = 1000 / configRef.current.fps
 
@@ -109,11 +111,10 @@ export const useRecording = () => {
 					recordingDurationSec: elapsed / 1000,
 				}))
 			}
+		}
 
-			rafRef.current = requestAnimationFrame(frameLoop)
-		},
-		[state.isRecording],
-	)
+		rafRef.current = requestAnimationFrame(frameLoop)
+	}, [])
 
 	const startRecording = useCallback(
 		async (
@@ -154,6 +155,16 @@ export const useRecording = () => {
 					codec: "vp9",
 				})
 
+				source.errorPromise.catch((err: unknown) => {
+					setState((prev) => ({
+						...prev,
+						error:
+							err instanceof Error
+								? err.message
+								: "Encoding error",
+					}))
+				})
+
 				const output = new Output({
 					format: new WebMOutputFormat(),
 					target: new BufferTarget(),
@@ -184,12 +195,16 @@ export const useRecording = () => {
 				recordingDurationSec: 0,
 			}))
 
+			isRecordingRef.current = true
+
 			rafRef.current = requestAnimationFrame(frameLoop)
 		},
 		[frameLoop],
 	)
 
 	const stopRecording = useCallback(async () => {
+		isRecordingRef.current = false
+
 		setState((prev) => ({
 			...prev,
 			isRecording: false,
@@ -224,6 +239,26 @@ export const useRecording = () => {
 		return videoBuffer
 	}, [])
 
+	const pauseRecording = useCallback(() => {
+		isPausedRef.current = true
+
+		if (streamRef.current) {
+			streamRef.current.getVideoTracks().forEach((track) => {
+				track.enabled = false
+			})
+		}
+	}, [])
+
+	const resumeRecording = useCallback(() => {
+		isPausedRef.current = false
+
+		if (streamRef.current) {
+			streamRef.current.getVideoTracks().forEach((track) => {
+				track.enabled = true
+			})
+		}
+	}, [])
+
 	const updateConfig = useCallback((config: Partial<RecordingConfig>) => {
 		configRef.current = {
 			...configRef.current,
@@ -233,6 +268,7 @@ export const useRecording = () => {
 
 	useEffect(() => {
 		return () => {
+			isRecordingRef.current = false
 			cancelAnimationFrame(rafRef.current)
 
 			if (streamRef.current) {
@@ -245,6 +281,8 @@ export const useRecording = () => {
 
 	return {
 		...state,
+		pauseRecording,
+		resumeRecording,
 		startRecording,
 		stopRecording,
 		updateConfig,

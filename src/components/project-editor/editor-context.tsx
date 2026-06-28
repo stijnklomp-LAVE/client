@@ -58,7 +58,10 @@ interface EditorContextValue {
 	rawFramesDirectoryHandle: FileSystemDirectoryHandle | null
 	rawFramesDirectoryName: string | null
 	setRawFramesDirectory: (handle: FileSystemDirectoryHandle | null) => void
-	startRecording: (layerId: string) => Promise<void>
+	pendingRecordingLayerId: string | null
+	setPendingRecordingLayerId: (layerId: string) => void
+	clearPendingRecordingLayerId: () => void
+	startRecording: (layerId: string, stream?: MediaStream) => Promise<void>
 	stopRecording: () => Promise<void>
 	pauseRecording: () => void
 	resumeRecording: () => void
@@ -101,6 +104,18 @@ export const EditorProvider = ({
 		null,
 	)
 	const [isPaused, setIsPaused] = useState(false)
+	const [pendingRecordingLayerId, setPendingRecordingLayerIdState] = useState<
+		string | null
+	>(null)
+
+	const setPendingRecordingLayerId = useCallback(
+		(layerId: string) => setPendingRecordingLayerIdState(layerId),
+		[],
+	)
+	const clearPendingRecordingLayerId = useCallback(
+		() => setPendingRecordingLayerIdState(null),
+		[],
+	)
 
 	const recording = useRecording()
 	const streamRef = useRef<MediaStream | null>(null)
@@ -171,18 +186,21 @@ export const EditorProvider = ({
 	)
 
 	const startRecording = useCallback(
-		async (layerId: string) => {
+		async (layerId: string, stream?: MediaStream) => {
 			try {
-				const stream = await navigator.mediaDevices.getUserMedia({
-					video: {
-						deviceId: selectedCameraId
-							? { exact: selectedCameraId }
-							: undefined,
-					},
-					audio: false,
-				})
+				if (!stream) {
+					stream = await navigator.mediaDevices.getUserMedia({
+						video: {
+							deviceId: selectedCameraId
+								? { exact: selectedCameraId }
+								: undefined,
+						},
+						audio: false,
+					})
+				}
 
 				streamRef.current = stream
+				clearPendingRecordingLayerId()
 
 				const video = document.createElement("video")
 				video.srcObject = stream
@@ -212,7 +230,13 @@ export const EditorProvider = ({
 				)
 			}
 		},
-		[selectedCameraId, rawFramesDirectoryHandle, recording, setModeState],
+		[
+			selectedCameraId,
+			rawFramesDirectoryHandle,
+			recording,
+			setModeState,
+			clearPendingRecordingLayerId,
+		],
 	)
 
 	const stopRecording = useCallback(async () => {
@@ -270,22 +294,14 @@ export const EditorProvider = ({
 	}, [recording, recordingLayerId, projectId, addSegment, setModeState])
 
 	const pauseRecording = useCallback(() => {
-		if (streamRef.current) {
-			streamRef.current.getVideoTracks().forEach((track) => {
-				track.enabled = false
-			})
-		}
+		recording.pauseRecording()
 		setIsPaused(true)
-	}, [])
+	}, [recording])
 
 	const resumeRecording = useCallback(() => {
-		if (streamRef.current) {
-			streamRef.current.getVideoTracks().forEach((track) => {
-				track.enabled = true
-			})
-		}
+		recording.resumeRecording()
 		setIsPaused(false)
-	}, [])
+	}, [recording])
 
 	return (
 		<EditorContext.Provider
@@ -322,6 +338,9 @@ export const EditorProvider = ({
 				rawFramesDirectoryHandle,
 				rawFramesDirectoryName,
 				setRawFramesDirectory,
+				pendingRecordingLayerId,
+				setPendingRecordingLayerId,
+				clearPendingRecordingLayerId,
 				startRecording,
 				stopRecording,
 				pauseRecording,

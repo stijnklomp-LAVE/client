@@ -24,7 +24,8 @@ export const TimelinePanel = (): React.JSX.Element => {
 		isRecording,
 		recordingLayerId,
 		recordingDurationSec,
-		startRecording,
+		setMode,
+		setPendingRecordingLayerId,
 	} = useEditorContext()
 	const [pickerLayerId, setPickerLayerId] = useState<string | null>(null)
 
@@ -259,7 +260,8 @@ export const TimelinePanel = (): React.JSX.Element => {
 							const layerId = pickerLayerId
 							setPickerLayerId(null)
 							if (layerId) {
-								startRecording(layerId)
+								setPendingRecordingLayerId(layerId)
+								setMode("capture")
 							}
 						}}
 						type="button">

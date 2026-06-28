@@ -1,12 +1,15 @@
 "use client"
 
-import { useCallback } from "react"
+import { useCallback, useState } from "react"
 import { Drawer, NumberInput, Select, Slider } from "@mantine/core"
 import { useMediaQuery } from "@mantine/hooks"
 import { useTranslations } from "next-intl"
 
 import { useEditorContext, type TabId } from "./editor-context"
-import { pickRawFramesDirectory } from "@/lib/editor/raw-frames-directory"
+import {
+	isFileSystemAccessSupported,
+	pickRawFramesDirectory,
+} from "@/lib/editor/raw-frames-directory"
 import styles from "./side-pane.module.scss"
 
 const TAB_IDS: TabId[] = ["settings", "timeline", "styling"]
@@ -20,16 +23,33 @@ const RecordingSettings = (): React.JSX.Element => {
 		updateRecordingConfig,
 		projectId,
 	} = useEditorContext()
+	const [directoryError, setDirectoryError] = useState<string | null>(null)
 
 	const handleChooseDirectory = useCallback(async () => {
-		const handle = await pickRawFramesDirectory(projectId)
-		if (handle) {
-			setRawFramesDirectory(handle)
+		setDirectoryError(null)
+
+		if (!isFileSystemAccessSupported()) {
+			setDirectoryError(t("recording.directoryBrowserUnsupported"))
+			return
 		}
-	}, [projectId, setRawFramesDirectory])
+
+		try {
+			const handle = await pickRawFramesDirectory(projectId)
+			if (handle) {
+				setRawFramesDirectory(handle)
+			}
+		} catch (err) {
+			setDirectoryError(
+				err instanceof Error
+					? err.message
+					: t("recording.directoryError"),
+			)
+		}
+	}, [projectId, setRawFramesDirectory, t])
 
 	const handleRemoveDirectory = useCallback(() => {
 		setRawFramesDirectory(null)
+		setDirectoryError(null)
 	}, [setRawFramesDirectory])
 
 	return (
@@ -54,6 +74,9 @@ const RecordingSettings = (): React.JSX.Element => {
 					type="button">
 					{t("recording.chooseDirectory")}
 				</button>
+			)}
+			{directoryError && (
+				<p className={styles.directoryError}>{directoryError}</p>
 			)}
 
 			<p className={styles.settingLabel}>{t("recording.fps")}</p>

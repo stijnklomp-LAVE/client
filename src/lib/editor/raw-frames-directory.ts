@@ -1,18 +1,34 @@
 const DIRECTORY_HANDLE_KEY = "editor.rawFramesDirectory"
 
+export const isFileSystemAccessSupported = (): boolean =>
+	typeof globalThis.showDirectoryPicker === "function"
+
 export const pickRawFramesDirectory = async (
 	projectId: string,
 ): Promise<FileSystemDirectoryHandle | null> => {
+	if (!isFileSystemAccessSupported()) {
+		throw new Error(
+			"Your browser does not support the File System Access API. " +
+				"Please use a Chromium-based browser (Chrome, Edge, Opera) " +
+				"with a secure connection (HTTPS or localhost).",
+		)
+	}
+
 	try {
+		const id = `rf-${projectId}`.slice(0, 32)
 		const handle: FileSystemDirectoryHandle | null =
 			await showDirectoryPicker({
-				id: `raw-frames-${projectId}`,
+				id,
 				mode: "readwrite",
 			})
 
 		return handle
-	} catch {
-		return null
+	} catch (err) {
+		if (err instanceof DOMException && err.name === "AbortError") {
+			return null
+		}
+
+		throw err
 	}
 }
 

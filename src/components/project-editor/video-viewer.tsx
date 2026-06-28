@@ -1,7 +1,7 @@
 "use client"
 
-import { useEffect, useRef } from "react"
-import { IconVideo } from "@tabler/icons-react"
+import { useCallback, useEffect, useRef, useState } from "react"
+import { IconPlayerRecord, IconVideo } from "@tabler/icons-react"
 import { useTranslations } from "next-intl"
 
 import { useEditorContext } from "./editor-context"
@@ -15,9 +15,15 @@ export const VideoViewer = (): React.JSX.Element => {
 		setAvailableCameras,
 		cameraError,
 		setCameraError,
+		isRecording,
+		pendingRecordingLayerId,
+		clearPendingRecordingLayerId,
+		layers,
+		startRecording,
 	} = useEditorContext()
 	const videoRef = useRef<HTMLVideoElement>(null)
 	const streamRef = useRef<MediaStream | null>(null)
+	const [showLayerPicker, setShowLayerPicker] = useState(false)
 
 	useEffect(() => {
 		if (mode !== "capture") {
@@ -100,8 +106,39 @@ export const VideoViewer = (): React.JSX.Element => {
 		}
 	}, [mode, selectedCameraId, setAvailableCameras, setCameraError])
 
+	const handleStartRecording = useCallback(
+		async (layerId: string) => {
+			if (!streamRef.current) return
+			await startRecording(layerId, streamRef.current)
+		},
+		[startRecording],
+	)
+
+	const handleRecordClick = useCallback(() => {
+		if (pendingRecordingLayerId) {
+			handleStartRecording(pendingRecordingLayerId)
+			clearPendingRecordingLayerId()
+		} else {
+			setShowLayerPicker((prev) => !prev)
+		}
+	}, [
+		pendingRecordingLayerId,
+		handleStartRecording,
+		clearPendingRecordingLayerId,
+	])
+
+	const handleLayerSelect = useCallback(
+		(layerId: string) => {
+			setShowLayerPicker(false)
+			handleStartRecording(layerId)
+		},
+		[handleStartRecording],
+	)
+
 	if (mode === "capture") {
 		const hasActiveCamera = Boolean(selectedCameraId) && !cameraError
+		const showRecordButton = hasActiveCamera && !isRecording
+
 		return (
 			<div className={styles.wrapper}>
 				<div className={styles.viewport}>
@@ -119,6 +156,36 @@ export const VideoViewer = (): React.JSX.Element => {
 							<span>
 								{cameraError ?? t("camera.selectCamera")}
 							</span>
+						</div>
+					)}
+					{showRecordButton && (
+						<div className={styles.recordOverlay}>
+							<button
+								className={styles.recordButton}
+								onClick={handleRecordClick}
+								type="button">
+								<IconPlayerRecord size={20} />
+								<span>
+									{pendingRecordingLayerId
+										? t("recording.start")
+										: t("recording.startWithLayer")}
+								</span>
+							</button>
+							{showLayerPicker && layers.length > 0 && (
+								<div className={styles.layerPicker}>
+									{layers.map((layer) => (
+										<button
+											key={layer.id}
+											className={styles.layerOption}
+											onClick={() =>
+												handleLayerSelect(layer.id)
+											}
+											type="button">
+											{layer.name}
+										</button>
+									))}
+								</div>
+							)}
 						</div>
 					)}
 				</div>

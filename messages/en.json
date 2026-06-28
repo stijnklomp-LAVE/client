@@ -212,6 +212,8 @@
 		"recording": {
 			"recordNew": "Record new fragment...",
 			"recording": "Recording",
+			"start": "Start Recording",
+			"startWithLayer": "Record to layer...",
 			"stop": "Stop",
 			"pause": "Pause",
 			"resume": "Resume",
@@ -221,7 +223,9 @@
 			"remove": "Remove",
 			"fps": "Frame rate (fps)",
 			"format": "Image format",
-			"quality": "JPEG quality"
+			"quality": "JPEG quality",
+			"directoryBrowserUnsupported": "Your browser doesn't support directory access. Use Chrome/Edge with HTTPS or localhost.",
+			"directoryError": "Failed to access directory. Please try again."
 		}
 	},
 	"nav": {
