@@ -244,9 +244,9 @@ export const useSendFragments = ({
 
 						return {
 							fragment,
+							isAuthoritative: authoritative === device.deviceId,
 							isDuplicate: isDup,
 							isResolved: isDup && authoritative !== undefined,
-							isAuthoritative: authoritative === device.deviceId,
 							updatedAt: entry?.updatedAt ?? "",
 							updaterDeviceId: entry?.updaterDeviceId ?? null,
 						}
@@ -382,6 +382,7 @@ export const useSendFragments = ({
 					if (deviceId === authoritativeDeviceId) {
 						const current = new Set(next.get(deviceId) ?? [])
 						current.delete(fragmentId)
+
 						if (current.size === 0) {
 							next.delete(deviceId)
 						} else {
@@ -495,8 +496,8 @@ export const useSendFragments = ({
 		getFragmentsForSource,
 		greyedOutFragmentIds,
 		initSourceDefaults,
-		resolveDuplicate,
 		resolveAllDuplicatesOnDevice,
+		resolveDuplicate,
 		resolvedDuplicates,
 		selectedFragmentIds,
 		selectedProjectIds,

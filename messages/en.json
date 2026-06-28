@@ -58,7 +58,23 @@
 		"resetPasswordOnProfile": "Reset password",
 		"resetPasswordTitleProfile": "Reset your password?",
 		"resetPasswordConfirmProfile": "Your previous password reset link will no longer be valid. A new one will be sent to your email.",
-		"resetPasswordSent": "A password reset link has been sent to your email."
+		"resetPasswordSent": "A password reset link has been sent to your email.",
+		"deleteAccount": "Delete Account",
+		"deleteAccountTitle": "Delete Account",
+		"deleteAccountWarning": "Warning: This action cannot be undone.",
+		"deleteAccountConfirm": "Type {email} to confirm permanent deletion:",
+		"deleteAccountHint": "Confirm your email",
+		"deleteAccountPermanently": "Permanently delete my account",
+		"deleteAccountError": "Failed to close account. Please try again.",
+		"deleteAccountSuccess": "Your account has been closed. Your data will be permanently deleted after 30 days.",
+		"accountClosing": "Account Closing",
+		"accountClosingMessage": "Your account is scheduled for permanent deletion on {date}. You can restore your account before then.",
+		"scheduledDeletion": "Scheduled deletion: {date}",
+		"restoreAccount": "Restore Account",
+		"restoreAccountTitle": "Restore your account?",
+		"restoreAccountConfirm": "Your account will be restored and you will regain access to all features.",
+		"restoreSuccess": "Account restored successfully",
+		"restoreError": "Failed to restore account. Please try again."
 	},
 	"home": {
 		"title": "Edit Video From Anywhere",
@@ -126,6 +142,11 @@
 	"projects": {
 		"title": "My Projects",
 		"newProject": "New Project",
+		"settings": {
+			"title": "Project Settings",
+			"description": "Advanced project settings will go here — resolution, encoding, and more."
+		},
+		"openInEditor": "Open in Editor",
 		"nameLabel": "Name",
 		"namePlaceholder": "My Awesome Video",
 		"descriptionLabel": "Description (optional)",
@@ -158,6 +179,35 @@
 			"failedDelete": "Failed to delete project",
 			"failedRename": "Failed to rename project",
 			"deleted": "Deleted \"{name}\""
+		}
+	},
+	"editor": {
+		"videoPreview": "Video preview",
+		"untitledProject": "Untitled project",
+		"goBack": "Go back",
+		"undo": "Undo",
+		"redo": "Redo",
+		"modeCapture": "Capture mode",
+		"modeEditing": "Editing mode",
+		"openSidePane": "Open side pane",
+		"closeSidePane": "Close side pane",
+		"tabs": {
+			"settings": "Settings",
+			"timeline": "Timeline editing",
+			"styling": "Styling"
+		},
+		"contentPlaceholder": "{tab} content will go here.",
+		"timeline": {
+			"expand": "Expand timeline",
+			"collapse": "Collapse timeline",
+			"title": "Timeline",
+			"placeholder": "Fragments &amp; timeline will go here"
+		},
+		"camera": {
+			"settings": "Camera Settings",
+			"selectCamera": "Select a camera",
+			"noCamera": "No camera detected",
+			"none": "None"
 		}
 	},
 	"nav": {

@@ -1,20 +1,6 @@
-import { redirect } from "next/navigation"
-
-import { auth } from "@/auth"
 import { ProfileForm } from "@/components/auth/profile-form"
 
-export default async function ProfilePage({
-	params,
-}: {
-	params: Promise<{ locale: string }>
-}): Promise<React.JSX.Element> {
-	const { locale } = await params
-	const session = await auth()
-
-	if (!session?.user) {
-		redirect(`/${locale}/login`)
-	}
-
+export default async function ProfilePage(): Promise<React.JSX.Element> {
 	return (
 		<div
 			style={{

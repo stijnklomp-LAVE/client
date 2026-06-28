@@ -8,6 +8,7 @@ import "@/styles/utilities.scss"
 import "@/styles/animations.scss"
 
 import type { Metadata, Viewport } from "next"
+import { getLocale } from "next-intl/server"
 
 export const metadata: Metadata = {
 	icons: {
@@ -20,12 +21,18 @@ export const viewport: Viewport = {
 	themeColor: "#0a0a0a",
 }
 
-const RootLayout = ({
+const RootLayout = async ({
 	children,
 }: Readonly<{
 	children: React.ReactNode
-}>): React.JSX.Element => {
-	return <>{children}</>
+}>): Promise<React.JSX.Element> => {
+	const locale = await getLocale()
+
+	return (
+		<html lang={locale} suppressHydrationWarning>
+			<body suppressHydrationWarning>{children}</body>
+		</html>
+	)
 }
 
 export default RootLayout

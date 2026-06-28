@@ -1,6 +1,7 @@
 "use client"
 
 import { Box, Button, Grid, Group, Text, Title } from "@mantine/core"
+import { useRouter } from "next/navigation"
 import { CtaButton } from "@/components/ui/cta-button"
 import {
 	IconCloud,
@@ -42,12 +43,19 @@ export const HeroBanner = ({
 	subtitle,
 	ctaLabel,
 	secondaryLabel,
+	isAuthenticated,
 }: {
 	title: string
 	subtitle: string
 	ctaLabel: string
 	secondaryLabel: string
+	isAuthenticated: boolean
 }): React.JSX.Element => {
+	const router = useRouter()
+	const handleCtaClick = (): void => {
+		router.push(isAuthenticated ? "/projects" : "/login")
+	}
+
 	return (
 		<Box
 			style={{
@@ -118,7 +126,9 @@ export const HeroBanner = ({
 						</Text>
 
 						<Group gap="md">
-							<CtaButton>{ctaLabel}</CtaButton>
+							<CtaButton onClick={handleCtaClick}>
+								{ctaLabel}
+							</CtaButton>
 							<Button
 								size="lg"
 								variant="outline"

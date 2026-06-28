@@ -8,7 +8,7 @@ WORKDIR /app
 ENV NODE_ENV=production
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
-RUN bun run build
+RUN bun run prisma:generate && bun run build
 
 FROM oven/bun:alpine AS runner
 WORKDIR /app

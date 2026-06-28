@@ -1,0 +1,124 @@
+.sidePaneDesktop {
+	width: 0;
+	height: 100%;
+	overflow-y: auto;
+	overflow-x: hidden;
+	transition: width 0.2s ease;
+	background: var(--bg-primary);
+	border-left: 1px solid var(--border-primary);
+
+	&[data-open="true"] {
+		width: 300px;
+	}
+}
+
+.sidePaneInner {
+	width: 300px;
+	height: 100%;
+	display: flex;
+	flex-direction: column;
+}
+
+.tabBar {
+	display: flex;
+	border-bottom: 1px solid var(--border-primary);
+	flex-shrink: 0;
+}
+
+.tab {
+	flex: 1;
+	padding: 10px 8px;
+	font-size: 12px;
+	font-weight: 500;
+	text-align: center;
+	border: none;
+	background: transparent;
+	color: var(--text-tertiary);
+	cursor: pointer;
+	transition:
+		color 0.15s ease,
+		background-color 0.15s ease;
+	position: relative;
+
+	&:hover {
+		color: var(--text-secondary);
+		background: var(--bg-tertiary);
+	}
+
+	&[data-active="true"] {
+		color: var(--text-primary);
+		background: var(--bg-secondary);
+
+		&::after {
+			content: "";
+			position: absolute;
+			bottom: 0;
+			left: 0;
+			right: 0;
+			height: 2px;
+			background: var(--accent);
+		}
+	}
+
+	&[data-disabled="true"] {
+		opacity: 0.35;
+		cursor: not-allowed;
+	}
+}
+
+.tabContent {
+	flex: 1;
+	overflow-y: auto;
+	padding: 16px;
+}
+
+.cameraSettings {
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+}
+
+.settingLabel {
+	font-size: 12px;
+	font-weight: 600;
+	color: var(--text-secondary);
+	text-transform: uppercase;
+	letter-spacing: 0.3px;
+}
+
+.cameraList {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+}
+
+.cameraOption {
+	display: flex;
+	align-items: center;
+	padding: 8px 12px;
+	font-size: 13px;
+	border: 1px solid var(--border-primary);
+	border-radius: var(--border-radius);
+	background: transparent;
+	color: var(--text-primary);
+	cursor: pointer;
+	text-align: left;
+	transition:
+		background-color 0.15s ease,
+		border-color 0.15s ease;
+
+	&:hover {
+		background: var(--bg-tertiary);
+	}
+
+	&[data-selected] {
+		border-color: var(--accent);
+		background: var(--bg-secondary);
+	}
+}
+
+.placeholderText {
+	font-size: 13px;
+	color: var(--text-tertiary);
+	line-height: 1.5;
+}

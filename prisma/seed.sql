@@ -64,3 +64,38 @@ VALUES
 		'2026-06-21 19:05:30.000'::timestamptz
 	)
 ON CONFLICT ("id") DO NOTHING;
+
+-- TimelineLayer (default layer)
+INSERT INTO "public"."TimelineLayer" ("id", "projectId", "name", "zIndex", "createdAt")
+VALUES (
+	'lay_main_001',
+	'cmqo5itaj00006wn5h8wt1zk7',
+	'Layer 1',
+	0,
+	'2026-06-21 19:06:00.000'::timestamptz
+) ON CONFLICT ("id") DO NOTHING;
+
+-- TimelineSegments (ordered within the layer)
+INSERT INTO "public"."TimelineSegment" ("id", "layerId", "fragmentId", "name", "order", "inPoint", "outPoint", "createdAt")
+VALUES
+	(
+		'seg_intro_001',
+		'lay_main_001',
+		'frag_intro_001',
+		'intro.mp4',
+		0,
+		0,
+		30.5,
+		'2026-06-21 19:06:10.000'::timestamptz
+	),
+	(
+		'seg_scene1_002',
+		'lay_main_001',
+		'frag_scene1_002',
+		'scene-01.mp4',
+		1,
+		0,
+		120.0,
+		'2026-06-21 19:06:20.000'::timestamptz
+	)
+ON CONFLICT ("id") DO NOTHING;

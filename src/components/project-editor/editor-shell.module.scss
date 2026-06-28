@@ -1,0 +1,46 @@
+.shell {
+	display: grid;
+	grid-template-columns: 1fr;
+	grid-template-rows: auto 1fr auto;
+	grid-template-areas:
+		"topbar"
+		"main"
+		"timeline";
+	height: 100dvh;
+	overflow: hidden;
+	background: var(--bg-primary);
+	color: var(--text-primary);
+
+	@media (min-width: 48em) {
+		grid-template-columns: 1fr auto;
+		grid-template-areas:
+			"topbar  topbar"
+			"main    sidebar"
+			"timeline timeline";
+	}
+}
+
+.topbarArea {
+	grid-area: topbar;
+}
+
+.mainArea {
+	grid-area: main;
+	display: flex;
+	overflow: hidden;
+}
+
+.sidebarArea {
+	grid-area: sidebar;
+	display: none;
+
+	@media (min-width: 48em) {
+		display: block;
+		overflow: hidden;
+		height: 100%;
+	}
+}
+
+.timelineArea {
+	grid-area: timeline;
+}

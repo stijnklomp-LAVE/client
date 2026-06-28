@@ -8,20 +8,19 @@
 		"dev": "rm -rf .next && bun --bun next dev --webpack --hostname 0.0.0.0",
 		"doc": "typedoc",
 		"format": "prettier --write .",
-		"lint": "eslint --report-unused-disable-directives . --cache",
-		"lint:fix": "eslint --report-unused-disable-directives . --cache --fix",
+		"lint": "eslint --report-unused-disable-directives . && tsc --noEmit",
+		"lint:fix": "eslint --report-unused-disable-directives . --fix && tsc --noEmit",
 		"migrate": "bunx prisma migrate deploy",
 		"prepare": "husky",
 		"prisma:generate": "bunx prisma generate",
-		"sort": "./node_modules/stijnklomp-linting-formatting-config/sortJson.sh ./tsconfig.json ./.lintstagedrc.json",
+		"sort": "./node_modules/stijnklomp-linting-formatting-config/sortJson.sh ./tsconfig.json ./.lintstagedrc.json ./pacts/*",
 		"start": "node .next/standalone/server.js",
 		"test": "bun test src/",
 		"test:e2e": "playwright test",
 		"test:e2e:ui": "playwright test --ui",
 		"test:unit": "bun test src/",
 		"test:unit:ci": "bun test --coverage src/ --coverage-reporter text --coverage-reporter lcov",
-		"test:unit:coverage": "bun test --coverage src/ --coverage-reporter text",
-		"typecheck": "tsc --noEmit"
+		"test:unit:coverage": "bun test --coverage src/ --coverage-reporter text"
 	},
 	"dependencies": {
 		"@auth/prisma-adapter": "^2.9.0",
@@ -46,6 +45,7 @@
 	"devDependencies": {
 		"@eslint/compat": "^2.1.0",
 		"@eslint/js": "^10.0.1",
+		"@pact-foundation/pact": "^16.5.0",
 		"@playwright/test": "^1.60.0",
 		"@testing-library/jest-dom": "^6.9.1",
 		"@testing-library/react": "^16.3.2",

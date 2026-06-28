@@ -58,7 +58,23 @@
 		"resetPasswordOnProfile": "Wachtwoord resetten",
 		"resetPasswordTitleProfile": "Wachtwoord resetten?",
 		"resetPasswordConfirmProfile": "Je vorige resetlink is niet langer geldig. Er wordt een nieuwe naar je e-mail gestuurd.",
-		"resetPasswordSent": "Er is een resetlink naar je e-mail gestuurd."
+		"resetPasswordSent": "Er is een resetlink naar je e-mail gestuurd.",
+		"deleteAccount": "Account verwijderen",
+		"deleteAccountTitle": "Account verwijderen",
+		"deleteAccountWarning": "Waarschuwing: deze actie kan niet ongedaan worden gemaakt.",
+		"deleteAccountConfirm": "Typ {email} om permanent verwijderen te bevestigen:",
+		"deleteAccountHint": "Bevestig je e-mail",
+		"deleteAccountPermanently": "Verwijder mijn account permanent",
+		"deleteAccountError": "Account sluiten mislukt. Probeer het opnieuw.",
+		"deleteAccountSuccess": "Je account is gesloten. Je gegevens worden na 30 dagen permanent verwijderd.",
+		"accountClosing": "Account wordt gesloten",
+		"accountClosingMessage": "Je account staat gepland voor permanente verwijdering op {date}. Je kunt je account herstellen voordat dit gebeurt.",
+		"scheduledDeletion": "Geplande verwijdering: {date}",
+		"restoreAccount": "Account herstellen",
+		"restoreAccountTitle": "Account herstellen?",
+		"restoreAccountConfirm": "Je account wordt hersteld en je krijgt weer toegang tot alle functies.",
+		"restoreSuccess": "Account succesvol hersteld",
+		"restoreError": "Account herstellen mislukt. Probeer het opnieuw."
 	},
 	"home": {
 		"title": "Bewerk Video Vanaf Elke Locatie",
@@ -126,6 +142,11 @@
 	"projects": {
 		"title": "Mijn Projecten",
 		"newProject": "Nieuw Project",
+		"settings": {
+			"title": "Projectinstellingen",
+			"description": "Geavanceerde projectinstellingen komen hier — resolutie, encoding en meer."
+		},
+		"openInEditor": "Openen in Editor",
 		"nameLabel": "Naam",
 		"namePlaceholder": "Mijn Geweldige Video",
 		"descriptionLabel": "Beschrijving (optioneel)",
@@ -158,6 +179,35 @@
 			"failedDelete": "Project verwijderen mislukt",
 			"failedRename": "Project hernoemen mislukt",
 			"deleted": "\"{name}\" verwijderd"
+		}
+	},
+	"editor": {
+		"videoPreview": "Videovoorbeeld",
+		"untitledProject": "Naamloos project",
+		"goBack": "Terug",
+		"undo": "Ongedaan maken",
+		"redo": "Opnieuw",
+		"modeCapture": "Cameramodus",
+		"modeEditing": "Bewerkingsmodus",
+		"openSidePane": "Open zijpaneel",
+		"closeSidePane": "Sluit zijpaneel",
+		"tabs": {
+			"settings": "Instellingen",
+			"timeline": "Tijdlijn bewerken",
+			"styling": "Stijl"
+		},
+		"contentPlaceholder": "{tab} inhoud komt hier.",
+		"timeline": {
+			"expand": "Tijdlijn uitklappen",
+			"collapse": "Tijdlijn inklappen",
+			"title": "Tijdlijn",
+			"placeholder": "Fragmenten &amp; tijdlijn komen hier"
+		},
+		"camera": {
+			"settings": "Camera-instellingen",
+			"selectCamera": "Selecteer een camera",
+			"noCamera": "Geen camera gevonden",
+			"none": "Geen"
 		}
 	},
 	"nav": {

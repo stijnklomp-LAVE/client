@@ -96,7 +96,7 @@ bun run build
 Inside a Docker Compose container:
 
 ```bash
-# Check linting
+# Linting & type checking (ESLint + tsc)
 docker compose --profile dev run --rm dev bun run lint
 
 # Fix linting
@@ -104,9 +104,6 @@ docker compose --profile dev run --rm dev bun run lint:fix
 
 # Format with Prettier
 docker compose --profile dev run --rm dev bun run format
-
-# TypeScript type checking
-docker compose --profile dev run --rm dev bun run typecheck
 ```
 
 **Fallback:**
@@ -115,7 +112,6 @@ docker compose --profile dev run --rm dev bun run typecheck
 bun run lint
 bun run lint:fix
 bun run format
-bun run typecheck
 ```
 
 ESLint uses `stijnklomp-linting-formatting-config` with strict TypeScript and React rules. Key custom rules:
@@ -126,6 +122,8 @@ ESLint uses `stijnklomp-linting-formatting-config` with strict TypeScript and Re
 - Leading underscore allowed for unused parameters
 - Object literal numeric properties exempt from naming
 - React/JSX scope rules are off (Next.js handles this automatically)
+
+> Prefer running `bun run lint:fix` to auto-fix lint errors rather than fixing each one manually. The `--fix` flag handles most formatting and simple rule violations automatically. This saves tokens and avoids introducing mistakes. Only fix remaining errors by hand after `lint:fix` has done its job.
 
 ### Testing
 

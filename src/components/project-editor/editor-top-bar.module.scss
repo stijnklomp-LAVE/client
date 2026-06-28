@@ -1,0 +1,85 @@
+.bar {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	height: 48px;
+	padding: 0 12px;
+	background: var(--bg-primary);
+	border-bottom: 1px solid var(--border-primary);
+	gap: 8px;
+}
+
+.left {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	flex-shrink: 0;
+}
+
+.center {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	flex: 1;
+	overflow: hidden;
+}
+
+.right {
+	display: flex;
+	align-items: center;
+	gap: 4px;
+	flex-shrink: 0;
+}
+
+.projectName {
+	font-size: 14px;
+	font-weight: 600;
+	color: var(--text-secondary);
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.iconButton {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 32px;
+	height: 32px;
+	border: none;
+	border-radius: 6px;
+	background: transparent;
+	color: var(--text-secondary);
+	cursor: pointer;
+	transition:
+		background-color 0.15s ease,
+		color 0.15s ease;
+
+	&:hover {
+		background: var(--bg-tertiary);
+	}
+
+	&:active {
+		transform: scale(0.95);
+	}
+
+	&[data-active="true"] {
+		background: var(--accent);
+		color: var(--color-white, #fff);
+	}
+}
+
+.saveIndicator {
+	width: 8px;
+	height: 8px;
+	border-radius: 50%;
+	background: var(--text-tertiary);
+	flex-shrink: 0;
+}
+
+.separator {
+	width: 1px;
+	height: 20px;
+	background: var(--border-primary);
+	flex-shrink: 0;
+}

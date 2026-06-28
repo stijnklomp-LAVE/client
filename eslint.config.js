@@ -99,6 +99,7 @@ finalConfig.push(includeIgnoreFile(gitignorePath), {
 		"Dockerfile",
 		"scripts/",
 		"typedoc.config.js",
+		"pacts/",
 	],
 })
 

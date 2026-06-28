@@ -11,7 +11,13 @@ export const GET = async () => {
 	}
 
 	const user = await prismaClient.user.findUnique({
-		select: { email: true, id: true, name: true },
+		select: {
+			deletionScheduledAt: true,
+			email: true,
+			id: true,
+			markedForDeletionAt: true,
+			name: true,
+		},
 		where: { id: session.user.id },
 	})
 

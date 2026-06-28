@@ -8,10 +8,32 @@ import { prismaClient } from "./lib/db/prisma"
 export const { handlers, auth, signIn, signOut } = NextAuth({
 	adapter: PrismaAdapter(prismaClient),
 	callbacks: {
-		jwt({ token, user }) {
+		async jwt({ token, user, trigger }) {
 			// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
 			if (user) {
 				token.id = user.id
+			}
+
+			if (trigger === "signIn" || trigger === "update") {
+				if (token.sub) {
+					const dbUser = await prismaClient.user.findUnique({
+						select: {
+							deletionScheduledAt: true,
+							markedForDeletionAt: true,
+						},
+						where: { id: token.sub },
+					})
+
+					if (dbUser?.markedForDeletionAt) {
+						token.markedForDeletionAt =
+							dbUser.markedForDeletionAt.toISOString()
+						token.deletionScheduledAt =
+							dbUser.deletionScheduledAt?.toISOString()
+					} else {
+						delete token.markedForDeletionAt
+						delete token.deletionScheduledAt
+					}
+				}
 			}
 
 			return token
@@ -19,6 +41,14 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 		session({ session, token }) {
 			// eslint-disable-next-line @typescript-eslint/non-nullable-type-assertion-style
 			session.user.id = token.sub as string
+
+			if (token.markedForDeletionAt) {
+				session.user.markedForDeletionAt =
+					token.markedForDeletionAt as string
+				session.user.deletionScheduledAt = token.deletionScheduledAt as
+					| string
+					| undefined
+			}
 
 			return session
 		},

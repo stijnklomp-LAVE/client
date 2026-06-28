@@ -8,3 +8,4 @@
 !src/**
 !postcss.config.cjs
 !messages/**
+!prisma/**

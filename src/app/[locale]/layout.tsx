@@ -28,18 +28,14 @@ export default async function LocaleLayout({
 			: undefined
 
 	return (
-		<html lang={locale} suppressHydrationWarning>
-			<body suppressHydrationWarning>
-				<NextIntlClientProvider locale={locale} messages={messages}>
-					<SessionProvider session={session}>
-						<ThemeProvider initialTheme={initialTheme}>
-							<RouterProgress />
-							<Notifications position="top-right" />
-							{children}
-						</ThemeProvider>
-					</SessionProvider>
-				</NextIntlClientProvider>
-			</body>
-		</html>
+		<NextIntlClientProvider locale={locale} messages={messages}>
+			<SessionProvider session={session}>
+				<ThemeProvider initialTheme={initialTheme}>
+					<RouterProgress />
+					<Notifications position="top-right" />
+					{children}
+				</ThemeProvider>
+			</SessionProvider>
+		</NextIntlClientProvider>
 	)
 }

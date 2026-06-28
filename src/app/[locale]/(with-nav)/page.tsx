@@ -1,5 +1,6 @@
 import { getTranslations } from "next-intl/server"
 
+import { auth } from "@/auth"
 import { HeroBanner } from "@/components/ui/hero-banner"
 import { StatsBanner } from "@/components/ui/stats-banner"
 import { FeaturesSection } from "@/components/ui/features-section"
@@ -8,6 +9,7 @@ import { CTASection } from "@/components/ui/cta-section"
 
 export default async function HomePage(): Promise<React.JSX.Element> {
 	const t = await getTranslations("home")
+	const session = await auth()
 
 	const statsTranslations: Record<string, string> = {
 		editing: t("stats.editing"),
@@ -65,6 +67,7 @@ export default async function HomePage(): Promise<React.JSX.Element> {
 					subtitle={t("subtitle")}
 					ctaLabel={t("heroCta")}
 					secondaryLabel={t("heroSecondary")}
+					isAuthenticated={!!session?.user}
 				/>
 
 				<StatsBanner translations={statsTranslations} />
@@ -78,6 +81,7 @@ export default async function HomePage(): Promise<React.JSX.Element> {
 					subtitle={t("cta.subtitle")}
 					primaryLabel={t("cta.primary")}
 					secondaryLabel={t("cta.secondary")}
+					isAuthenticated={!!session?.user}
 				/>
 			</main>
 

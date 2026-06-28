@@ -6,9 +6,6 @@ const withNextIntl = createNextIntlPlugin()
 const nextConfig = {
 	output: "standalone",
 	allowedDevOrigins: ["*.*.*.*"],
-	server: {
-		trustHost: true,
-	},
 	experimental: {
 		optimizePackageImports: ["@mantine/core", "@mantine/hooks"],
 	},

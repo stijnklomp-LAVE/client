@@ -1,6 +1,7 @@
 "use client"
 
 import { Button, Text, Title } from "@mantine/core"
+import { useRouter } from "next/navigation"
 import { CtaButton } from "@/components/ui/cta-button"
 import { motion } from "motion/react"
 
@@ -9,12 +10,19 @@ export const CTASection = ({
 	subtitle,
 	primaryLabel,
 	secondaryLabel,
+	isAuthenticated,
 }: {
 	title: string
 	subtitle: string
 	primaryLabel: string
 	secondaryLabel: string
+	isAuthenticated: boolean
 }): React.JSX.Element => {
+	const router = useRouter()
+	const handlePrimaryClick = (): void => {
+		router.push(isAuthenticated ? "/projects" : "/login")
+	}
+
 	return (
 		<div style={{ padding: "80px 24px" }}>
 			<motion.div
@@ -72,7 +80,9 @@ export const CTASection = ({
 							justifyContent: "center",
 							flexWrap: "wrap",
 						}}>
-						<CtaButton>{primaryLabel}</CtaButton>
+						<CtaButton onClick={handlePrimaryClick}>
+							{primaryLabel}
+						</CtaButton>
 						<Button
 							size="lg"
 							variant="outline"

@@ -1,18 +1,16 @@
-import { redirect } from "next/navigation"
+import { getTranslations } from "next-intl/server"
 
-import { auth } from "@/auth"
+import { Stack, Text, Title } from "@mantine/core"
 
-export default async function ProjectDetailPage({
+import { OpenInEditorButton } from "@/components/projects/open-in-editor-button"
+
+export default async function ProjectSettingsPage({
 	params,
 }: {
 	params: Promise<{ locale: string; id: string }>
 }): Promise<React.JSX.Element> {
-	const { locale } = await params
-	const session = await auth()
-
-	if (!session?.user) {
-		redirect(`/${locale}/login`)
-	}
+	const t = await getTranslations("projects")
+	const { id } = await params
 
 	return (
 		<div
@@ -30,9 +28,20 @@ export default async function ProjectDetailPage({
 					maxWidth: 1200,
 					margin: "0 auto",
 					width: "100%",
+					display: "flex",
+					alignItems: "center",
+					justifyContent: "center",
 				}}>
-				Project detail page (coming soon)
+				<Stack align="center" gap="lg">
+					<Title order={2}>{t("settings.title")}</Title>
+					<Text c="dimmed" ta="center" maw={400}>
+						{t("settings.description")}
+					</Text>
+					<OpenInEditorButton projectId={id} />
+				</Stack>
 			</main>
 		</div>
 	)
 }
+
+ProjectSettingsPage.displayName = "ProjectSettingsPage"

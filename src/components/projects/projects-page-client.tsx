@@ -19,6 +19,7 @@ import {
 	IconCheck,
 	IconFolder,
 	IconPlus,
+	IconSettings,
 	IconTrash,
 	IconX,
 } from "@tabler/icons-react"
@@ -454,7 +455,7 @@ export const ProjectsPageClient = (): React.JSX.Element => {
 
 							<div
 								onClick={() =>
-									router.push(`/projects/${project.id}`)
+									router.push(`/editor/${project.id}`)
 								}
 								style={{
 									cursor: "pointer",
@@ -472,13 +473,32 @@ export const ProjectsPageClient = (): React.JSX.Element => {
 									</Text>
 								)}
 
-								<Text size="xs" c="dimmed" mt="auto">
-									{project.fragmentCount}{" "}
-									{project.fragmentCount === 1
-										? t("fragment")
-										: t("fragments")}{" "}
-									&middot; {formatDate(project.createdAt)}
-								</Text>
+								<Group
+									justify="space-between"
+									align="flex-end"
+									mt="auto">
+									<Text size="xs" c="dimmed">
+										{project.fragmentCount}{" "}
+										{project.fragmentCount === 1
+											? t("fragment")
+											: t("fragments")}{" "}
+										&middot; {formatDate(project.createdAt)}
+									</Text>
+
+									<ActionIcon
+										variant="subtle"
+										color="gray"
+										size="sm"
+										onClick={(e) => {
+											e.stopPropagation()
+											router.push(
+												`/projects/${project.id}`,
+											)
+										}}
+										aria-label="Project settings">
+										<IconSettings size={16} />
+									</ActionIcon>
+								</Group>
 							</div>
 						</Card>
 					))

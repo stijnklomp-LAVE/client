@@ -71,15 +71,15 @@ A RabbitMQ service is available via Docker Compose for message queue capabilitie
 
 ## Test
 
-### Lint
+### Linting & type checking
 
-ESLint is used as a linter and uses Prettier to format code.
+ESLint is used as a linter and uses Prettier to format code. `bun run lint` also runs TypeScript type checking.
 
 ```sh
-# ESLint
+# ESLint & TypeScript type checking
 bun run lint
 
-# ESLint and fix (also sorts JSON files)
+# Auto-fix ESLint issues (also sorts JSON files)
 # Prefix with `EXCLUDE_PATHS="<file_1> <file_2>"` to exclude files/directories (using GLOB pattern) from being auto-sorted
 bun run lint:fix
 
@@ -130,12 +130,6 @@ docker compose --profile test up --build --attach acceptance-once --exit-code-fr
 docker compose --profile <PROFILE> up --build -d && docker compose --profile <PROFILE> exec -ti dev sh -c "bun run test:acceptance"
 ```
 
-### TypeScript type checking
-
-```sh
-bun run typecheck
-```
-
 ## License
 
-FSL-1.1-MIT
+MIT

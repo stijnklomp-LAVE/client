@@ -13,3 +13,4 @@ dist
 postcss.config.cjs
 Dockerfile
 scripts
+pacts

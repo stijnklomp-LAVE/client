@@ -3,6 +3,7 @@ x-acceptance: &acceptance
   volumes:
     - .:/src
   working_dir: /src
+  user: "${HOST_UID:-1000}:${HOST_GID:-1000}"
   tty: true
   environment:
     RABBIT_HOST: rabbitmq
@@ -63,6 +64,7 @@ services:
     volumes:
       - .:/src
     working_dir: /src
+    user: "${HOST_UID:-1000}:${HOST_GID:-1000}"
     command: |
       sh -c "
         echo 'Running db migration...'
@@ -96,6 +98,7 @@ services:
     volumes:
       - .:/src
     working_dir: /src
+    user: "${HOST_UID:-1000}:${HOST_GID:-1000}"
     command: |
       sh -c "
         if [ ! -d node_modules ]; then
@@ -114,6 +117,7 @@ services:
     volumes:
       - .:/src
     working_dir: /src
+    user: "${HOST_UID:-1000}:${HOST_GID:-1000}"
     networks:
       - platform
     command: |
@@ -135,6 +139,7 @@ services:
     volumes:
       - .:/src
     working_dir: /src
+    user: "${HOST_UID:-1000}:${HOST_GID:-1000}"
     command: |
       sh -c "
         if [ ! -d node_modules ]; then
@@ -154,6 +159,7 @@ services:
     volumes:
       - .:/src
     working_dir: /src
+    user: "${HOST_UID:-1000}:${HOST_GID:-1000}"
     command: |
       sh -c "
         if [ ! -d node_modules ]; then
@@ -173,6 +179,7 @@ services:
     volumes:
       - .:/src
     working_dir: /src
+    user: "${HOST_UID:-1000}:${HOST_GID:-1000}"
     command: |
       sh -c "
         if [ ! -d node_modules ]; then

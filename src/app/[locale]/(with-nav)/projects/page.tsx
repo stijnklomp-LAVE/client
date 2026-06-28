@@ -1,20 +1,6 @@
-import { redirect } from "next/navigation"
-
-import { auth } from "@/auth"
 import { ProjectsPageClient } from "@/components/projects/projects-page-client"
 
-export default async function ProjectsPage({
-	params,
-}: {
-	params: Promise<{ locale: string }>
-}): Promise<React.JSX.Element> {
-	const { locale } = await params
-	const session = await auth()
-
-	if (!session?.user) {
-		redirect(`/${locale}/login`)
-	}
-
+export default async function ProjectsPage(): Promise<React.JSX.Element> {
 	return (
 		<div
 			style={{
