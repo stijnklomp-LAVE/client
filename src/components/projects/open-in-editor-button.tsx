@@ -1,6 +1,6 @@
 "use client"
 
-import { Button } from "@mantine/core"
+import { CtaButton } from "@/components/ui/cta-button"
 import { IconEdit } from "@tabler/icons-react"
 import { useTranslations } from "next-intl"
 import Link from "next/link"
@@ -12,15 +12,15 @@ type OpenInEditorButtonProps = {
 export const OpenInEditorButton = ({
 	projectId,
 }: OpenInEditorButtonProps): React.JSX.Element => {
-	const t = useTranslations("projects")
+	const translations = useTranslations("projects")
 
 	return (
-		<Button
+		<CtaButton
 			component={Link}
 			href={`/editor/${projectId}`}
 			size="lg"
 			leftSection={<IconEdit size={20} />}>
-			{t("openInEditor")}
-		</Button>
+			{translations("openInEditor")}
+		</CtaButton>
 	)
 }

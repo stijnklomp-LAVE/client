@@ -22,6 +22,12 @@ export type RecordingState = {
 	recordingDurationSec: number
 }
 
+const DEFAULT_CONFIG: RecordingConfig = {
+	format: "jpeg",
+	fps: 1,
+	jpegQuality: 80,
+}
+
 export const useRecording = () => {
 	const [state, setState] = useState<RecordingState>({
 		elapsedMs: 0,
@@ -31,11 +37,8 @@ export const useRecording = () => {
 		recordingDurationSec: 0,
 	})
 
-	const configRef = useRef<RecordingConfig>({
-		format: "jpeg",
-		fps: 1,
-		jpegQuality: 80,
-	})
+	const [config, setConfig] = useState<RecordingConfig>(DEFAULT_CONFIG)
+	const configRef = useRef<RecordingConfig>(DEFAULT_CONFIG)
 
 	const streamRef = useRef<MediaStream | null>(null)
 	const dirHandleRef = useRef<FileSystemDirectoryHandle | null>(null)
@@ -259,11 +262,12 @@ export const useRecording = () => {
 		}
 	}, [])
 
-	const updateConfig = useCallback((config: Partial<RecordingConfig>) => {
+	const updateConfig = useCallback((partial: Partial<RecordingConfig>) => {
 		configRef.current = {
 			...configRef.current,
-			...config,
+			...partial,
 		}
+		setConfig({ ...configRef.current })
 	}, [])
 
 	useEffect(() => {
@@ -281,6 +285,7 @@ export const useRecording = () => {
 
 	return {
 		...state,
+		config,
 		pauseRecording,
 		resumeRecording,
 		startRecording,

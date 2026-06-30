@@ -1,7 +1,14 @@
 "use client"
 
-import { useCallback, useState } from "react"
-import { Drawer, NumberInput, Select, Slider } from "@mantine/core"
+import { useCallback, useEffect, useRef, useState } from "react"
+import {
+	Divider,
+	Drawer,
+	NativeSelect,
+	NumberInput,
+	Select,
+	Slider,
+} from "@mantine/core"
 import { useMediaQuery } from "@mantine/hooks"
 import { useTranslations } from "next-intl"
 
@@ -15,21 +22,36 @@ import styles from "./side-pane.module.scss"
 const TAB_IDS: TabId[] = ["settings", "timeline", "styling"]
 
 const RecordingSettings = (): React.JSX.Element => {
-	const t = useTranslations("editor")
+	const translations = useTranslations("editor")
 	const {
 		rawFramesDirectoryName,
 		setRawFramesDirectory,
 		recordingConfig,
 		updateRecordingConfig,
 		projectId,
+		wiggleDirectoryKey,
 	} = useEditorContext()
 	const [directoryError, setDirectoryError] = useState<string | null>(null)
+	const [wiggling, setWiggling] = useState(false)
+	const wiggleTimer = useRef<ReturnType<typeof setTimeout>>(undefined)
+
+	useEffect(() => {
+		if (wiggleDirectoryKey === 0) return
+		clearTimeout(wiggleTimer.current)
+		wiggleTimer.current = setTimeout(() => {
+			setWiggling(true)
+			setTimeout(() => setWiggling(false), 500)
+		})
+		return () => clearTimeout(wiggleTimer.current)
+	}, [wiggleDirectoryKey])
 
 	const handleChooseDirectory = useCallback(async () => {
 		setDirectoryError(null)
 
 		if (!isFileSystemAccessSupported()) {
-			setDirectoryError(t("recording.directoryBrowserUnsupported"))
+			setDirectoryError(
+				translations("recording.directoryBrowserUnsupported"),
+			)
 			return
 		}
 
@@ -42,10 +64,10 @@ const RecordingSettings = (): React.JSX.Element => {
 			setDirectoryError(
 				err instanceof Error
 					? err.message
-					: t("recording.directoryError"),
+					: translations("recording.directoryError"),
 			)
 		}
-	}, [projectId, setRawFramesDirectory, t])
+	}, [projectId, setRawFramesDirectory, translations])
 
 	const handleRemoveDirectory = useCallback(() => {
 		setRawFramesDirectory(null)
@@ -54,32 +76,38 @@ const RecordingSettings = (): React.JSX.Element => {
 
 	return (
 		<div className={styles.section}>
-			<p className={styles.settingLabel}>{t("recording.directory")}</p>
-			{rawFramesDirectoryName ? (
-				<div className={styles.directoryInfo}>
-					<span className={styles.directoryName}>
-						{rawFramesDirectoryName}
-					</span>
+			<div className={wiggling ? styles.directoryWiggle : undefined}>
+				<p className={styles.settingLabel}>
+					{translations("recording.directory")}
+				</p>
+				{rawFramesDirectoryName ? (
+					<div className={styles.directoryInfo}>
+						<span className={styles.directoryName}>
+							{rawFramesDirectoryName}
+						</span>
+						<button
+							className={styles.removeButton}
+							onClick={handleRemoveDirectory}
+							type="button">
+							{translations("recording.remove")}
+						</button>
+					</div>
+				) : (
 					<button
-						className={styles.removeButton}
-						onClick={handleRemoveDirectory}
+						className={styles.chooseButton}
+						onClick={handleChooseDirectory}
 						type="button">
-						{t("recording.remove")}
+						{translations("recording.chooseDirectory")}
 					</button>
-				</div>
-			) : (
-				<button
-					className={styles.chooseButton}
-					onClick={handleChooseDirectory}
-					type="button">
-					{t("recording.chooseDirectory")}
-				</button>
-			)}
-			{directoryError && (
-				<p className={styles.directoryError}>{directoryError}</p>
-			)}
+				)}
+				{directoryError && (
+					<p className={styles.directoryError}>{directoryError}</p>
+				)}
+			</div>
 
-			<p className={styles.settingLabel}>{t("recording.fps")}</p>
+			<p className={styles.settingLabel}>
+				{translations("recording.fps")}
+			</p>
 			<NumberInput
 				value={recordingConfig.fps}
 				onChange={(value) =>
@@ -94,7 +122,9 @@ const RecordingSettings = (): React.JSX.Element => {
 				size="xs"
 			/>
 
-			<p className={styles.settingLabel}>{t("recording.format")}</p>
+			<p className={styles.settingLabel}>
+				{translations("recording.format")}
+			</p>
 			<Select
 				data={[
 					{ label: "JPEG", value: "jpeg" },
@@ -112,7 +142,7 @@ const RecordingSettings = (): React.JSX.Element => {
 			{recordingConfig.format === "jpeg" && (
 				<>
 					<p className={styles.settingLabel}>
-						{t("recording.quality")}
+						{translations("recording.quality")}
 					</p>
 					<Slider
 						value={recordingConfig.jpegQuality}
@@ -133,7 +163,7 @@ const RecordingSettings = (): React.JSX.Element => {
 RecordingSettings.displayName = "RecordingSettings"
 
 const CameraSettings = (): React.JSX.Element => {
-	const t = useTranslations("editor")
+	const translations = useTranslations("editor")
 	const {
 		selectedCameraId,
 		setSelectedCameraId,
@@ -141,41 +171,26 @@ const CameraSettings = (): React.JSX.Element => {
 		cameraError,
 	} = useEditorContext()
 
-	if (availableCameras.length === 0) {
-		return (
-			<div className={styles.section}>
-				<p className={styles.placeholderText}>
-					{cameraError ?? t("camera.noCamera")}
-				</p>
-			</div>
-		)
-	}
-
 	return (
 		<div className={styles.section}>
-			<p className={styles.settingLabel}>{t("camera.selectCamera")}</p>
-			<div className={styles.cameraList}>
-				<button
-					className={styles.cameraOption}
-					data-selected={selectedCameraId === "" ? true : undefined}
-					onClick={() => setSelectedCameraId("")}
-					type="button">
-					{t("camera.none")}
-				</button>
-				{availableCameras.map((camera) => (
-					<button
-						key={camera.deviceId}
-						className={styles.cameraOption}
-						data-selected={
-							selectedCameraId === camera.deviceId || undefined
-						}
-						onClick={() => setSelectedCameraId(camera.deviceId)}
-						type="button">
-						{camera.label ||
-							`Camera ${camera.deviceId.slice(0, 8)}`}
-					</button>
-				))}
-			</div>
+			<p className={styles.settingLabel}>
+				{translations("camera.selectCamera")}
+			</p>
+			<NativeSelect
+				value={selectedCameraId}
+				onChange={(e) => setSelectedCameraId(e.currentTarget.value)}
+				data={[
+					{ label: translations("camera.none"), value: "" },
+					...availableCameras.map((camera) => ({
+						label:
+							camera.label ||
+							`Camera ${camera.deviceId.slice(0, 8)}`,
+						value: camera.deviceId,
+					})),
+				]}
+				size="xs"
+				error={cameraError ?? undefined}
+			/>
 		</div>
 	)
 }
@@ -183,7 +198,7 @@ const CameraSettings = (): React.JSX.Element => {
 CameraSettings.displayName = "CameraSettings"
 
 const SidePaneContent = (): React.JSX.Element => {
-	const t = useTranslations("editor")
+	const translations = useTranslations("editor")
 	const { mode, activeTab, setActiveTab } = useEditorContext()
 
 	return (
@@ -202,7 +217,7 @@ const SidePaneContent = (): React.JSX.Element => {
 							}}
 							disabled={isDisabled}
 							type="button">
-							{t(`tabs.${id}`)}
+							{translations(`tabs.${id}`)}
 						</button>
 					)
 				})}
@@ -210,15 +225,19 @@ const SidePaneContent = (): React.JSX.Element => {
 
 			<div className={styles.tabContent}>
 				{activeTab === "settings" ? (
-					mode === "capture" ? (
-						<CameraSettings />
-					) : (
+					<>
 						<RecordingSettings />
-					)
+						{mode === "capture" && (
+							<>
+								<Divider my="xs" />
+								<CameraSettings />
+							</>
+						)}
+					</>
 				) : (
 					<p className={styles.placeholderText}>
-						{t("contentPlaceholder", {
-							tab: t(`tabs.${activeTab}`),
+						{translations("contentPlaceholder", {
+							tab: translations(`tabs.${activeTab}`),
 						})}
 					</p>
 				)}

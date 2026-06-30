@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { useDisclosure } from "@mantine/hooks"
 import { AuthCard } from "@/components/ui/auth-card"
+import { CtaButton } from "@/components/ui/cta-button"
 import {
 	Button,
 	Modal,
@@ -17,7 +18,7 @@ import { FormMessage, type Message } from "@/components/ui/form-message"
 import { ClientOnly } from "@/components/ui/client-only"
 
 export const RegisterForm = () => {
-	const t = useTranslations("auth")
+	const translations = useTranslations("auth")
 	const [name, setName] = useState("")
 	const [email, setEmail] = useState("")
 	const [password, setPassword] = useState("")
@@ -40,12 +41,18 @@ export const RegisterForm = () => {
 		e.preventDefault()
 
 		if (password !== confirmPassword) {
-			updateMessage({ text: t("passwordMismatch"), color: "red" })
+			updateMessage({
+				text: translations("passwordMismatch"),
+				color: "red",
+			})
 			return
 		}
 
 		if (password.length < 8) {
-			updateMessage({ text: t("passwordTooShort"), color: "red" })
+			updateMessage({
+				text: translations("passwordTooShort"),
+				color: "red",
+			})
 			return
 		}
 
@@ -61,7 +68,7 @@ export const RegisterForm = () => {
 
 		if (!res.ok) {
 			updateMessage({
-				text: data.error ?? t("registerError"),
+				text: data.error ?? translations("registerError"),
 				color: "red",
 			})
 			setLoading(false)
@@ -88,12 +95,12 @@ export const RegisterForm = () => {
 				const data = await res.json()
 
 				updateMessage({
-					text: data.error ?? t("resendError"),
+					text: data.error ?? translations("resendError"),
 					color: "red",
 				})
 			}
 		} catch {
-			updateMessage({ text: t("resendError"), color: "red" })
+			updateMessage({ text: translations("resendError"), color: "red" })
 		} finally {
 			setResending(false)
 		}
@@ -114,10 +121,10 @@ export const RegisterForm = () => {
 				{verifyUrl ? (
 					<>
 						<Title order={2} ta="center" mb="xs">
-							{t("checkEmail")}
+							{translations("checkEmail")}
 						</Title>
 						<Text c="dimmed" size="sm" ta="center" mb="lg">
-							{t("verificationSent")}
+							{translations("verificationSent")}
 						</Text>
 
 						{process.env.NODE_ENV === "development" && (
@@ -136,7 +143,7 @@ export const RegisterForm = () => {
 							fullWidth
 							mb="sm"
 							onClick={resendHandlers.open}>
-							{t("resendVerification")}
+							{translations("resendVerification")}
 						</Button>
 
 						<Button
@@ -144,7 +151,7 @@ export const RegisterForm = () => {
 							href="/login"
 							fullWidth
 							variant="outline">
-							{t("goToLogin")}
+							{translations("goToLogin")}
 						</Button>
 					</>
 				) : (
@@ -156,10 +163,10 @@ export const RegisterForm = () => {
 							}
 						}}>
 						<Title order={2} ta="center" mb="xs">
-							{t("register")}
+							{translations("register")}
 						</Title>
 						<Text c="dimmed" size="sm" ta="center" mb="lg">
-							{t("registerSubtitle")}
+							{translations("registerSubtitle")}
 						</Text>
 
 						<FormMessage
@@ -168,15 +175,15 @@ export const RegisterForm = () => {
 						/>
 
 						<TextInput
-							label={t("name")}
-							placeholder={t("namePlaceholder")}
+							label={translations("name")}
+							placeholder={translations("namePlaceholder")}
 							value={name}
 							onChange={(e) => setName(e.currentTarget.value)}
 							mb="md"
 						/>
 
 						<TextInput
-							label={t("email")}
+							label={translations("email")}
 							placeholder="you@example.com"
 							value={email}
 							onChange={(e) => setEmail(e.currentTarget.value)}
@@ -185,8 +192,8 @@ export const RegisterForm = () => {
 						/>
 
 						<PasswordInput
-							label={t("password")}
-							placeholder={t("passwordPlaceholder")}
+							label={translations("password")}
+							placeholder={translations("passwordPlaceholder")}
 							value={password}
 							onChange={(e) => setPassword(e.currentTarget.value)}
 							required
@@ -194,8 +201,10 @@ export const RegisterForm = () => {
 						/>
 
 						<PasswordInput
-							label={t("confirmPassword")}
-							placeholder={t("confirmPasswordPlaceholder")}
+							label={translations("confirmPassword")}
+							placeholder={translations(
+								"confirmPasswordPlaceholder",
+							)}
 							value={confirmPassword}
 							onChange={(e) =>
 								setConfirmPassword(e.currentTarget.value)
@@ -204,19 +213,19 @@ export const RegisterForm = () => {
 							mb="lg"
 						/>
 
-						<Button type="submit" fullWidth loading={loading}>
-							{t("createAccount")}
-						</Button>
+						<CtaButton type="submit" fullWidth loading={loading}>
+							{translations("createAccount")}
+						</CtaButton>
 
 						<Text c="dimmed" size="sm" ta="center" mt="lg">
-							{t("hasAccount")}{" "}
+							{translations("hasAccount")}{" "}
 							<Link
 								href="/login"
 								style={{
 									color: "var(--text-primary)",
 									fontWeight: 600,
 								}}>
-								{t("signIn")}
+								{translations("signIn")}
 							</Link>
 						</Text>
 					</form>
@@ -225,17 +234,17 @@ export const RegisterForm = () => {
 				<Modal
 					opened={resendOpened}
 					onClose={resendHandlers.close}
-					title={t("resendVerificationTitle")}
+					title={translations("resendVerificationTitle")}
 					centered>
 					<Text size="sm" mb="lg">
-						{t("resendVerificationConfirm")}
+						{translations("resendVerificationConfirm")}
 					</Text>
-					<Button
+					<CtaButton
 						fullWidth
 						loading={resending}
 						onClick={handleResend}>
-						{t("resendVerificationButton")}
-					</Button>
+						{translations("resendVerificationButton")}
+					</CtaButton>
 				</Modal>
 			</AuthCard>
 		</ClientOnly>

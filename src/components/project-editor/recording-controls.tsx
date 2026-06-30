@@ -11,7 +11,7 @@ import { useEditorContext } from "./editor-context"
 import styles from "./recording-controls.module.scss"
 
 export const RecordingControls = (): React.JSX.Element | null => {
-	const t = useTranslations("editor")
+	const translations = useTranslations("editor")
 	const {
 		isRecording,
 		recordingElapsedMs,
@@ -37,13 +37,13 @@ export const RecordingControls = (): React.JSX.Element | null => {
 				<div className={styles.indicator}>
 					<span className={styles.dot} />
 					<span className={styles.label}>
-						{t("recording.recording")}
+						{translations("recording.recording")}
 					</span>
 					<span className={styles.timer}>
 						{formatTime(recordingElapsedMs)}
 					</span>
 					<span className={styles.frameCount}>
-						{t("recording.framesCaptured", {
+						{translations("recording.framesCaptured", {
 							count: recordingFrameCount,
 						})}
 					</span>
@@ -55,8 +55,8 @@ export const RecordingControls = (): React.JSX.Element | null => {
 						type="button"
 						aria-label={
 							isPaused
-								? t("recording.resume")
-								: t("recording.pause")
+								? translations("recording.resume")
+								: translations("recording.pause")
 						}>
 						{isPaused ? (
 							<IconPlayerPlay size={18} />
@@ -68,7 +68,7 @@ export const RecordingControls = (): React.JSX.Element | null => {
 						className={styles.stopButton}
 						onClick={stopRecording}
 						type="button"
-						aria-label={t("recording.stop")}>
+						aria-label={translations("recording.stop")}>
 						<IconPlayerStop size={18} />
 					</button>
 				</div>

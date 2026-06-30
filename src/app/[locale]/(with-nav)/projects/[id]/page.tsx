@@ -9,7 +9,7 @@ import { OpenInEditorButton } from "@/components/projects/open-in-editor-button"
 import { pickRawFramesDirectory } from "@/lib/editor/raw-frames-directory"
 
 export default function ProjectSettingsPage() {
-	const t = useTranslations("projects")
+	const translations = useTranslations("projects")
 	const { id } = useParams<{ id: string }>()
 	const [dirName, setDirName] = useState<string | null>(null)
 
@@ -42,9 +42,9 @@ export default function ProjectSettingsPage() {
 					width: "100%",
 				}}>
 				<Stack gap="lg">
-					<Title order={2}>{t("settings.title")}</Title>
+					<Title order={2}>{translations("settings.title")}</Title>
 					<Text c="dimmed" ta="center" maw={400}>
-						{t("settings.description")}
+						{translations("settings.description")}
 					</Text>
 
 					<div

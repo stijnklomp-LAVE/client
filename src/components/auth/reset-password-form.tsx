@@ -4,13 +4,14 @@ import { useState } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { nprogress } from "@/components/providers/router-progress"
 import { AuthCard } from "@/components/ui/auth-card"
+import { CtaButton } from "@/components/ui/cta-button"
 import { Button, PasswordInput, Text, Title } from "@mantine/core"
 import { useTranslations } from "next-intl"
 import Link from "next/link"
 import { FormMessage, type Message } from "@/components/ui/form-message"
 
 export const ResetPasswordForm = (): React.JSX.Element => {
-	const t = useTranslations("auth")
+	const translations = useTranslations("auth")
 	const router = useRouter()
 	const searchParams = useSearchParams()
 	const token = searchParams.get("token")
@@ -31,13 +32,19 @@ export const ResetPasswordForm = (): React.JSX.Element => {
 		e.preventDefault()
 
 		if (password !== confirmPassword) {
-			updateMessage({ text: t("passwordMismatch"), color: "red" })
+			updateMessage({
+				text: translations("passwordMismatch"),
+				color: "red",
+			})
 
 			return
 		}
 
 		if (password.length < 8) {
-			updateMessage({ text: t("passwordTooShort"), color: "red" })
+			updateMessage({
+				text: translations("passwordTooShort"),
+				color: "red",
+			})
 
 			return
 		}
@@ -55,7 +62,7 @@ export const ResetPasswordForm = (): React.JSX.Element => {
 
 			if (!res.ok) {
 				updateMessage({
-					text: data.error ?? t("resetError"),
+					text: data.error ?? translations("resetError"),
 					color: "red",
 				})
 
@@ -65,7 +72,7 @@ export const ResetPasswordForm = (): React.JSX.Element => {
 			nprogress.start()
 			router.replace("/login?reset=true")
 		} catch {
-			updateMessage({ text: t("resetError"), color: "red" })
+			updateMessage({ text: translations("resetError"), color: "red" })
 		} finally {
 			setLoading(false)
 		}
@@ -75,13 +82,13 @@ export const ResetPasswordForm = (): React.JSX.Element => {
 		return (
 			<AuthCard>
 				<Title order={2} ta="center" mb="xs">
-					{t("resetPassword")}
+					{translations("resetPassword")}
 				</Title>
 				<Text c="red" size="sm" ta="center" mb="lg">
-					{t("resetMissingToken")}
+					{translations("resetMissingToken")}
 				</Text>
 				<Button component="a" href="/login" fullWidth variant="outline">
-					{t("backToLogin")}
+					{translations("backToLogin")}
 				</Button>
 			</AuthCard>
 		)
@@ -91,17 +98,17 @@ export const ResetPasswordForm = (): React.JSX.Element => {
 		<AuthCard>
 			<form onSubmit={handleSubmit}>
 				<Title order={2} ta="center" mb="xs">
-					{t("resetPassword")}
+					{translations("resetPassword")}
 				</Title>
 				<Text c="dimmed" size="sm" ta="center" mb="lg">
-					{t("resetPasswordSubtitle")}
+					{translations("resetPasswordSubtitle")}
 				</Text>
 
 				<FormMessage message={message} messageKey={messageKey} />
 
 				<PasswordInput
-					label={t("newPassword")}
-					placeholder={t("passwordPlaceholder")}
+					label={translations("newPassword")}
+					placeholder={translations("passwordPlaceholder")}
 					value={password}
 					onChange={(e) => setPassword(e.currentTarget.value)}
 					required
@@ -109,17 +116,17 @@ export const ResetPasswordForm = (): React.JSX.Element => {
 				/>
 
 				<PasswordInput
-					label={t("confirmPassword")}
-					placeholder={t("confirmPasswordPlaceholder")}
+					label={translations("confirmPassword")}
+					placeholder={translations("confirmPasswordPlaceholder")}
 					value={confirmPassword}
 					onChange={(e) => setConfirmPassword(e.currentTarget.value)}
 					required
 					mb="lg"
 				/>
 
-				<Button type="submit" fullWidth loading={loading}>
-					{t("resetPasswordButton")}
-				</Button>
+				<CtaButton type="submit" fullWidth loading={loading}>
+					{translations("resetPasswordButton")}
+				</CtaButton>
 
 				<Text c="dimmed" size="sm" ta="center" mt="lg">
 					<Link
@@ -128,7 +135,7 @@ export const ResetPasswordForm = (): React.JSX.Element => {
 							color: "var(--text-primary)",
 							fontWeight: 600,
 						}}>
-						{t("backToLogin")}
+						{translations("backToLogin")}
 					</Link>
 				</Text>
 			</form>

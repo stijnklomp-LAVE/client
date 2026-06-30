@@ -1,6 +1,7 @@
 "use client"
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
+import { CtaButton } from "@/components/ui/cta-button"
 import {
 	Badge,
 	Button,
@@ -51,7 +52,7 @@ const TransferProgressCard = ({
 	onCancel: (requestId: string) => void
 	requestId: string
 }): React.JSX.Element => {
-	const t = useTranslations("devices")
+	const translations = useTranslations("devices")
 	const isActive =
 		transfer.peerState === "connected" ||
 		transfer.peerState === "connecting"
@@ -61,8 +62,8 @@ const TransferProgressCard = ({
 			<Group justify="space-between" mb="xs">
 				<Text fw={500} size="sm">
 					{transfer.direction === "SEND"
-						? t("requests.sendingTitle")
-						: t("requests.receivingTitle")}
+						? translations("requests.sendingTitle")
+						: translations("requests.receivingTitle")}
 				</Text>
 				{transfer.error ? (
 					<Badge color="red" variant="light">
@@ -132,7 +133,7 @@ const TransferProgressCard = ({
 					size="xs"
 					variant="outline"
 					onClick={() => onCancel(requestId)}>
-					{t("requests.cancelTransfer")}
+					{translations("requests.cancelTransfer")}
 				</Button>
 			)}
 		</Card>
@@ -144,7 +145,7 @@ export const DevicesLayoutClient = ({
 }: {
 	children: React.ReactNode
 }): React.JSX.Element => {
-	const t = useTranslations("devices")
+	const translations = useTranslations("devices")
 	const pathname = usePathname()
 	const [devices, setDevices] = useState<Device[]>([])
 	const [statuses, setStatuses] = useState<DeviceStatuses>({})
@@ -196,9 +197,9 @@ export const DevicesLayoutClient = ({
 				cancelledToasts.current.add(requestId)
 				showThrottledNotification({
 					color: "orange",
-					message: t("notifications.otherDeviceCancelled"),
+					message: translations("notifications.otherDeviceCancelled"),
 					throttleKey: "otherDeviceCancelled",
-					title: t("notifications.transferCancelled"),
+					title: translations("notifications.transferCancelled"),
 				})
 			}
 		}
@@ -235,9 +236,9 @@ export const DevicesLayoutClient = ({
 		} catch {
 			showThrottledNotification({
 				color: "red",
-				message: t("notifications.failedLoadDevices"),
+				message: translations("notifications.failedLoadDevices"),
 				throttleKey: "failedLoadDevices",
-				title: t("notifications.error"),
+				title: translations("notifications.error"),
 			})
 		}
 	}
@@ -255,9 +256,9 @@ export const DevicesLayoutClient = ({
 		} catch {
 			showThrottledNotification({
 				color: "red",
-				message: t("notifications.failedLoadProjects"),
+				message: translations("notifications.failedLoadProjects"),
 				throttleKey: "failedLoadProjects",
-				title: t("notifications.error"),
+				title: translations("notifications.error"),
 			})
 		}
 	}
@@ -290,12 +291,12 @@ export const DevicesLayoutClient = ({
 		} catch {
 			showThrottledNotification({
 				color: "red",
-				message: t("notifications.failedLoadRequests"),
+				message: translations("notifications.failedLoadRequests"),
 				throttleKey: "failedLoadRequests",
-				title: t("notifications.error"),
+				title: translations("notifications.error"),
 			})
 		}
-	}, [t])
+	}, [translations])
 
 	useEffect(() => {
 		const load = async () => {
@@ -349,10 +350,10 @@ export const DevicesLayoutClient = ({
 
 				notifications.show({
 					color: "green",
-					message: t("notifications.deviceRegistered", {
+					message: translations("notifications.deviceRegistered", {
 						name: newDeviceName.trim(),
 					}),
-					title: t("notifications.success"),
+					title: translations("notifications.success"),
 				})
 				setNewDeviceName("")
 				closeRegister()
@@ -362,15 +363,16 @@ export const DevicesLayoutClient = ({
 				notifications.show({
 					color: "red",
 					message:
-						data.error ?? t("notifications.failedRegisterDevice"),
-					title: t("notifications.error"),
+						data.error ??
+						translations("notifications.failedRegisterDevice"),
+					title: translations("notifications.error"),
 				})
 			}
 		} catch {
 			notifications.show({
 				color: "red",
-				message: t("notifications.failedRegisterDevice"),
-				title: t("notifications.error"),
+				message: translations("notifications.failedRegisterDevice"),
+				title: translations("notifications.error"),
 			})
 		}
 	}
@@ -400,9 +402,9 @@ export const DevicesLayoutClient = ({
 					color: "green",
 					message:
 						action === "accept"
-							? t("notifications.requestAccepted")
-							: t("notifications.requestRejected"),
-					title: t("notifications.success"),
+							? translations("notifications.requestAccepted")
+							: translations("notifications.requestRejected"),
+					title: translations("notifications.success"),
 				})
 				await fetchRequests()
 			} else {
@@ -436,23 +438,25 @@ export const DevicesLayoutClient = ({
 				cancelTransfer(requestId)
 				notifications.show({
 					color: "orange",
-					message: t("notifications.transferCancelled"),
-					title: t("notifications.success"),
+					message: translations("notifications.transferCancelled"),
+					title: translations("notifications.success"),
 				})
 				await fetchRequests()
 			} else {
 				const data = (await res.json()) as { error?: string }
 				notifications.show({
 					color: "red",
-					message: data.error ?? t("notifications.cancelFailed"),
-					title: t("notifications.error"),
+					message:
+						data.error ??
+						translations("notifications.cancelFailed"),
+					title: translations("notifications.error"),
 				})
 			}
 		} catch {
 			notifications.show({
 				color: "red",
-				message: t("notifications.cancelFailed"),
-				title: t("notifications.error"),
+				message: translations("notifications.cancelFailed"),
+				title: translations("notifications.error"),
 			})
 		}
 	}
@@ -492,9 +496,9 @@ export const DevicesLayoutClient = ({
 			}}>
 			<Group justify="space-between" mb="lg">
 				<div>
-					<Title order={2}>{t("title")}</Title>
+					<Title order={2}>{translations("title")}</Title>
 					<Text c="dimmed" size="sm">
-						{t("subtitle")}
+						{translations("subtitle")}
 					</Text>
 					{currentDeviceName ? (
 						<Text c="dimmed" size="xs">
@@ -502,17 +506,17 @@ export const DevicesLayoutClient = ({
 						</Text>
 					) : null}
 				</div>
-				<Button
+				<CtaButton
 					leftSection={<IconPlus size={16} />}
 					onClick={openRegister}>
-					{t("registerDevice")}
-				</Button>
+					{translations("registerDevice")}
+				</CtaButton>
 			</Group>
 
 			{activeTransfers.size > 0 ? (
 				<Card withBorder padding="md" radius="md" mb="md">
 					<Text fw={500} mb="sm" size="sm">
-						{t("requests.activeTransfers")}
+						{translations("requests.activeTransfers")}
 					</Text>
 					<Stack gap="sm">
 						{Array.from(activeTransfers.entries()).map(
@@ -542,7 +546,7 @@ export const DevicesLayoutClient = ({
 						renderRoot={(props) => (
 							<Link href="/devices" {...props} />
 						)}>
-						{t("tabs.devices")}
+						{translations("tabs.devices")}
 					</Tabs.Tab>
 					<Tabs.Tab
 						leftSection={<IconSend size={16} />}
@@ -550,7 +554,7 @@ export const DevicesLayoutClient = ({
 						renderRoot={(props) => (
 							<Link href="/devices/share-fragments" {...props} />
 						)}>
-						{t("tabs.send")}
+						{translations("tabs.send")}
 					</Tabs.Tab>
 					<Tabs.Tab
 						leftSection={<IconSend size={16} />}
@@ -558,7 +562,7 @@ export const DevicesLayoutClient = ({
 						renderRoot={(props) => (
 							<Link href="/devices/requests" {...props} />
 						)}>
-						{t("tabs.requests")}
+						{translations("tabs.requests")}
 						{requests.length ? ` (${requests.length})` : ""}
 					</Tabs.Tab>
 				</Tabs.List>
@@ -569,12 +573,12 @@ export const DevicesLayoutClient = ({
 			<Modal
 				onClose={closeRegister}
 				opened={registerOpened}
-				title={t("modal.title")}>
+				title={translations("modal.title")}>
 				<Stack gap="md">
 					<TextInput
 						autoFocus
-						label={t("modal.deviceName")}
-						placeholder={t("modal.placeholder")}
+						label={translations("modal.deviceName")}
+						placeholder={translations("modal.placeholder")}
 						value={newDeviceName}
 						onChange={(e) =>
 							setNewDeviceName(e.currentTarget.value)
@@ -587,14 +591,14 @@ export const DevicesLayoutClient = ({
 								closeRegister()
 								setNewDeviceName("")
 							}}>
-							{t("modal.cancel")}
+							{translations("modal.cancel")}
 						</Button>
-						<Button
+						<CtaButton
 							disabled={!newDeviceName.trim()}
 							leftSection={<IconPlus size={16} />}
 							onClick={handleRegister}>
-							{t("modal.register")}
-						</Button>
+							{translations("modal.register")}
+						</CtaButton>
 					</Group>
 				</Stack>
 			</Modal>

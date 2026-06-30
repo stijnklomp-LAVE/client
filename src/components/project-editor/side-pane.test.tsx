@@ -82,6 +82,8 @@ const defaultContextValue = {
 	rawFramesDirectoryHandle: null,
 	rawFramesDirectoryName: null,
 	setRawFramesDirectory: mockSetRawFramesDirectory,
+	wiggleDirectoryKey: 0,
+	notifyNoDirectory: vi.fn(),
 	pendingRecordingLayerId: null,
 	setPendingRecordingLayerId: vi.fn(),
 	clearPendingRecordingLayerId: vi.fn(),

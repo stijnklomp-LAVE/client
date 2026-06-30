@@ -1,6 +1,7 @@
 "use client"
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
+import { CtaButton } from "@/components/ui/cta-button"
 import {
 	Accordion,
 	Badge,
@@ -78,8 +79,8 @@ export const SendTab = ({
 	projects,
 	onSendComplete,
 }: SendTabProps): React.JSX.Element => {
-	const sendT = useTranslations("devices.send")
-	const msgT = useTranslations("devices.notifications")
+	const sendTranslations = useTranslations("devices.send")
+	const msgTranslations = useTranslations("devices.notifications")
 
 	const hook = useSendFragments({
 		deviceFragments,
@@ -189,40 +190,40 @@ export const SendTab = ({
 		if (successCount > 0) {
 			notifications.show({
 				color: "green",
-				message: msgT("requestSent", {
+				message: msgTranslations("requestSent", {
 					count: successCount.toString(),
 				}),
-				title: msgT("success"),
+				title: msgTranslations("success"),
 			})
 		}
 
 		if (failCount > 0) {
 			notifications.show({
 				color: "red",
-				message: msgT("failedSendRequest"),
-				title: msgT("error"),
+				message: msgTranslations("failedSendRequest"),
+				title: msgTranslations("error"),
 			})
 		}
 
 		setMessage("")
 		onSendComplete?.()
-	}, [buildSendPayload, message, msgT, onSendComplete])
+	}, [buildSendPayload, message, msgTranslations, onSendComplete])
 
 	return (
 		<Card withBorder padding="lg" radius="md" mb="md">
 			<Text fw={500} mb="md" size="lg">
-				{sendT("title")}
+				{sendTranslations("title")}
 			</Text>
 
 			<Stack gap="md">
 				{/* Step 1: Project Selection */}
 				<div>
 					<Text fw={500} mb="xs" size="sm">
-						{sendT("selectProject")}
+						{sendTranslations("selectProject")}
 					</Text>
 					{projects.length === 0 ? (
 						<Text c="dimmed" size="sm">
-							{sendT("noProjects")}
+							{sendTranslations("noProjects")}
 						</Text>
 					) : (
 						<Accordion multiple>
@@ -262,7 +263,9 @@ export const SendTab = ({
 															project.fragments
 																.length
 														}{" "}
-														{sendT("fragments")}
+														{sendTranslations(
+															"fragments",
+														)}
 														{project.description
 															? ` — ${project.description}`
 															: ""}
@@ -274,7 +277,7 @@ export const SendTab = ({
 														color="gray"
 														size="sm"
 														variant="light">
-														{sendT(
+														{sendTranslations(
 															"alreadyOnTarget",
 															{
 																count: greyedCount.toString(),
@@ -381,16 +384,16 @@ export const SendTab = ({
 								? "dimmed"
 								: undefined
 						}>
-						{sendT("selectTarget")}
+						{sendTranslations("selectTarget")}
 						<Text component="span" c="dimmed" fw={400} size="sm">
 							{" — "}
-							{sendT("selectTargetDescription")}
+							{sendTranslations("selectTargetDescription")}
 						</Text>
 					</Text>
 					{selectedProjectIds.length > 0 ? (
 						availableTargetDevices.length === 0 ? (
 							<Text c="dimmed" size="sm">
-								{sendT("noDevicesForProject")}
+								{sendTranslations("noDevicesForProject")}
 							</Text>
 						) : (
 							<Box pl="md">
@@ -414,7 +417,9 @@ export const SendTab = ({
 												description={
 													device.deviceId ===
 													localDeviceId
-														? sendT("thisDevice")
+														? sendTranslations(
+																"thisDevice",
+															)
 														: undefined
 												}
 											/>
@@ -439,10 +444,10 @@ export const SendTab = ({
 								? "dimmed"
 								: undefined
 						}>
-						{sendT("selectSource")}
+						{sendTranslations("selectSource")}
 						<Text component="span" c="dimmed" fw={400} size="sm">
 							{" — "}
-							{sendT("selectSourceDescription")}
+							{sendTranslations("selectSourceDescription")}
 						</Text>
 					</Text>
 					{selectedProjectIds.length > 0 &&
@@ -461,7 +466,9 @@ export const SendTab = ({
 												size={14}
 											/>
 											<Text c="dimmed" size="xs">
-												{sendT("duplicateWarning")}
+												{sendTranslations(
+													"duplicateWarning",
+												)}
 											</Text>
 										</Group>
 									</Text>
@@ -477,7 +484,7 @@ export const SendTab = ({
 													size={14}
 												/>
 												<Text c="dimmed" size="xs">
-													{sendT(
+													{sendTranslations(
 														"duplicatesResolved",
 													)}
 												</Text>
@@ -521,7 +528,7 @@ export const SendTab = ({
 														</Text>
 														{isDuplicate ? (
 															<Tooltip
-																label={sendT(
+																label={sendTranslations(
 																	"duplicateWarning",
 																)}
 																withArrow>
@@ -562,7 +569,7 @@ export const SendTab = ({
 																		device.deviceId,
 																	)
 																}}>
-																{sendT(
+																{sendTranslations(
 																	"resolveAllDuplicates",
 																)}
 															</Button>
@@ -643,7 +650,7 @@ export const SendTab = ({
 																					c="dimmed"
 																					size="xs">
 																					{isResolved
-																						? sendT(
+																						? sendTranslations(
 																								"duplicateResolved",
 																								{
 																									device:
@@ -659,7 +666,7 @@ export const SendTab = ({
 																										"",
 																								},
 																							)
-																						: sendT(
+																						: sendTranslations(
 																								"alsoOnAnotherSource",
 																							)}
 																				</Text>
@@ -667,7 +674,7 @@ export const SendTab = ({
 																					<Tooltip
 																						label={
 																							updatedAt
-																								? `${sendT("updatedAt", { time: formatRelativeTime(updatedAt) })} — ${new Date(updatedAt).toISOString()}`
+																								? `${sendTranslations("updatedAt", { time: formatRelativeTime(updatedAt) })} — ${new Date(updatedAt).toISOString()}`
 																								: ""
 																						}
 																						withArrow>
@@ -704,7 +711,7 @@ export const SendTab = ({
 																					device.deviceId,
 																				)
 																			}>
-																			{sendT(
+																			{sendTranslations(
 																				"resolveDuplicate",
 																			)}
 																		</Button>
@@ -720,7 +727,7 @@ export const SendTab = ({
 								</Accordion>
 							) : (
 								<Text c="dimmed" size="sm">
-									{sendT("noSourceDevices")}
+									{sendTranslations("noSourceDevices")}
 								</Text>
 							)}
 						</>
@@ -731,25 +738,25 @@ export const SendTab = ({
 
 				{/* Message */}
 				<Textarea
-					label={sendT("messageLabel")}
-					placeholder={sendT("messagePlaceholder")}
+					label={sendTranslations("messageLabel")}
+					placeholder={sendTranslations("messagePlaceholder")}
 					value={message}
 					onChange={(e) => setMessage(e.currentTarget.value)}
 				/>
 
 				{/* Send Button */}
-				<Button
+				<CtaButton
 					disabled={!canSend}
 					leftSection={<IconSend size={16} />}
 					onClick={handleSend}>
 					{canSend
-						? sendT("sendCount", {
+						? sendTranslations("sendCount", {
 								fragments: totalFragmentsToSend.toString(),
 								targets:
 									selectedTargetDeviceIds.length.toString(),
 							})
-						: sendT("sendButton")}
-				</Button>
+						: sendTranslations("sendButton")}
+				</CtaButton>
 			</Stack>
 		</Card>
 	)

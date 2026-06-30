@@ -21,7 +21,7 @@ export const EditorTopBar = ({
 }: {
 	projectName?: string
 }): React.JSX.Element => {
-	const t = useTranslations("editor")
+	const translations = useTranslations("editor")
 	const router = useRouter()
 	const { mode, setMode, sidePaneOpen, toggleSidePane } = useEditorContext()
 
@@ -36,7 +36,7 @@ export const EditorTopBar = ({
 					className={styles.iconButton}
 					onClick={handleBack}
 					type="button"
-					aria-label={t("goBack")}>
+					aria-label={translations("goBack")}>
 					<IconArrowLeft size={18} />
 				</button>
 
@@ -49,7 +49,9 @@ export const EditorTopBar = ({
 					}
 					type="button"
 					aria-label={
-						mode === "capture" ? t("modeEditing") : t("modeCapture")
+						mode === "capture"
+							? translations("modeEditing")
+							: translations("modeCapture")
 					}
 					data-active={mode === "capture"}>
 					{mode === "capture" ? (
@@ -62,7 +64,7 @@ export const EditorTopBar = ({
 				<button
 					className={styles.iconButton}
 					type="button"
-					aria-label={t("undo")}
+					aria-label={translations("undo")}
 					disabled>
 					<IconPlayerSkipBack size={16} />
 				</button>
@@ -70,7 +72,7 @@ export const EditorTopBar = ({
 				<button
 					className={styles.iconButton}
 					type="button"
-					aria-label={t("redo")}
+					aria-label={translations("redo")}
 					disabled>
 					<IconPlayerSkipForward size={16} />
 				</button>
@@ -78,7 +80,7 @@ export const EditorTopBar = ({
 
 			<div className={styles.center}>
 				<span className={styles.projectName}>
-					{projectName ?? t("untitledProject")}
+					{projectName ?? translations("untitledProject")}
 				</span>
 			</div>
 
@@ -90,7 +92,9 @@ export const EditorTopBar = ({
 					onClick={toggleSidePane}
 					type="button"
 					aria-label={
-						sidePaneOpen ? t("closeSidePane") : t("openSidePane")
+						sidePaneOpen
+							? translations("closeSidePane")
+							: translations("openSidePane")
 					}>
 					{sidePaneOpen ? (
 						<IconLayoutSidebarRightCollapse size={18} />

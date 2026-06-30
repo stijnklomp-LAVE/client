@@ -16,7 +16,7 @@ import { nprogress } from "@/components/providers/router-progress"
 export const Header = (): React.JSX.Element => {
 	const { data: session } = useSession()
 	const pathname = usePathname()
-	const t = useTranslations("nav")
+	const translations = useTranslations("nav")
 
 	return (
 		<header
@@ -88,7 +88,7 @@ export const Header = (): React.JSX.Element => {
 							onClick={() => {
 								nprogress.start()
 							}}>
-							{t("projects")}
+							{translations("projects")}
 						</Button>
 						<Button
 							component={Link}
@@ -107,7 +107,7 @@ export const Header = (): React.JSX.Element => {
 							onClick={() => {
 								nprogress.start()
 							}}>
-							{t("devices")}
+							{translations("devices")}
 						</Button>
 					</Group>
 				)}

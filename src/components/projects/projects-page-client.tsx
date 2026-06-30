@@ -1,6 +1,7 @@
 "use client"
 
 import { useCallback, useEffect, useState } from "react"
+import { CtaButton } from "@/components/ui/cta-button"
 import {
 	ActionIcon,
 	Button,
@@ -35,7 +36,7 @@ type Project = {
 }
 
 export const ProjectsPageClient = (): React.JSX.Element => {
-	const t = useTranslations("projects")
+	const translations = useTranslations("projects")
 	const router = useRouter()
 	const [projects, setProjects] = useState<Project[]>([])
 	const [loading, setLoading] = useState(true)
@@ -61,11 +62,11 @@ export const ProjectsPageClient = (): React.JSX.Element => {
 		} catch {
 			notifications.show({
 				color: "red",
-				message: t("notifications.failedLoad"),
-				title: t("notifications.error"),
+				message: translations("notifications.failedLoad"),
+				title: translations("notifications.error"),
 			})
 		}
-	}, [t])
+	}, [translations])
 
 	useEffect(() => {
 		const load = async () => {
@@ -112,8 +113,8 @@ export const ProjectsPageClient = (): React.JSX.Element => {
 			if (res.ok) {
 				notifications.show({
 					color: "green",
-					message: t("notifications.created"),
-					title: t("notifications.success"),
+					message: translations("notifications.created"),
+					title: translations("notifications.success"),
 				})
 				setNewName("")
 				setNewDescription("")
@@ -122,15 +123,17 @@ export const ProjectsPageClient = (): React.JSX.Element => {
 				const data = await res.json()
 				notifications.show({
 					color: "red",
-					message: data.error ?? t("notifications.failedCreate"),
-					title: t("notifications.error"),
+					message:
+						data.error ??
+						translations("notifications.failedCreate"),
+					title: translations("notifications.error"),
 				})
 			}
 		} catch {
 			notifications.show({
 				color: "red",
-				message: t("notifications.failedCreate"),
-				title: t("notifications.error"),
+				message: translations("notifications.failedCreate"),
+				title: translations("notifications.error"),
 			})
 		} finally {
 			setCreating(false)
@@ -161,15 +164,17 @@ export const ProjectsPageClient = (): React.JSX.Element => {
 				const data = await res.json()
 				notifications.show({
 					color: "red",
-					message: data.error ?? t("notifications.failedRename"),
-					title: t("notifications.error"),
+					message:
+						data.error ??
+						translations("notifications.failedRename"),
+					title: translations("notifications.error"),
 				})
 			}
 		} catch {
 			notifications.show({
 				color: "red",
-				message: t("notifications.failedRename"),
-				title: t("notifications.error"),
+				message: translations("notifications.failedRename"),
+				title: translations("notifications.error"),
 			})
 		}
 	}
@@ -187,10 +192,10 @@ export const ProjectsPageClient = (): React.JSX.Element => {
 			if (res.ok) {
 				notifications.show({
 					color: "green",
-					message: t("notifications.deleted", {
+					message: translations("notifications.deleted", {
 						name: deleteTarget.name,
 					}),
-					title: t("notifications.success"),
+					title: translations("notifications.success"),
 				})
 				setDeleteTarget(null)
 				setConfirmName("")
@@ -199,15 +204,17 @@ export const ProjectsPageClient = (): React.JSX.Element => {
 				const data = await res.json()
 				notifications.show({
 					color: "red",
-					message: data.error ?? t("notifications.failedDelete"),
-					title: t("notifications.error"),
+					message:
+						data.error ??
+						translations("notifications.failedDelete"),
+					title: translations("notifications.error"),
 				})
 			}
 		} catch {
 			notifications.show({
 				color: "red",
-				message: t("notifications.failedDelete"),
-				title: t("notifications.error"),
+				message: translations("notifications.failedDelete"),
+				title: translations("notifications.error"),
 			})
 		} finally {
 			setDeleting(false)
@@ -220,9 +227,10 @@ export const ProjectsPageClient = (): React.JSX.Element => {
 		const diffMs = now.getTime() - date.getTime()
 		const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24))
 
-		if (diffDays === 0) return t("time.today")
-		if (diffDays === 1) return t("time.yesterday")
-		if (diffDays < 7) return t("time.daysAgo", { days: diffDays })
+		if (diffDays === 0) return translations("time.today")
+		if (diffDays === 1) return translations("time.yesterday")
+		if (diffDays < 7)
+			return translations("time.daysAgo", { days: diffDays })
 		return date.toLocaleDateString()
 	}
 
@@ -230,7 +238,7 @@ export const ProjectsPageClient = (): React.JSX.Element => {
 		return (
 			<>
 				<Title order={2} mb="lg">
-					{t("title")}
+					{translations("title")}
 				</Title>
 				<SimpleGrid cols={{ base: 1, sm: 2, md: 3 }} spacing="lg">
 					<Skeleton height={180} radius="md" />
@@ -244,7 +252,7 @@ export const ProjectsPageClient = (): React.JSX.Element => {
 	return (
 		<>
 			<Title order={2} mb="lg">
-				{t("title")}
+				{translations("title")}
 			</Title>
 
 			<SimpleGrid cols={{ base: 1, sm: 2, md: 3 }} spacing="lg">
@@ -259,20 +267,20 @@ export const ProjectsPageClient = (): React.JSX.Element => {
 						borderStyle: "dashed",
 					}}>
 					<Text fw={500} ta="center" mb="md">
-						{t("newProject")}
+						{translations("newProject")}
 					</Text>
 
 					<TextInput
-						label={t("nameLabel")}
-						placeholder={t("namePlaceholder")}
+						label={translations("nameLabel")}
+						placeholder={translations("namePlaceholder")}
 						value={newName}
 						onChange={(e) => setNewName(e.currentTarget.value)}
 						mb="sm"
 					/>
 
 					<Textarea
-						label={t("descriptionLabel")}
-						placeholder={t("descriptionPlaceholder")}
+						label={translations("descriptionLabel")}
+						placeholder={translations("descriptionPlaceholder")}
 						value={newDescription}
 						onChange={(e) =>
 							setNewDescription(e.currentTarget.value)
@@ -283,13 +291,13 @@ export const ProjectsPageClient = (): React.JSX.Element => {
 						maxRows={4}
 					/>
 
-					<Button
+					<CtaButton
 						fullWidth
 						leftSection={<IconPlus size={16} />}
 						loading={creating}
 						onClick={handleCreate}>
-						{t("createButton")}
-					</Button>
+						{translations("createButton")}
+					</CtaButton>
 				</Card>
 
 				{projects.length === 0 ? (
@@ -308,13 +316,15 @@ export const ProjectsPageClient = (): React.JSX.Element => {
 						<Group justify="space-between" mb="xs">
 							<Group gap="xs">
 								<IconFolder size={20} />
-								<Text fw={500}>{t("placeholderName")}</Text>
+								<Text fw={500}>
+									{translations("placeholderName")}
+								</Text>
 							</Group>
 						</Group>
 
 						<Text size="xs" c="dimmed" mt="auto">
-							{t("placeholderFragments")} &middot;{" "}
-							{t("placeholderDate")}
+							{translations("placeholderFragments")} &middot;{" "}
+							{translations("placeholderDate")}
 						</Text>
 					</Card>
 				) : (
@@ -447,7 +457,9 @@ export const ProjectsPageClient = (): React.JSX.Element => {
 											setDeleteTarget(project)
 											setConfirmName("")
 										}}
-										aria-label={t("deleteProject")}>
+										aria-label={translations(
+											"deleteProject",
+										)}>
 										<IconTrash size={16} />
 									</ActionIcon>
 								)}
@@ -480,8 +492,8 @@ export const ProjectsPageClient = (): React.JSX.Element => {
 									<Text size="xs" c="dimmed">
 										{project.fragmentCount}{" "}
 										{project.fragmentCount === 1
-											? t("fragment")
-											: t("fragments")}{" "}
+											? translations("fragment")
+											: translations("fragments")}{" "}
 										&middot; {formatDate(project.createdAt)}
 									</Text>
 
@@ -511,10 +523,10 @@ export const ProjectsPageClient = (): React.JSX.Element => {
 					setDeleteTarget(null)
 					setConfirmName("")
 				}}
-				title={t("deleteModal.title")}
+				title={translations("deleteModal.title")}
 				centered>
 				<Text size="sm" mb="md">
-					{t("deleteModal.confirm", {
+					{translations("deleteModal.confirm", {
 						name: deleteTarget?.name ?? "",
 					})}
 				</Text>
@@ -533,14 +545,14 @@ export const ProjectsPageClient = (): React.JSX.Element => {
 							setDeleteTarget(null)
 							setConfirmName("")
 						}}>
-						{t("deleteModal.cancel")}
+						{translations("deleteModal.cancel")}
 					</Button>
 					<Button
 						color="red"
 						loading={deleting}
 						disabled={confirmName !== deleteTarget?.name}
 						onClick={handleDeleteConfirm}>
-						{t("deleteModal.delete")}
+						{translations("deleteModal.delete")}
 					</Button>
 				</Group>
 			</Modal>

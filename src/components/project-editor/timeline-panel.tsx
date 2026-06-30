@@ -11,9 +11,11 @@ import styles from "./timeline-panel.module.scss"
 const TIMELINE_HEIGHT_KEY = "editor.timelineHeight"
 const MIN_HEIGHT = 80
 const DEFAULT_HEIGHT = 200
+const TOPBAR_HEIGHT = 48
+const MAIN_MIN_HEIGHT = 200
 
 export const TimelinePanel = (): React.JSX.Element => {
-	const t = useTranslations("editor")
+	const translations = useTranslations("editor")
 	const {
 		timelineExpanded,
 		toggleTimeline,
@@ -52,9 +54,11 @@ export const TimelinePanel = (): React.JSX.Element => {
 		setIsDragging(true)
 
 		const handleMouseMove = (moveEvent: MouseEvent) => {
-			const newHeight = Math.max(
-				MIN_HEIGHT,
-				window.innerHeight - moveEvent.clientY,
+			const maxHeight =
+				window.innerHeight - TOPBAR_HEIGHT - MAIN_MIN_HEIGHT
+			const newHeight = Math.min(
+				Math.max(MIN_HEIGHT, window.innerHeight - moveEvent.clientY),
+				maxHeight,
 			)
 			setTimelineHeight(newHeight)
 			heightRef.current = newHeight
@@ -110,15 +114,15 @@ export const TimelinePanel = (): React.JSX.Element => {
 				type="button"
 				aria-label={
 					timelineExpanded
-						? t("timeline.collapse")
-						: t("timeline.expand")
+						? translations("timeline.collapse")
+						: translations("timeline.expand")
 				}>
 				{timelineExpanded ? (
 					<IconChevronDown size={14} />
 				) : (
 					<IconChevronUp size={14} />
 				)}
-				<span>{t("timeline.title")}</span>
+				<span>{translations("timeline.title")}</span>
 			</button>
 
 			{timelineExpanded && (

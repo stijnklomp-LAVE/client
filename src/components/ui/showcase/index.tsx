@@ -4,11 +4,11 @@ import { IconBell, IconBrandTabler, IconPlayerPlay } from "@tabler/icons-react"
 import { useTranslations } from "next-intl"
 
 export const Showcase = (): React.JSX.Element => {
-	const t = useTranslations("showcase")
+	const translations = useTranslations("showcase")
 
 	return (
 		<Stack gap="xl" style={{ maxWidth: 800, margin: "0 auto" }}>
-			<Section title={t("notifications.title")}>
+			<Section title={translations("notifications.title")}>
 				<Group gap="sm">
 					<Button
 						variant="filled"
@@ -19,7 +19,7 @@ export const Showcase = (): React.JSX.Element => {
 								color: "teal",
 							})
 						}>
-						{t("notifications.success")}
+						{translations("notifications.success")}
 					</Button>
 					<Button
 						variant="filled"
@@ -31,7 +31,7 @@ export const Showcase = (): React.JSX.Element => {
 								color: "red",
 							})
 						}>
-						{t("notifications.error")}
+						{translations("notifications.error")}
 					</Button>
 					<Button
 						variant="filled"
@@ -44,7 +44,7 @@ export const Showcase = (): React.JSX.Element => {
 								color: "grape",
 							})
 						}>
-						{t("notifications.withIcon")}
+						{translations("notifications.withIcon")}
 					</Button>
 					<Button
 						variant="outline"
@@ -67,19 +67,19 @@ export const Showcase = (): React.JSX.Element => {
 								})
 							}, 2000)
 						}}>
-						{t("notifications.asyncProgress")}
+						{translations("notifications.asyncProgress")}
 					</Button>
 				</Group>
 			</Section>
 
-			<Section title={t("icons.title")}>
+			<Section title={translations("icons.title")}>
 				<Group gap="md">
 					<IconBrandTabler size={32} />
 					<IconBell size={32} />
 					<IconPlayerPlay size={32} />
 				</Group>
 				<Text c="dimmed" size="sm">
-					{t("icons.description")}
+					{translations("icons.description")}
 				</Text>
 			</Section>
 		</Stack>

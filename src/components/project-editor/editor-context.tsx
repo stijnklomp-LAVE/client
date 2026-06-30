@@ -4,13 +4,37 @@ import {
 	createContext,
 	useCallback,
 	useContext,
+	useEffect,
 	useRef,
 	useState,
 	type ReactNode,
 } from "react"
 import { useDisclosure } from "@mantine/hooks"
+import { notifications } from "@mantine/notifications"
+import { useTranslations } from "next-intl"
 import type { TimelineLayer, TimelineSegment } from "@/lib/editor/types"
 import { useRecording, type RecordingConfig } from "@/lib/editor/use-recording"
+
+const STORAGE_PREFIX = "editor."
+
+const getStored = <T,>(key: string, fallback: T): T => {
+	if (typeof window === "undefined") return fallback
+	try {
+		const raw = localStorage.getItem(STORAGE_PREFIX + key)
+		if (raw !== null) return JSON.parse(raw) as T
+	} catch {
+		/* ignore */
+	}
+	return fallback
+}
+
+const setStored = <T,>(key: string, value: T): void => {
+	try {
+		localStorage.setItem(STORAGE_PREFIX + key, JSON.stringify(value))
+	} catch {
+		/* ignore */
+	}
+}
 
 export type EditorMode = "capture" | "editing"
 
@@ -58,6 +82,8 @@ interface EditorContextValue {
 	rawFramesDirectoryHandle: FileSystemDirectoryHandle | null
 	rawFramesDirectoryName: string | null
 	setRawFramesDirectory: (handle: FileSystemDirectoryHandle | null) => void
+	wiggleDirectoryKey: number
+	notifyNoDirectory: () => void
 	pendingRecordingLayerId: string | null
 	setPendingRecordingLayerId: (layerId: string) => void
 	clearPendingRecordingLayerId: () => void
@@ -82,11 +108,35 @@ export const EditorProvider = ({
 	initialFragments: ProjectFragment[]
 	projectId: string
 }): React.JSX.Element => {
-	const [sidePaneOpen, { toggle: toggleSidePane, close: closeSidePane }] =
-		useDisclosure(false)
+	const translations = useTranslations("editor")
+	const [
+		sidePaneOpen,
+		{
+			toggle: toggleSidePaneRaw,
+			close: closeSidePaneRaw,
+			open: openSidePane,
+		},
+	] = useDisclosure(false)
+	const toggleSidePane = useCallback(() => {
+		toggleSidePaneRaw()
+		setStored("sidePaneOpen", !sidePaneOpen)
+	}, [toggleSidePaneRaw, sidePaneOpen])
+	const closeSidePane = useCallback(() => {
+		closeSidePaneRaw()
+		setStored("sidePaneOpen", false)
+	}, [closeSidePaneRaw])
+
 	const [activeTab, setActiveTab] = useState<TabId>("settings")
 	const [timelineExpanded, { toggle: toggleTimeline }] = useDisclosure(false)
 	const [mode, setModeState] = useState<EditorMode>("editing")
+
+	useEffect(() => {
+		if (getStored("sidePaneOpen", false)) openSidePane()
+		const storedMode = getStored<EditorMode>("mode", "editing")
+		if (storedMode !== "editing") {
+			setTimeout(() => setModeState(storedMode))
+		}
+	}, [openSidePane])
 	const [selectedCameraId, setSelectedCameraId] = useState<string>("")
 	const [availableCameras, setAvailableCameras] = useState<MediaDeviceInfo[]>(
 		[],
@@ -100,6 +150,15 @@ export const EditorProvider = ({
 	const [rawFramesDirectoryName, setRawFramesDirectoryName] = useState<
 		string | null
 	>(null)
+	const [wiggleDirectoryKey, setWiggleDirectoryKey] = useState(0)
+	const notifyNoDirectory = useCallback(() => {
+		notifications.show({
+			color: "red",
+			message: translations("recording.noDirectory"),
+			title: "No directory configured",
+		})
+		setWiggleDirectoryKey((k) => k + 1)
+	}, [translations])
 	const [recordingLayerId, setRecordingLayerId] = useState<string | null>(
 		null,
 	)
@@ -170,6 +229,7 @@ export const EditorProvider = ({
 	const setMode = useCallback(
 		(nextMode: EditorMode) => {
 			setModeState(nextMode)
+			setStored("mode", nextMode)
 			if (nextMode === "capture" && activeTab === "styling") {
 				setActiveTab("settings")
 			}
@@ -212,7 +272,8 @@ export const EditorProvider = ({
 				setRecordingLayerId(layerId)
 
 				if (!rawFramesDirectoryHandle) {
-					throw new Error("No raw frames directory configured")
+					notifyNoDirectory()
+					return
 				}
 
 				setModeState("capture")
@@ -236,6 +297,7 @@ export const EditorProvider = ({
 			recording,
 			setModeState,
 			clearPendingRecordingLayerId,
+			notifyNoDirectory,
 		],
 	)
 
@@ -338,6 +400,8 @@ export const EditorProvider = ({
 				rawFramesDirectoryHandle,
 				rawFramesDirectoryName,
 				setRawFramesDirectory,
+				wiggleDirectoryKey,
+				notifyNoDirectory,
 				pendingRecordingLayerId,
 				setPendingRecordingLayerId,
 				clearPendingRecordingLayerId,
@@ -345,11 +409,7 @@ export const EditorProvider = ({
 				stopRecording,
 				pauseRecording,
 				resumeRecording,
-				recordingConfig: {
-					fps: 1,
-					format: "jpeg",
-					jpegQuality: 80,
-				},
+				recordingConfig: recording.config,
 				updateRecordingConfig: recording.updateConfig,
 			}}>
 			{children}

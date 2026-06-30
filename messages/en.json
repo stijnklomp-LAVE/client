@@ -213,7 +213,7 @@
 			"recordNew": "Record new fragment...",
 			"recording": "Recording",
 			"start": "Start Recording",
-			"startWithLayer": "Record to layer...",
+			"startWithLayer": "Record to layer",
 			"stop": "Stop",
 			"pause": "Pause",
 			"resume": "Resume",
@@ -225,7 +225,8 @@
 			"format": "Image format",
 			"quality": "JPEG quality",
 			"directoryBrowserUnsupported": "Your browser doesn't support directory access. Use Chrome/Edge with HTTPS or localhost.",
-			"directoryError": "Failed to access directory. Please try again."
+			"directoryError": "Failed to access directory. Please try again.",
+			"noDirectory": "Select a raw frames directory in settings before recording"
 		}
 	},
 	"nav": {

@@ -48,7 +48,7 @@
 	width: 100%;
 	background: transparent;
 	cursor: pointer;
-	color: var(--text-tertiary);
+	color: var(--text-secondary);
 	flex-shrink: 0;
 	gap: 6px;
 	font-size: 11px;
@@ -61,7 +61,7 @@
 
 	&:hover {
 		background: var(--bg-tertiary);
-		color: var(--text-secondary);
+		color: var(--text-primary);
 	}
 }
 
@@ -82,7 +82,7 @@
 
 .emptyText {
 	font-size: 13px;
-	color: var(--text-tertiary);
+	color: var(--text-secondary);
 }
 
 .addLayerButton {
@@ -93,7 +93,7 @@
 	border: 1px dashed var(--border-primary);
 	border-radius: var(--border-radius);
 	background: transparent;
-	color: var(--text-tertiary);
+	color: var(--text-secondary);
 	cursor: pointer;
 	font-size: 12px;
 	font-weight: 500;
@@ -103,7 +103,7 @@
 
 	&:hover {
 		background: var(--bg-tertiary);
-		color: var(--text-secondary);
+		color: var(--text-primary);
 		border-color: var(--border-secondary);
 	}
 }
@@ -123,7 +123,7 @@
 .trackLabel {
 	font-size: 11px;
 	font-weight: 600;
-	color: var(--text-tertiary);
+	color: var(--text-secondary);
 	width: 70px;
 	flex-shrink: 0;
 	text-overflow: ellipsis;
@@ -139,12 +139,12 @@
 	height: 36px;
 	background: var(--bg-tertiary);
 	border-radius: var(--border-radius);
-	padding: 4px 6px;
+	padding: 0 6px;
 	overflow-x: auto;
 }
 
 .segment {
-	height: 28px;
+	height: 100%;
 	min-width: 60px;
 	max-width: 200px;
 	background: var(--accent-bg, #2b6aff33);
@@ -159,8 +159,8 @@
 
 .segName {
 	font-size: 10px;
-	font-weight: 500;
-	color: var(--accent-color, #2b6aff);
+	font-weight: 600;
+	color: var(--text-primary);
 	overflow: hidden;
 	text-overflow: ellipsis;
 	white-space: nowrap;
@@ -170,12 +170,12 @@
 	display: flex;
 	align-items: center;
 	gap: 3px;
-	height: 28px;
+	height: 100%;
 	padding: 0 10px;
 	border: 1px dashed var(--border-primary);
 	border-radius: 4px;
 	background: transparent;
-	color: var(--text-tertiary);
+	color: var(--text-secondary);
 	cursor: pointer;
 	font-size: 10px;
 	font-weight: 500;
@@ -187,7 +187,7 @@
 
 	&:hover {
 		background: var(--bg-secondary);
-		color: var(--text-secondary);
+		color: var(--text-primary);
 		border-color: var(--border-secondary);
 	}
 }
@@ -260,7 +260,7 @@
 }
 
 .recordingIndicator {
-	height: 28px;
+	height: 100%;
 	min-width: 40px;
 	background: rgba(224, 49, 49, 0.2);
 	border: 1px solid #e03131;
@@ -273,7 +273,7 @@
 
 .recordingLabel {
 	font-size: 10px;
-	font-weight: 600;
+	font-weight: 700;
 	color: #e03131;
 	overflow: hidden;
 	text-overflow: ellipsis;

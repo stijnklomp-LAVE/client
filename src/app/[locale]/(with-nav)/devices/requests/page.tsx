@@ -36,7 +36,7 @@ const isExpired = (req: TransferRequest): boolean => {
 }
 
 export default function RequestsPage(): React.JSX.Element {
-	const t = useTranslations("devices")
+	const translations = useTranslations("devices")
 	const {
 		devices,
 		requests,
@@ -77,10 +77,10 @@ export default function RequestsPage(): React.JSX.Element {
 			{incoming.length > 0 ? (
 				<Card withBorder padding="lg" radius="md" mb="md">
 					<Text fw={500} mb="md" size="lg">
-						{t("requests.incoming")}
+						{translations("requests.incoming")}
 					</Text>
 					<Text c="dimmed" mb="md" size="sm">
-						{t("requests.incomingDescription")}
+						{translations("requests.incomingDescription")}
 					</Text>
 					<Stack gap="md">
 						{incoming.map((req) => {
@@ -100,8 +100,8 @@ export default function RequestsPage(): React.JSX.Element {
 									(p) => p.role === "TARGET",
 								)?.deviceName ?? ""
 							const label = isTarget
-								? `${t("requests.from")} ${sourceName} — ${req.direction === "SEND" ? t("requests.sendingYou") : t("requests.requestingFromYou")}`
-								: `${t("requests.to")} ${targetName} — ${req.direction === "SEND" ? t("requests.sendingFiles") : t("requests.requestingFiles")}`
+								? `${translations("requests.from")} ${sourceName} — ${req.direction === "SEND" ? translations("requests.sendingYou") : translations("requests.requestingFromYou")}`
+								: `${translations("requests.to")} ${targetName} — ${req.direction === "SEND" ? translations("requests.sendingFiles") : translations("requests.requestingFiles")}`
 
 							const isAccepted =
 								myParticipant?.status === "ACCEPTED"
@@ -117,18 +117,20 @@ export default function RequestsPage(): React.JSX.Element {
 											<Text fw={500}>{label}</Text>
 											<Text c="dimmed" size="xs">
 												{isTarget
-													? `${t("requests.to")} ${targetName}`
-													: `${t("requests.from")} ${sourceName}`}
+													? `${translations("requests.to")} ${targetName}`
+													: `${translations("requests.from")} ${sourceName}`}
 											</Text>
 											{req.projectName ? (
 												<Text c="dimmed" size="sm">
-													{t("requests.projectLabel")}{" "}
+													{translations(
+														"requests.projectLabel",
+													)}{" "}
 													{req.projectName}
 												</Text>
 											) : null}
 											{req.fragmentNames.length > 0 ? (
 												<Text c="dimmed" size="sm">
-													{t(
+													{translations(
 														"requests.fragmentsLabel",
 													)}{" "}
 													{req.fragmentNames.join(
@@ -138,12 +140,16 @@ export default function RequestsPage(): React.JSX.Element {
 											) : null}
 											{req.message ? (
 												<Text c="dimmed" size="sm">
-													{t("requests.messageLabel")}{" "}
+													{translations(
+														"requests.messageLabel",
+													)}{" "}
 													{req.message}
 												</Text>
 											) : null}
 											<Text c="dimmed" size="xs">
-												{t("requests.expiresLabel")}{" "}
+												{translations(
+													"requests.expiresLabel",
+												)}{" "}
 												{new Date(
 													req.expiresAt,
 												).toLocaleString()}
@@ -154,7 +160,9 @@ export default function RequestsPage(): React.JSX.Element {
 												color="green"
 												variant="light"
 												size="lg">
-												{t("requests.accepted")}
+												{translations(
+													"requests.accepted",
+												)}
 											</Badge>
 										) : (
 											<Group>
@@ -168,7 +176,9 @@ export default function RequestsPage(): React.JSX.Element {
 															"accept",
 														)
 													}>
-													{t("requests.accept")}
+													{translations(
+														"requests.accept",
+													)}
 												</Button>
 												<Button
 													color="red"
@@ -181,7 +191,9 @@ export default function RequestsPage(): React.JSX.Element {
 															"reject",
 														)
 													}>
-													{t("requests.reject")}
+													{translations(
+														"requests.reject",
+													)}
 												</Button>
 											</Group>
 										)}
@@ -197,10 +209,10 @@ export default function RequestsPage(): React.JSX.Element {
 			{sent.length > 0 ? (
 				<Card withBorder padding="lg" radius="md" mb="md">
 					<Text fw={500} mb="md" size="lg">
-						{t("requests.sent")}
+						{translations("requests.sent")}
 					</Text>
 					<Text c="dimmed" mb="md" size="sm">
-						{t("requests.sentDescription")}
+						{translations("requests.sentDescription")}
 					</Text>
 					<Stack gap="md">
 						{sent.map((req) => {
@@ -227,23 +239,28 @@ export default function RequestsPage(): React.JSX.Element {
 									<Group justify="space-between" mb="xs">
 										<div>
 											<Text fw={500}>
-												{t("requests.to")} {targetName}
+												{translations("requests.to")}{" "}
+												{targetName}
 												{" — "}
 												{req.direction === "SEND"
-													? t("requests.sendingFiles")
-													: t(
+													? translations(
+															"requests.sendingFiles",
+														)
+													: translations(
 															"requests.requestingFiles",
 														)}
 											</Text>
 											{req.projectName ? (
 												<Text c="dimmed" size="sm">
-													{t("requests.projectLabel")}{" "}
+													{translations(
+														"requests.projectLabel",
+													)}{" "}
 													{req.projectName}
 												</Text>
 											) : null}
 											{req.fragmentNames.length > 0 ? (
 												<Text c="dimmed" size="sm">
-													{t(
+													{translations(
 														"requests.fragmentsLabel",
 													)}{" "}
 													{req.fragmentNames.join(
@@ -253,7 +270,9 @@ export default function RequestsPage(): React.JSX.Element {
 											) : null}
 											{req.message ? (
 												<Text c="dimmed" size="sm">
-													{t("requests.messageLabel")}{" "}
+													{translations(
+														"requests.messageLabel",
+													)}{" "}
 													{req.message}
 												</Text>
 											) : null}
@@ -263,7 +282,9 @@ export default function RequestsPage(): React.JSX.Element {
 												color="green"
 												variant="light"
 												size="lg">
-												{t("requests.accepted")}
+												{translations(
+													"requests.accepted",
+												)}
 											</Badge>
 										) : (
 											<Button
@@ -276,7 +297,9 @@ export default function RequestsPage(): React.JSX.Element {
 														"accept",
 													)
 												}>
-												{t("requests.accept")}
+												{translations(
+													"requests.accept",
+												)}
 											</Button>
 										)}
 									</Group>
@@ -292,7 +315,7 @@ export default function RequestsPage(): React.JSX.Element {
 												localDeviceId ?? "",
 											)
 										}>
-										{t("requests.cancelRequest")}
+										{translations("requests.cancelRequest")}
 									</Button>
 								</Card>
 							)
@@ -304,10 +327,10 @@ export default function RequestsPage(): React.JSX.Element {
 			{/* History */}
 			<Card withBorder padding="lg" radius="md">
 				<Text fw={500} mb="md" size="lg">
-					{t("requests.title")}
+					{translations("requests.title")}
 				</Text>
 				{requests.length === 0 ? (
-					<Text c="dimmed">{t("requests.empty")}</Text>
+					<Text c="dimmed">{translations("requests.empty")}</Text>
 				) : (
 					<>
 						<Box visibleFrom="sm">
@@ -315,22 +338,22 @@ export default function RequestsPage(): React.JSX.Element {
 								<Table.Thead>
 									<Table.Tr>
 										<Table.Th>
-											{t("requests.direction")}
+											{translations("requests.direction")}
 										</Table.Th>
 										<Table.Th>
-											{t("requests.source")}
+											{translations("requests.source")}
 										</Table.Th>
 										<Table.Th>
-											{t("requests.target")}
+											{translations("requests.target")}
 										</Table.Th>
 										<Table.Th>
-											{t("requests.project")}
+											{translations("requests.project")}
 										</Table.Th>
 										<Table.Th>
-											{t("requests.status")}
+											{translations("requests.status")}
 										</Table.Th>
 										<Table.Th>
-											{t("requests.created")}
+											{translations("requests.created")}
 										</Table.Th>
 									</Table.Tr>
 								</Table.Thead>
@@ -353,10 +376,10 @@ export default function RequestsPage(): React.JSX.Element {
 														variant="light">
 														{req.direction ===
 														"SEND"
-															? t(
+															? translations(
 																	"requests.sending",
 																)
-															: t(
+															: translations(
 																	"requests.receiving",
 																)}
 													</Badge>
@@ -444,8 +467,10 @@ export default function RequestsPage(): React.JSX.Element {
 													}
 													variant="light">
 													{req.direction === "SEND"
-														? t("requests.sending")
-														: t(
+														? translations(
+																"requests.sending",
+															)
+														: translations(
 																"requests.receiving",
 															)}
 												</Badge>
@@ -488,7 +513,10 @@ export default function RequestsPage(): React.JSX.Element {
 													style={{
 														color: "var(--text-secondary)",
 													}}>
-													{t("requests.to")}:{" "}
+													{translations(
+														"requests.to",
+													)}
+													:{" "}
 												</span>
 												{req.participants.find(
 													(p) => p.role === "TARGET",
@@ -500,7 +528,7 @@ export default function RequestsPage(): React.JSX.Element {
 														style={{
 															color: "var(--text-secondary)",
 														}}>
-														{t(
+														{translations(
 															"requests.projectLabel",
 														)}{" "}
 													</span>

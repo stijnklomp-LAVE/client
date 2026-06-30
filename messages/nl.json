@@ -212,6 +212,8 @@
 		"recording": {
 			"recordNew": "Nieuw fragment opnemen...",
 			"recording": "Opnemen",
+			"start": "Start opname",
+			"startWithLayer": "Opnemen naar laag",
 			"stop": "Stop",
 			"pause": "Pauze",
 			"resume": "Hervat",
@@ -221,7 +223,10 @@
 			"remove": "Verwijderen",
 			"fps": "Framerate (fps)",
 			"format": "Afbeeldingsformaat",
-			"quality": "JPEG-kwaliteit"
+			"quality": "JPEG-kwaliteit",
+			"directoryBrowserUnsupported": "Je browser ondersteunt geen map-toegang. Gebruik Chrome/Edge met HTTPS of localhost.",
+			"directoryError": "Toegang tot map mislukt. Probeer het opnieuw.",
+			"noDirectory": "Selecteer een raw frames map in de instellingen voor het opnemen"
 		}
 	},
 	"nav": {

@@ -6,6 +6,7 @@ import { useDisclosure } from "@mantine/hooks"
 import { nprogress } from "@/components/providers/router-progress"
 import { signIn, useSession } from "next-auth/react"
 import { AuthCard } from "@/components/ui/auth-card"
+import { CtaButton } from "@/components/ui/cta-button"
 import {
 	Button,
 	Modal,
@@ -20,7 +21,7 @@ import { FormMessage, type Message } from "@/components/ui/form-message"
 import { ClientOnly } from "@/components/ui/client-only"
 
 export const LoginForm = () => {
-	const t = useTranslations("auth")
+	const translations = useTranslations("auth")
 	const router = useRouter()
 	const { update } = useSession()
 	const searchParams = useSearchParams()
@@ -48,41 +49,41 @@ export const LoginForm = () => {
 
 	const urlMessage: Message | null = useMemo(() => {
 		if (searchParams.get("verified") === "true") {
-			return { text: t("emailVerified"), color: "green" }
+			return { text: translations("emailVerified"), color: "green" }
 		}
 
 		if (searchParams.get("reset") === "true") {
-			return { text: t("resetSuccess"), color: "green" }
+			return { text: translations("resetSuccess"), color: "green" }
 		}
 
 		const errorParam = searchParams.get("error")
 
 		if (errorParam === "expired-token") {
-			return { text: t("verificationExpired"), color: "red" }
+			return { text: translations("verificationExpired"), color: "red" }
 		}
 
 		if (errorParam === "invalid-token") {
-			return { text: t("verificationInvalid"), color: "red" }
+			return { text: translations("verificationInvalid"), color: "red" }
 		}
 
 		if (errorParam === "missing-token") {
-			return { text: t("verificationMissing"), color: "red" }
+			return { text: translations("verificationMissing"), color: "red" }
 		}
 
 		if (errorParam === "verification-failed") {
-			return { text: t("verificationFailed"), color: "red" }
+			return { text: translations("verificationFailed"), color: "red" }
 		}
 
 		return null
-	}, [searchParams, t])
+	}, [searchParams, translations])
 
 	const displayMessage = message ?? (interacted ? null : urlMessage)
 
 	const isUnverified =
-		displayMessage?.text === t("emailNotVerified") ||
-		displayMessage?.text === t("verificationExpired") ||
-		displayMessage?.text === t("verificationInvalid") ||
-		displayMessage?.text === t("verificationFailed")
+		displayMessage?.text === translations("emailNotVerified") ||
+		displayMessage?.text === translations("verificationExpired") ||
+		displayMessage?.text === translations("verificationInvalid") ||
+		displayMessage?.text === translations("verificationFailed")
 	const [resendOpened, resendHandlers] = useDisclosure(false)
 	const [resending, setResending] = useState(false)
 
@@ -99,17 +100,20 @@ export const LoginForm = () => {
 
 			if (res.ok) {
 				resendHandlers.close()
-				updateMessage({ text: t("verificationResent"), color: "green" })
+				updateMessage({
+					text: translations("verificationResent"),
+					color: "green",
+				})
 			} else {
 				const data = await res.json()
 
 				updateMessage({
-					text: data.error ?? t("resendError"),
+					text: data.error ?? translations("resendError"),
 					color: "red",
 				})
 			}
 		} catch {
-			updateMessage({ text: t("resendError"), color: "red" })
+			updateMessage({ text: translations("resendError"), color: "red" })
 		} finally {
 			setResending(false)
 		}
@@ -135,11 +139,14 @@ export const LoginForm = () => {
 
 				if (exists && !verified) {
 					updateMessage({
-						text: t("emailNotVerified"),
+						text: translations("emailNotVerified"),
 						color: "red",
 					})
 				} else {
-					updateMessage({ text: t("loginError"), color: "red" })
+					updateMessage({
+						text: translations("loginError"),
+						color: "red",
+					})
 				}
 
 				setLoading(false)
@@ -151,7 +158,7 @@ export const LoginForm = () => {
 			nprogress.start()
 			router.replace("/")
 		} catch {
-			updateMessage({ text: t("loginError"), color: "red" })
+			updateMessage({ text: translations("loginError"), color: "red" })
 			setLoading(false)
 		}
 	}
@@ -176,10 +183,10 @@ export const LoginForm = () => {
 						}
 					}}>
 					<Title order={2} ta="center" mb="xs">
-						{t("login")}
+						{translations("login")}
 					</Title>
 					<Text c="dimmed" size="sm" ta="center" mb="lg">
-						{t("loginSubtitle")}
+						{translations("loginSubtitle")}
 					</Text>
 
 					<FormMessage
@@ -193,7 +200,7 @@ export const LoginForm = () => {
 								variant="subtle"
 								size="xs"
 								onClick={resendHandlers.open}>
-								{t("resendVerification")}
+								{translations("resendVerification")}
 							</Button>
 						</Text>
 					)}
@@ -201,21 +208,21 @@ export const LoginForm = () => {
 					<Modal
 						opened={resendOpened}
 						onClose={resendHandlers.close}
-						title={t("resendVerificationTitle")}
+						title={translations("resendVerificationTitle")}
 						centered>
 						<Text size="sm" mb="lg">
-							{t("resendVerificationConfirm")}
+							{translations("resendVerificationConfirm")}
 						</Text>
-						<Button
+						<CtaButton
 							fullWidth
 							loading={resending}
 							onClick={handleResend}>
-							{t("resendVerificationButton")}
-						</Button>
+							{translations("resendVerificationButton")}
+						</CtaButton>
 					</Modal>
 
 					<TextInput
-						label={t("email")}
+						label={translations("email")}
 						placeholder="you@example.com"
 						value={email}
 						onChange={(e) => setEmail(e.currentTarget.value)}
@@ -224,8 +231,8 @@ export const LoginForm = () => {
 					/>
 
 					<PasswordInput
-						label={t("password")}
-						placeholder={t("passwordPlaceholder")}
+						label={translations("password")}
+						placeholder={translations("passwordPlaceholder")}
 						value={password}
 						onChange={(e) => setPassword(e.currentTarget.value)}
 						required
@@ -239,23 +246,23 @@ export const LoginForm = () => {
 								fontSize: "14px",
 								fontWeight: 500,
 							}}>
-							{t("forgotPassword")}
+							{translations("forgotPassword")}
 						</Link>
 					</Text>
 
-					<Button type="submit" fullWidth loading={loading}>
-						{t("signIn")}
-					</Button>
+					<CtaButton type="submit" fullWidth loading={loading}>
+						{translations("signIn")}
+					</CtaButton>
 
 					<Text c="dimmed" size="sm" ta="center" mt="lg">
-						{t("noAccount")}{" "}
+						{translations("noAccount")}{" "}
 						<Link
 							href="/register"
 							style={{
 								color: "var(--text-primary)",
 								fontWeight: 600,
 							}}>
-							{t("createOne")}
+							{translations("createOne")}
 						</Link>
 					</Text>
 				</form>

@@ -2,13 +2,14 @@
 
 import { useState } from "react"
 import { AuthCard } from "@/components/ui/auth-card"
+import { CtaButton } from "@/components/ui/cta-button"
 import { Button, Text, TextInput, Title } from "@mantine/core"
 import { useTranslations } from "next-intl"
 import Link from "next/link"
 import { FormMessage, type Message } from "@/components/ui/form-message"
 
 export const ForgotPasswordForm = (): React.JSX.Element => {
-	const t = useTranslations("auth")
+	const translations = useTranslations("auth")
 	const [email, setEmail] = useState("")
 	const [message, setMessage] = useState<Message | null>(null)
 	const [messageKey, setMessageKey] = useState(0)
@@ -37,7 +38,7 @@ export const ForgotPasswordForm = (): React.JSX.Element => {
 				const data = await res.json()
 
 				updateMessage({
-					text: data.error ?? t("resetError"),
+					text: data.error ?? translations("resetError"),
 					color: "red",
 				})
 
@@ -46,7 +47,7 @@ export const ForgotPasswordForm = (): React.JSX.Element => {
 
 			setSent(true)
 		} catch {
-			updateMessage({ text: t("resetError"), color: "red" })
+			updateMessage({ text: translations("resetError"), color: "red" })
 		} finally {
 			setLoading(false)
 		}
@@ -56,14 +57,14 @@ export const ForgotPasswordForm = (): React.JSX.Element => {
 		return (
 			<AuthCard>
 				<Title order={2} ta="center" mb="xs">
-					{t("checkEmail")}
+					{translations("checkEmail")}
 				</Title>
 				<Text c="dimmed" size="sm" ta="center" mb="lg">
-					{t("resetSent")}
+					{translations("resetSent")}
 				</Text>
 
 				<Button component="a" href="/login" fullWidth variant="outline">
-					{t("backToLogin")}
+					{translations("backToLogin")}
 				</Button>
 			</AuthCard>
 		)
@@ -73,16 +74,16 @@ export const ForgotPasswordForm = (): React.JSX.Element => {
 		<AuthCard>
 			<form onSubmit={handleSubmit}>
 				<Title order={2} ta="center" mb="xs">
-					{t("forgotPassword")}
+					{translations("forgotPassword")}
 				</Title>
 				<Text c="dimmed" size="sm" ta="center" mb="lg">
-					{t("forgotPasswordSubtitle")}
+					{translations("forgotPasswordSubtitle")}
 				</Text>
 
 				<FormMessage message={message} messageKey={messageKey} />
 
 				<TextInput
-					label={t("email")}
+					label={translations("email")}
 					placeholder="you@example.com"
 					value={email}
 					onChange={(e) => setEmail(e.currentTarget.value)}
@@ -90,19 +91,19 @@ export const ForgotPasswordForm = (): React.JSX.Element => {
 					mb="lg"
 				/>
 
-				<Button type="submit" fullWidth loading={loading}>
-					{t("sendResetLink")}
-				</Button>
+				<CtaButton type="submit" fullWidth loading={loading}>
+					{translations("sendResetLink")}
+				</CtaButton>
 
 				<Text c="dimmed" size="sm" ta="center" mt="lg">
-					{t("rememberPassword")}{" "}
+					{translations("rememberPassword")}{" "}
 					<Link
 						href="/login"
 						style={{
 							color: "var(--text-primary)",
 							fontWeight: 600,
 						}}>
-						{t("signIn")}
+						{translations("signIn")}
 					</Link>
 				</Text>
 			</form>

@@ -18,13 +18,13 @@ const statusColor = (status: "online" | "stale" | "offline"): string => {
 }
 
 export default function DevicesPage(): React.JSX.Element {
-	const t = useTranslations("devices")
+	const translations = useTranslations("devices")
 	const { devices, statuses, loading, localDeviceId } = useDevicesContext()
 
 	return (
 		<Card withBorder padding="lg" radius="md" mb="md">
 			<Text fw={500} mb="md" size="lg">
-				{t("connectedDevices")}
+				{translations("connectedDevices")}
 			</Text>
 			{loading ? (
 				<Stack gap="xs">
@@ -34,14 +34,16 @@ export default function DevicesPage(): React.JSX.Element {
 					<Skeleton height={52} radius="sm" />
 				</Stack>
 			) : devices.length === 0 ? (
-				<Text c="dimmed">{t("noDevices")}</Text>
+				<Text c="dimmed">{translations("noDevices")}</Text>
 			) : (
 				<Table>
 					<Table.Thead>
 						<Table.Tr>
-							<Table.Th>{t("table.name")}</Table.Th>
-							<Table.Th>{t("table.status")}</Table.Th>
-							<Table.Th>{t("table.lastSeen")}</Table.Th>
+							<Table.Th>{translations("table.name")}</Table.Th>
+							<Table.Th>{translations("table.status")}</Table.Th>
+							<Table.Th>
+								{translations("table.lastSeen")}
+							</Table.Th>
 						</Table.Tr>
 					</Table.Thead>
 					<Table.Tbody>
@@ -65,7 +67,9 @@ export default function DevicesPage(): React.JSX.Element {
 										<Badge
 											color={statusColor(deviceStatus)}
 											variant="light">
-											{t(`status.${deviceStatus}`)}
+											{translations(
+												`status.${deviceStatus}`,
+											)}
 										</Badge>
 									</Table.Td>
 									<Table.Td>

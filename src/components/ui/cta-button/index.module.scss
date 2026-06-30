@@ -1,0 +1,17 @@
+.root {
+	transition:
+		transform 0.2s ease,
+		box-shadow 0.2s ease,
+		filter 0.2s ease;
+
+	&:hover {
+		transform: translateY(-1px);
+		box-shadow: 0 4px 20px rgba(34, 139, 230, 0.35);
+		filter: brightness(1.08);
+	}
+
+	&:active {
+		transform: translateY(0);
+		filter: brightness(0.95);
+	}
+}

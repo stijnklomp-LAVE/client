@@ -8,7 +8,7 @@ import { useEditorContext } from "./editor-context"
 import styles from "./video-viewer.module.scss"
 
 export const VideoViewer = (): React.JSX.Element => {
-	const t = useTranslations("editor")
+	const translations = useTranslations("editor")
 	const {
 		mode,
 		selectedCameraId,
@@ -20,6 +20,8 @@ export const VideoViewer = (): React.JSX.Element => {
 		clearPendingRecordingLayerId,
 		layers,
 		startRecording,
+		rawFramesDirectoryHandle,
+		notifyNoDirectory,
 	} = useEditorContext()
 	const videoRef = useRef<HTMLVideoElement>(null)
 	const streamRef = useRef<MediaStream | null>(null)
@@ -108,13 +110,17 @@ export const VideoViewer = (): React.JSX.Element => {
 
 	const handleStartRecording = useCallback(
 		async (layerId: string) => {
-			if (!streamRef.current) return
-			await startRecording(layerId, streamRef.current)
+			await startRecording(layerId, streamRef.current ?? undefined)
 		},
 		[startRecording],
 	)
 
 	const handleRecordClick = useCallback(() => {
+		if (!rawFramesDirectoryHandle) {
+			notifyNoDirectory()
+			return
+		}
+
 		if (pendingRecordingLayerId) {
 			handleStartRecording(pendingRecordingLayerId)
 			clearPendingRecordingLayerId()
@@ -122,9 +128,11 @@ export const VideoViewer = (): React.JSX.Element => {
 			setShowLayerPicker((prev) => !prev)
 		}
 	}, [
+		rawFramesDirectoryHandle,
 		pendingRecordingLayerId,
 		handleStartRecording,
 		clearPendingRecordingLayerId,
+		notifyNoDirectory,
 	])
 
 	const handleLayerSelect = useCallback(
@@ -154,7 +162,8 @@ export const VideoViewer = (): React.JSX.Element => {
 						<div className={styles.placeholder}>
 							<IconVideo size={48} stroke={1} />
 							<span>
-								{cameraError ?? t("camera.selectCamera")}
+								{cameraError ??
+									translations("camera.selectCamera")}
 							</span>
 						</div>
 					)}
@@ -167,8 +176,10 @@ export const VideoViewer = (): React.JSX.Element => {
 								<IconPlayerRecord size={20} />
 								<span>
 									{pendingRecordingLayerId
-										? t("recording.start")
-										: t("recording.startWithLayer")}
+										? translations("recording.start")
+										: translations(
+												"recording.startWithLayer",
+											)}
 								</span>
 							</button>
 							{showLayerPicker && layers.length > 0 && (
@@ -198,7 +209,7 @@ export const VideoViewer = (): React.JSX.Element => {
 			<div className={styles.viewport}>
 				<div className={styles.placeholder}>
 					<IconVideo size={48} stroke={1} />
-					<span>{t("videoPreview")}</span>
+					<span>{translations("videoPreview")}</span>
 				</div>
 			</div>
 		</div>

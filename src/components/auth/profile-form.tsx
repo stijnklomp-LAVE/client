@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { AuthCard } from "@/components/ui/auth-card"
+import { CtaButton } from "@/components/ui/cta-button"
 import { Button, Divider, Modal, Text, TextInput, Title } from "@mantine/core"
 import { useDisclosure } from "@mantine/hooks"
 import { IconLogout, IconTrash, IconRestore } from "@tabler/icons-react"
@@ -16,16 +17,16 @@ const DeletionNotice = ({
 	deletionScheduledAt: string
 	onRestore: () => void
 }): React.JSX.Element => {
-	const t = useTranslations("auth")
+	const translations = useTranslations("auth")
 	const deletionDate = new Date(deletionScheduledAt)
 
 	return (
 		<AuthCard maxWidth={480}>
 			<Title order={2} mb="xs">
-				{t("accountClosing")}
+				{translations("accountClosing")}
 			</Title>
 			<Text c="dimmed" size="sm" mb="lg">
-				{t("accountClosingMessage", {
+				{translations("accountClosingMessage", {
 					date: deletionDate.toLocaleDateString(),
 				})}
 			</Text>
@@ -36,14 +37,14 @@ const DeletionNotice = ({
 				color="green"
 				leftSection={<IconRestore size={16} />}
 				onClick={onRestore}>
-				{t("restoreAccount")}
+				{translations("restoreAccount")}
 			</Button>
 		</AuthCard>
 	)
 }
 
 export const ProfileForm = (): React.JSX.Element | null => {
-	const t = useTranslations("auth")
+	const translations = useTranslations("auth")
 	const locale = useLocale()
 	const { data: session, update } = useSession()
 
@@ -80,18 +81,21 @@ export const ProfileForm = (): React.JSX.Element | null => {
 
 			if (res.ok) {
 				restoreHandlers.close()
-				updateMessage({ text: t("restoreSuccess"), color: "green" })
+				updateMessage({
+					text: translations("restoreSuccess"),
+					color: "green",
+				})
 				await update()
 			} else {
 				const data = await res.json()
 
 				updateMessage({
-					text: data.error ?? t("restoreError"),
+					text: data.error ?? translations("restoreError"),
 					color: "red",
 				})
 			}
 		} catch {
-			updateMessage({ text: t("restoreError"), color: "red" })
+			updateMessage({ text: translations("restoreError"), color: "red" })
 		} finally {
 			setRestoreSending(false)
 		}
@@ -115,17 +119,17 @@ export const ProfileForm = (): React.JSX.Element | null => {
 				<Modal
 					opened={restoreOpened}
 					onClose={restoreHandlers.close}
-					title={t("restoreAccountTitle")}
+					title={translations("restoreAccountTitle")}
 					centered>
 					<Text size="sm" mb="lg">
-						{t("restoreAccountConfirm")}
+						{translations("restoreAccountConfirm")}
 					</Text>
 					<Button
 						fullWidth
 						color="green"
 						loading={restoreSending}
 						onClick={handleRestoreAccount}>
-						{t("restoreAccount")}
+						{translations("restoreAccount")}
 					</Button>
 				</Modal>
 			</>
@@ -148,14 +152,14 @@ export const ProfileForm = (): React.JSX.Element | null => {
 
 		if (!res.ok) {
 			updateMessage({
-				text: data.error ?? t("updateError"),
+				text: data.error ?? translations("updateError"),
 				color: "red",
 			})
 			setLoading(false)
 			return
 		}
 
-		updateMessage({ text: t("updateSuccess"), color: "green" })
+		updateMessage({ text: translations("updateSuccess"), color: "green" })
 		setLoading(false)
 		await update()
 	}
@@ -172,17 +176,20 @@ export const ProfileForm = (): React.JSX.Element | null => {
 
 			if (res.ok) {
 				resetHandlers.close()
-				updateMessage({ text: t("resetPasswordSent"), color: "green" })
+				updateMessage({
+					text: translations("resetPasswordSent"),
+					color: "green",
+				})
 			} else {
 				const data = await res.json()
 
 				updateMessage({
-					text: data.error ?? t("resetError"),
+					text: data.error ?? translations("resetError"),
 					color: "red",
 				})
 			}
 		} catch {
-			updateMessage({ text: t("resetError"), color: "red" })
+			updateMessage({ text: translations("resetError"), color: "red" })
 		} finally {
 			setResetSending(false)
 		}
@@ -205,12 +212,15 @@ export const ProfileForm = (): React.JSX.Element | null => {
 				const data = await res.json()
 
 				updateMessage({
-					text: data.error ?? t("deleteAccountError"),
+					text: data.error ?? translations("deleteAccountError"),
 					color: "red",
 				})
 			}
 		} catch {
-			updateMessage({ text: t("deleteAccountError"), color: "red" })
+			updateMessage({
+				text: translations("deleteAccountError"),
+				color: "red",
+			})
 		} finally {
 			setDeleteSending(false)
 		}
@@ -221,24 +231,24 @@ export const ProfileForm = (): React.JSX.Element | null => {
 			<AuthCard maxWidth={480}>
 				<form onSubmit={handleSubmit}>
 					<Title order={2} mb="xs">
-						{t("profile")}
+						{translations("profile")}
 					</Title>
 					<Text c="dimmed" size="sm" mb="lg">
-						{t("profileSubtitle")}
+						{translations("profileSubtitle")}
 					</Text>
 
 					<FormMessage message={message} messageKey={messageKey} />
 
 					<TextInput
-						label={t("name")}
-						placeholder={t("namePlaceholder")}
+						label={translations("name")}
+						placeholder={translations("namePlaceholder")}
 						value={name}
 						onChange={(e) => setName(e.currentTarget.value)}
 						mb="md"
 					/>
 
 					<TextInput
-						label={t("email")}
+						label={translations("email")}
 						placeholder="you@example.com"
 						value={email}
 						onChange={(e) => setEmail(e.currentTarget.value)}
@@ -246,9 +256,13 @@ export const ProfileForm = (): React.JSX.Element | null => {
 						mb="lg"
 					/>
 
-					<Button type="submit" fullWidth loading={loading} mb="md">
-						{t("saveChanges")}
-					</Button>
+					<CtaButton
+						type="submit"
+						fullWidth
+						loading={loading}
+						mb="md">
+						{translations("saveChanges")}
+					</CtaButton>
 				</form>
 
 				<Button
@@ -256,23 +270,23 @@ export const ProfileForm = (): React.JSX.Element | null => {
 					variant="subtle"
 					mb="md"
 					onClick={resetHandlers.open}>
-					{t("resetPasswordOnProfile")}
+					{translations("resetPasswordOnProfile")}
 				</Button>
 
 				<Modal
 					opened={resetOpened}
 					onClose={resetHandlers.close}
-					title={t("resetPasswordTitleProfile")}
+					title={translations("resetPasswordTitleProfile")}
 					centered>
 					<Text size="sm" mb="lg">
-						{t("resetPasswordConfirmProfile")}
+						{translations("resetPasswordConfirmProfile")}
 					</Text>
-					<Button
+					<CtaButton
 						fullWidth
 						loading={resetSending}
 						onClick={handleResetPassword}>
-						{t("sendResetLink")}
-					</Button>
+						{translations("sendResetLink")}
+					</CtaButton>
 				</Modal>
 
 				<Divider my="lg" />
@@ -283,7 +297,7 @@ export const ProfileForm = (): React.JSX.Element | null => {
 					color="red"
 					leftSection={<IconLogout size={16} />}
 					onClick={() => signOut({ callbackUrl: `/${locale}` })}>
-					{t("signOut")}
+					{translations("signOut")}
 				</Button>
 
 				<Divider my="lg" />
@@ -294,25 +308,25 @@ export const ProfileForm = (): React.JSX.Element | null => {
 					color="red"
 					leftSection={<IconTrash size={16} />}
 					onClick={deleteHandlers.open}>
-					{t("deleteAccount")}
+					{translations("deleteAccount")}
 				</Button>
 
 				<Modal
 					opened={deleteOpened}
 					onClose={deleteHandlers.close}
-					title={t("deleteAccountTitle")}
+					title={translations("deleteAccountTitle")}
 					centered>
 					<Text size="sm" mb="xs">
-						{t("deleteAccountWarning")}
+						{translations("deleteAccountWarning")}
 					</Text>
 					<Text size="sm" mb="lg">
-						{t("deleteAccountConfirm", {
+						{translations("deleteAccountConfirm", {
 							email: currentSession.user.email ?? "",
 						})}
 					</Text>
 
 					<TextInput
-						label={t("deleteAccountHint")}
+						label={translations("deleteAccountHint")}
 						placeholder={currentSession.user.email ?? ""}
 						value={deleteEmail}
 						onChange={(e) => setDeleteEmail(e.currentTarget.value)}
@@ -326,7 +340,7 @@ export const ProfileForm = (): React.JSX.Element | null => {
 						loading={deleteSending}
 						disabled={deleteEmail !== currentSession.user.email}
 						onClick={handleDeleteAccount}>
-						{t("deleteAccountPermanently")}
+						{translations("deleteAccountPermanently")}
 					</Button>
 				</Modal>
 			</AuthCard>
