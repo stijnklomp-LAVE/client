@@ -3,6 +3,7 @@ import crypto from "node:crypto"
 import { NextResponse } from "next/server"
 import bcrypt from "bcryptjs"
 
+import { logger } from "@/lib/logger"
 import { prismaClient } from "@/lib/db/prisma"
 
 type RegisterBody = {
@@ -76,7 +77,7 @@ export const POST = async (request: Request) => {
 			{ status: 201 },
 		)
 	} catch (error) {
-		console.error("Registration error:", error)
+		logger.error("Registration error:", error)
 
 		return NextResponse.json(
 			{ error: "Internal server error" },

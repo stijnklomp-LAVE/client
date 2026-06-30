@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 
 import { auth } from "@/auth"
+import { logger } from "@/lib/logger"
 import { prismaClient } from "@/lib/db/prisma"
 
 export const GET = async () => {
@@ -66,7 +67,7 @@ export const PUT = async (request: Request) => {
 
 		return NextResponse.json({ user })
 	} catch (error) {
-		console.error("Profile update error:", error)
+		logger.error("Profile update error:", error)
 
 		return NextResponse.json(
 			{ error: "Internal server error" },

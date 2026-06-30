@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 
 import { auth } from "@/auth"
+import { logger } from "@/lib/logger"
 import { prismaClient } from "@/lib/db/prisma"
 
 export const POST = async () => {
@@ -21,7 +22,7 @@ export const POST = async () => {
 
 		return NextResponse.json({ message: "Account restored successfully" })
 	} catch (error) {
-		console.error("Restore account error:", error)
+		logger.error("Restore account error:", error)
 
 		return NextResponse.json(
 			{ error: "Internal server error" },

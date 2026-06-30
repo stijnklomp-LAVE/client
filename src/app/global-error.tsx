@@ -2,6 +2,8 @@
 
 import { useEffect } from "react"
 
+import { logger } from "@/lib/logger"
+
 const GlobalError = ({
 	error,
 	reset,
@@ -10,7 +12,7 @@ const GlobalError = ({
 	reset: () => void
 }) => {
 	useEffect(() => {
-		console.error(error)
+		logger.error(error)
 	}, [error])
 
 	return (

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server"
 
 import { auth } from "@/auth"
 import { signJwt } from "@/lib/api/jwt"
+import { logger } from "@/lib/logger"
 import { proxyToFragmentComposer } from "@/lib/api/fragment-composer"
 
 export const POST = async (
@@ -32,7 +33,7 @@ export const POST = async (
 	})
 
 	if (!res.ok) {
-		console.error(
+		logger.error(
 			`Failed to create layer: ${String(res.status)} ${JSON.stringify(await res.json())}`,
 		)
 	}

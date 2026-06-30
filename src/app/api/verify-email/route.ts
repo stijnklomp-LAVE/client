@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server"
 
+import { logger } from "@/lib/logger"
 import { prismaClient } from "@/lib/db/prisma"
 import { routing } from "@/i18n/routing"
 
@@ -58,7 +59,7 @@ export const GET = async (request: Request) => {
 
 		return redirectToLogin(request, "verified=true")
 	} catch (error) {
-		console.error("Verification error:", error)
+		logger.error("Verification error:", error)
 
 		return redirectToLogin(request, "error=verification-failed")
 	}

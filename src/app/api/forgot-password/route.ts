@@ -2,6 +2,7 @@ import crypto from "node:crypto"
 
 import { NextResponse } from "next/server"
 
+import { logger } from "@/lib/logger"
 import { prismaClient } from "@/lib/db/prisma"
 
 export const POST = async (request: Request) => {
@@ -46,7 +47,7 @@ export const POST = async (request: Request) => {
 				"If an account with that email exists, a password reset link has been sent.",
 		})
 	} catch (error) {
-		console.error("Forgot password error:", error)
+		logger.error("Forgot password error:", error)
 
 		return NextResponse.json(
 			{ error: "Internal server error" },

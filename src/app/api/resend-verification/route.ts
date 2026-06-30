@@ -2,6 +2,7 @@ import crypto from "node:crypto"
 
 import { NextResponse } from "next/server"
 
+import { logger } from "@/lib/logger"
 import { prismaClient } from "@/lib/db/prisma"
 
 export const POST = async (request: Request) => {
@@ -58,7 +59,7 @@ export const POST = async (request: Request) => {
 			verifyUrl,
 		})
 	} catch (error) {
-		console.error("Resend verification error:", error)
+		logger.error("Resend verification error:", error)
 
 		return NextResponse.json(
 			{ error: "Internal server error" },

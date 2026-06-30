@@ -13,7 +13,8 @@ coveragePathIgnorePatterns = [
 	"test/**",
 	"dist/**",
 	"prisma/*.",
-	"generated/**"
+	"generated/**",
+	"src/lib/logger.ts"
 ]
 
 [test.ci]

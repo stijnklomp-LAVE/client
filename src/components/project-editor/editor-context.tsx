@@ -13,6 +13,7 @@ import { useDisclosure } from "@mantine/hooks"
 import { notifications } from "@mantine/notifications"
 import { useTranslations } from "next-intl"
 import type { TimelineLayer, TimelineSegment } from "@/lib/editor/types"
+import { logger } from "@/lib/logger"
 import { useRecording, type RecordingConfig } from "@/lib/editor/use-recording"
 
 const STORAGE_PREFIX = "editor."
@@ -186,7 +187,7 @@ export const EditorProvider = ({
 		})
 
 		if (!res.ok) {
-			console.error(
+			logger.error(
 				`Failed to create layer: ${res.status} ${JSON.stringify(await res.json())}`,
 			)
 			return
@@ -341,7 +342,7 @@ export const EditorProvider = ({
 				)
 
 				if (!res.ok) {
-					console.error("Failed to create fragment")
+					logger.error("Failed to create fragment")
 					return
 				}
 
@@ -353,7 +354,7 @@ export const EditorProvider = ({
 
 				await addSegment(layerId, fragment.id)
 			} catch (err) {
-				console.error("Failed to save recording", err)
+				logger.error("Failed to save recording", err)
 			}
 		}
 	}, [recording, recordingLayerId, projectId, addSegment, setModeState])

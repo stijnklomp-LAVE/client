@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 
 import { auth } from "@/auth"
+import { logger } from "@/lib/logger"
 import { prismaClient } from "@/lib/db/prisma"
 
 export const POST = async (request: Request) => {
@@ -43,7 +44,7 @@ export const POST = async (request: Request) => {
 				"Your account has been closed. Your data will be permanently deleted after 30 days.",
 		})
 	} catch (error) {
-		console.error("Close account error:", error)
+		logger.error("Close account error:", error)
 
 		return NextResponse.json(
 			{ error: "Internal server error" },

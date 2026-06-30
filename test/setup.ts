@@ -1,3 +1,4 @@
+import { mock } from "bun:test"
 import { Window } from "happy-dom"
 
 const window = new Window()
@@ -51,3 +52,19 @@ globalThis.HTMLStyleElement = window.HTMLStyleElement
 globalThis.HTMLCanvasElement = window.HTMLCanvasElement
 globalThis.URL = window.URL
 globalThis.URLSearchParams = window.URLSearchParams
+
+const loggerMocks = {
+	debug: mock(() => {}),
+	error: mock(() => {}),
+	info: mock(() => {}),
+	warn: mock(() => {}),
+}
+
+await mock.module("@/lib/logger", () => ({
+	logger: {
+		debug: loggerMocks.debug,
+		error: loggerMocks.error,
+		info: loggerMocks.info,
+		warn: loggerMocks.warn,
+	},
+}))
