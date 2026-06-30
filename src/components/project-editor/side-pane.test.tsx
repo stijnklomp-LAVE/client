@@ -1,19 +1,19 @@
 import "@testing-library/jest-dom"
 import { cleanup, render, screen } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
+import { MantineProvider } from "@mantine/core"
 import { afterEach, describe, expect, it, vi } from "bun:test"
-import type { ReactNode } from "react"
+
+if (typeof globalThis.ShadowRoot === "undefined") {
+	// @ts-expect-error test environment doesn't have ShadowRoot
+	globalThis.ShadowRoot = class {}
+}
 
 import { EditorContext, type EditorMode } from "./editor-context"
 import { SidePane } from "./side-pane"
 
 vi.mock("next-intl", () => ({
 	useTranslations: () => (key: string) => key,
-}))
-
-vi.mock("@mantine/core", () => ({
-	// eslint-disable-next-line @typescript-eslint/naming-convention
-	Drawer: ({ children }: { children: ReactNode }) => <>{children}</>,
 }))
 
 vi.mock("@mantine/hooks", () => ({
@@ -99,10 +99,12 @@ const renderWithContext = (
 	overrides: Partial<typeof defaultContextValue> = {},
 ) =>
 	render(
-		<EditorContext.Provider
-			value={{ ...defaultContextValue, ...overrides }}>
-			<SidePane />
-		</EditorContext.Provider>,
+		<MantineProvider>
+			<EditorContext.Provider
+				value={{ ...defaultContextValue, ...overrides }}>
+				<SidePane />
+			</EditorContext.Provider>
+		</MantineProvider>,
 	)
 
 afterEach(() => {
@@ -114,51 +116,69 @@ describe("SidePane camera list", () => {
 	it("shows a None option alongside camera options", () => {
 		renderWithContext()
 
-		expect(screen.getByText("camera.none")).toBeInTheDocument()
-		expect(screen.getByText("Camera One")).toBeInTheDocument()
-		expect(screen.getByText("Camera Two")).toBeInTheDocument()
+		const select = screen.getByRole("combobox", {
+			name: "camera.selectCamera",
+		})
+		expect(select).toBeInTheDocument()
+		const options = screen.getAllByRole("option")
+		expect(options).toHaveLength(3)
+		expect(options[0]).toHaveTextContent("camera.none")
+		expect(options[1]).toHaveTextContent("Camera One")
+		expect(options[2]).toHaveTextContent("Camera Two")
 	})
 
-	it("selects None when the None button is clicked", async () => {
+	it("selects None when None is chosen", async () => {
 		const user = userEvent.setup()
 		renderWithContext()
 
-		await user.click(screen.getByText("camera.none"))
+		const select = screen.getByRole("combobox", {
+			name: "camera.selectCamera",
+		})
+		await user.selectOptions(select, "")
 
 		expect(mockSetSelectedCameraId).toHaveBeenCalledWith("")
 	})
 
-	it("selects a camera when its button is clicked", async () => {
+	it("selects a camera when it is chosen", async () => {
 		const user = userEvent.setup()
 		renderWithContext()
 
-		await user.click(screen.getByText("Camera Two"))
+		const select = screen.getByRole("combobox", {
+			name: "camera.selectCamera",
+		})
+		await user.selectOptions(select, "cam-2")
 
 		expect(mockSetSelectedCameraId).toHaveBeenCalledWith("cam-2")
 	})
 
-	it("marks None as selected when no camera is chosen", () => {
+	it("has None selected when no camera is chosen", () => {
 		renderWithContext()
 
-		const noneButton = screen.getByText("camera.none").closest("button")
-		expect(noneButton).toHaveAttribute("data-selected")
+		const select = screen.getByRole("combobox", {
+			name: "camera.selectCamera",
+		}) as HTMLSelectElement
+		expect(select.value).toBe("")
 	})
 
-	it("marks the active camera as selected", () => {
+	it("has the active camera selected", () => {
 		renderWithContext({ selectedCameraId: "cam-1" })
 
-		const cameraButton = screen.getByText("Camera One").closest("button")
-		const noneButton = screen.getByText("camera.none").closest("button")
-		expect(cameraButton).toHaveAttribute("data-selected")
-		expect(noneButton).not.toHaveAttribute("data-selected")
+		const select = screen.getByRole("combobox", {
+			name: "camera.selectCamera",
+		}) as HTMLSelectElement
+		expect(select.value).toBe("cam-1")
 	})
 
-	it("does not show camera settings when no cameras are available", () => {
+	it("shows camera settings with no cameras available", () => {
 		renderWithContext({ availableCameras: [] })
 
-		expect(screen.queryByText("camera.none")).not.toBeInTheDocument()
-		expect(
-			screen.queryByText("camera.selectCamera"),
-		).not.toBeInTheDocument()
+		const select = screen.getByRole("combobox", {
+			name: "camera.selectCamera",
+		})
+		expect(select).toBeInTheDocument()
+		expect(screen.getByText("camera.selectCamera")).toBeInTheDocument()
+		const options = screen.getAllByRole("option")
+		expect(options).toHaveLength(1)
+		expect(options[0]).toHaveTextContent("camera.none")
 	})
 })

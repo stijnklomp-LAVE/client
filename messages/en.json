@@ -212,6 +212,7 @@
 		"recording": {
 			"recordNew": "Record new fragment...",
 			"recording": "Recording",
+			"paused": "Paused",
 			"start": "Start Recording",
 			"startWithLayer": "Record to layer",
 			"stop": "Stop",

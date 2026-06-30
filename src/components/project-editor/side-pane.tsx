@@ -177,6 +177,7 @@ const CameraSettings = (): React.JSX.Element => {
 				{translations("camera.selectCamera")}
 			</p>
 			<NativeSelect
+				aria-label={translations("camera.selectCamera")}
 				value={selectedCameraId}
 				onChange={(e) => setSelectedCameraId(e.currentTarget.value)}
 				data={[

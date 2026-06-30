@@ -34,11 +34,25 @@ export const RecordingControls = (): React.JSX.Element | null => {
 	return (
 		<div className={styles.overlay}>
 			<div className={styles.bar}>
-				<div className={styles.indicator}>
-					<span className={styles.dot} />
-					<span className={styles.label}>
-						{translations("recording.recording")}
-					</span>
+				<div className={styles.statusGroup}>
+					<span
+						className={styles.dot}
+						data-paused={isPaused || undefined}
+					/>
+					<div className={styles.labelWrapper}>
+						<span
+							className={styles.label}
+							data-hidden={!isPaused || undefined}>
+							{translations("recording.recording")}
+						</span>
+						<span
+							className={styles.label}
+							data-hidden={isPaused || undefined}>
+							{translations("recording.paused")}
+						</span>
+					</div>
+				</div>
+				<div className={styles.infoGroup}>
 					<span className={styles.timer}>
 						{formatTime(recordingElapsedMs)}
 					</span>

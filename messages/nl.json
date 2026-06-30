@@ -212,6 +212,7 @@
 		"recording": {
 			"recordNew": "Nieuw fragment opnemen...",
 			"recording": "Opnemen",
+			"paused": "Gepauzeerd",
 			"start": "Start opname",
 			"startWithLayer": "Opnemen naar laag",
 			"stop": "Stop",

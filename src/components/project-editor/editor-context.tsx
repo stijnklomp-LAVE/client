@@ -283,6 +283,8 @@ export const EditorProvider = ({
 					rawFramesDirectoryHandle,
 					video,
 				)
+				recording.pauseRecording()
+				setIsPaused(true)
 			} catch (err) {
 				setCameraError(
 					err instanceof Error
@@ -298,6 +300,7 @@ export const EditorProvider = ({
 			setModeState,
 			clearPendingRecordingLayerId,
 			notifyNoDirectory,
+			setIsPaused,
 		],
 	)
 

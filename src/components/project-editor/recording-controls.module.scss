@@ -10,7 +10,7 @@
 .bar {
 	display: flex;
 	align-items: center;
-	gap: 16px;
+	gap: 12px;
 	background: rgba(0, 0, 0, 0.8);
 	border: 1px solid rgba(255, 255, 255, 0.15);
 	border-radius: 8px;
@@ -19,10 +19,18 @@
 	backdrop-filter: blur(8px);
 }
 
-.indicator {
+.statusGroup {
 	display: flex;
 	align-items: center;
 	gap: 8px;
+	flex: 1;
+}
+
+.infoGroup {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	flex-shrink: 0;
 }
 
 .dot {
@@ -31,6 +39,11 @@
 	border-radius: 50%;
 	background: #e03131;
 	animation: pulse 1.5s ease-in-out infinite;
+
+	&[data-paused] {
+		background: #fcc419;
+		animation: none;
+	}
 }
 
 @keyframes pulse {
@@ -43,12 +56,24 @@
 	}
 }
 
+.labelWrapper {
+	display: grid;
+}
+
 .label {
+	grid-area: 1 / 1;
+	white-space: nowrap;
 	color: #e03131;
 	font-size: 12px;
 	font-weight: 600;
 	text-transform: uppercase;
 	letter-spacing: 0.05em;
+	opacity: 1;
+	transition: opacity 0.15s ease;
+
+	&[data-hidden] {
+		opacity: 0;
+	}
 }
 
 .timer {

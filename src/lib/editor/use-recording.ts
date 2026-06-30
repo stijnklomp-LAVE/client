@@ -51,6 +51,7 @@ export const useRecording = () => {
 	const videoRef = useRef<HTMLVideoElement | null>(null)
 	const isRecordingRef = useRef(false)
 	const isPausedRef = useRef(false)
+	const pauseStartRef = useRef(0)
 
 	const frameLoop = useCallback((timestamp: number) => {
 		if (!isRecordingRef.current) return
@@ -244,21 +245,15 @@ export const useRecording = () => {
 
 	const pauseRecording = useCallback(() => {
 		isPausedRef.current = true
-
-		if (streamRef.current) {
-			streamRef.current.getVideoTracks().forEach((track) => {
-				track.enabled = false
-			})
-		}
+		pauseStartRef.current = performance.now()
 	}, [])
 
 	const resumeRecording = useCallback(() => {
 		isPausedRef.current = false
 
-		if (streamRef.current) {
-			streamRef.current.getVideoTracks().forEach((track) => {
-				track.enabled = true
-			})
+		if (pauseStartRef.current > 0) {
+			startTimeRef.current += performance.now() - pauseStartRef.current
+			pauseStartRef.current = 0
 		}
 	}, [])
 
