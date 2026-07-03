@@ -253,14 +253,6 @@ const startSendFlow = async (
 
 		channel.onopen = () => {
 			updateTransfer(requestId, { channelState: "open" })
-			void sendFiles(
-				channel,
-				updateTransfer,
-				requestId,
-				fragmentIds,
-				fragmentNames,
-			)
-			channel.close()
 		}
 
 		channel.onclose = () => {
@@ -393,79 +385,6 @@ const startReceiveFlow = async (
 		iceAbort.abort()
 		updateTransfer(requestId, {
 			error: err instanceof Error ? err.message : "Connection failed",
-		})
-	}
-}
-
-const sendFiles = async (
-	channel: RTCDataChannel,
-	updateTransfer: (id: string, partial: Partial<ActiveTransfer>) => void,
-	requestId: string,
-	fragmentIds: string[],
-	fragmentNames: string[],
-): Promise<void> => {
-	try {
-		const chunkSize = 16_384
-
-		for (let i = 0; i < fragmentIds.length; i++) {
-			const fragmentId = fragmentIds[i]
-			const fileName = fragmentNames[i] ?? "unknown"
-
-			updateTransfer(requestId, {
-				progress: [
-					{
-						bytesReceived: 0,
-						bytesTotal: 0,
-						fileName,
-						status: "fetching",
-					},
-				],
-			})
-
-			const res = await fetch(
-				`/api/mock-files?fragmentId=${String(fragmentId)}`,
-			)
-
-			if (!res.ok) {
-				updateTransfer(requestId, {
-					error: `Failed to fetch ${fileName}`,
-				})
-
-				return
-			}
-
-			const buffer = await res.arrayBuffer()
-			const fileSize = buffer.byteLength
-
-			channel.send(JSON.stringify({ fileName, fileSize }))
-			await new Promise((r) => setTimeout(r, 0))
-
-			for (let offset = 0; offset < fileSize; offset += chunkSize) {
-				const chunk = buffer.slice(offset, offset + chunkSize)
-				channel.send(chunk)
-
-				const received = Math.min(offset + chunkSize, fileSize)
-
-				updateTransfer(requestId, {
-					progress: [
-						{
-							bytesReceived: received,
-							bytesTotal: fileSize,
-							fileName,
-							status:
-								received >= fileSize ? "done" : "transferring",
-						},
-					],
-				})
-
-				if (channel.bufferedAmount > 1_000_000) {
-					await new Promise((r) => setTimeout(r, 100))
-				}
-			}
-		}
-	} catch (err) {
-		updateTransfer(requestId, {
-			error: err instanceof Error ? err.message : "Send failed",
 		})
 	}
 }
