@@ -80,12 +80,8 @@ export const ProfileForm = (): React.JSX.Element | null => {
 			})
 
 			if (res.ok) {
-				restoreHandlers.close()
-				updateMessage({
-					text: translations("restoreSuccess"),
-					color: "green",
-				})
-				await update()
+				await update({})
+				window.location.href = `/${locale}/profile`
 			} else {
 				const data = await res.json()
 
@@ -267,7 +263,8 @@ export const ProfileForm = (): React.JSX.Element | null => {
 
 				<Button
 					fullWidth
-					variant="subtle"
+					variant="outline"
+					color="gray"
 					mb="md"
 					onClick={resetHandlers.open}>
 					{translations("resetPasswordOnProfile")}
