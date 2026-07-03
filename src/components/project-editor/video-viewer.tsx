@@ -19,6 +19,7 @@ export const VideoViewer = (): React.JSX.Element => {
 		pendingRecordingLayerId,
 		clearPendingRecordingLayerId,
 		layers,
+		addLayer,
 		startRecording,
 		rawFramesDirectoryHandle,
 		notifyNoDirectory,
@@ -26,6 +27,7 @@ export const VideoViewer = (): React.JSX.Element => {
 	const videoRef = useRef<HTMLVideoElement>(null)
 	const streamRef = useRef<MediaStream | null>(null)
 	const [showLayerPicker, setShowLayerPicker] = useState(false)
+	const [creatingLayer, setCreatingLayer] = useState(false)
 
 	useEffect(() => {
 		if (mode !== "capture") {
@@ -136,12 +138,22 @@ export const VideoViewer = (): React.JSX.Element => {
 	])
 
 	const handleLayerSelect = useCallback(
-		(layerId: string) => {
+		async (layerId: string) => {
 			setShowLayerPicker(false)
 			handleStartRecording(layerId)
 		},
 		[handleStartRecording],
 	)
+
+	const handleNewLayer = useCallback(async () => {
+		setCreatingLayer(true)
+		const layer = await addLayer()
+		setCreatingLayer(false)
+		if (layer) {
+			setShowLayerPicker(false)
+			handleStartRecording(layer.id)
+		}
+	}, [addLayer, handleStartRecording])
 
 	if (mode === "capture") {
 		const hasActiveCamera = Boolean(selectedCameraId) && !cameraError
@@ -182,20 +194,38 @@ export const VideoViewer = (): React.JSX.Element => {
 											)}
 								</span>
 							</button>
-							{showLayerPicker && layers.length > 0 && (
-								<div className={styles.layerPicker}>
+							{showLayerPicker && (
+								<select
+									className={styles.layerPicker}
+									defaultValue=""
+									disabled={creatingLayer}
+									onChange={(e) => {
+										const value = e.currentTarget.value
+										e.currentTarget.value = ""
+										if (value === "__new__") {
+											handleNewLayer()
+										} else if (value) {
+											handleLayerSelect(value)
+										}
+									}}>
+									<option value="" disabled>
+										{creatingLayer
+											? translations(
+													"recording.recording",
+												)
+											: translations(
+													"recording.recordNew",
+												)}
+									</option>
+									<option value="__new__">
+										+ {translations("recording.recordNew")}
+									</option>
 									{layers.map((layer) => (
-										<button
-											key={layer.id}
-											className={styles.layerOption}
-											onClick={() =>
-												handleLayerSelect(layer.id)
-											}
-											type="button">
+										<option key={layer.id} value={layer.id}>
 											{layer.name}
-										</button>
+										</option>
 									))}
-								</div>
+								</select>
 							)}
 						</div>
 					)}

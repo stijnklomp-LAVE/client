@@ -71,7 +71,7 @@ interface EditorContextValue {
 	fragments: ProjectFragment[]
 	setFragments: (fragments: ProjectFragment[]) => void
 	projectId: string
-	addLayer: () => Promise<void>
+	addLayer: () => Promise<TimelineLayer | null>
 	addSegment: (layerId: string, fragmentId: string) => Promise<void>
 	isRecording: boolean
 	recordingLayerId: string | null
@@ -181,7 +181,7 @@ export const EditorProvider = ({
 	const streamRef = useRef<MediaStream | null>(null)
 	const videoRef = useRef<HTMLVideoElement | null>(null)
 
-	const addLayer = useCallback(async () => {
+	const addLayer = useCallback(async (): Promise<TimelineLayer | null> => {
 		const res = await fetch(`/api/projects/${projectId}/layers`, {
 			method: "POST",
 		})
@@ -190,12 +190,14 @@ export const EditorProvider = ({
 			logger.error(
 				`Failed to create layer: ${res.status} ${JSON.stringify(await res.json())}`,
 			)
-			return
+			return null
 		}
 
 		const { layer } = (await res.json()) as { layer: TimelineLayer }
 
 		setLayers((prev) => [...prev, layer])
+
+		return layer
 	}, [projectId])
 
 	const addSegment = useCallback(
@@ -279,10 +281,13 @@ export const EditorProvider = ({
 
 				setModeState("capture")
 
+				const recordingId = crypto.randomUUID()
+
 				await recording.startRecording(
 					stream,
 					rawFramesDirectoryHandle,
-					video,
+					projectId,
+					recordingId,
 				)
 				recording.pauseRecording()
 				setIsPaused(true)
@@ -297,6 +302,7 @@ export const EditorProvider = ({
 		[
 			selectedCameraId,
 			rawFramesDirectoryHandle,
+			projectId,
 			recording,
 			setModeState,
 			clearPendingRecordingLayerId,
@@ -317,13 +323,13 @@ export const EditorProvider = ({
 			videoRef.current = null
 		}
 
-		const videoBuffer = await recording.stopRecording()
+		const result = await recording.stopRecording()
 
 		const layerId = recordingLayerId
 		setRecordingLayerId(null)
 		setModeState("editing")
 
-		if (videoBuffer && layerId) {
+		if (result && layerId) {
 			try {
 				const fragmentName = `Recording ${new Date().toLocaleTimeString()}`
 				const res = await fetch(
@@ -331,9 +337,9 @@ export const EditorProvider = ({
 					{
 						body: JSON.stringify({
 							duration: recording.recordingDurationSec,
-							filePath: `recording-${Date.now()}.webm`,
+							filePath: result.recordingId,
 							name: fragmentName,
-							size: videoBuffer.byteLength,
+							size: result.size,
 						}),
 						// eslint-disable-next-line @typescript-eslint/naming-convention
 						headers: { "Content-Type": "application/json" },

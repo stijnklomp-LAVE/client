@@ -77,30 +77,26 @@
 }
 
 .layerPicker {
-	display: flex;
-	flex-direction: column;
-	gap: 4px;
+	appearance: none;
+	-webkit-appearance: none;
 	background: #1e1e1e;
 	border: 1px solid rgba(255, 255, 255, 0.15);
 	border-radius: 8px;
-	padding: 6px;
-	min-width: 180px;
-	box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
-}
-
-.layerOption {
 	padding: 8px 12px;
-	border: none;
-	border-radius: 6px;
-	background: transparent;
+	min-width: 200px;
 	color: rgba(255, 255, 255, 0.85);
 	font-size: 13px;
 	cursor: pointer;
+	box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
 	text-align: left;
-	transition: background 0.1s ease;
 
-	&:hover {
-		background: rgba(255, 255, 255, 0.1);
-		color: #fff;
+	&:focus {
+		outline: none;
+		border-color: rgba(255, 255, 255, 0.3);
+	}
+
+	&:disabled {
+		opacity: 0.5;
+		cursor: not-allowed;
 	}
 }

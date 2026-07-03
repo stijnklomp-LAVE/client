@@ -14,11 +14,11 @@ export default function ProjectSettingsPage() {
 	const [dirName, setDirName] = useState<string | null>(null)
 
 	const handleChooseDirectory = useCallback(async () => {
-		const handle = await pickRawFramesDirectory(id)
+		const handle = await pickRawFramesDirectory()
 		if (handle) {
 			setDirName(handle.name)
 		}
-	}, [id])
+	}, [])
 
 	const handleRemoveDirectory = useCallback(() => {
 		setDirName(null)

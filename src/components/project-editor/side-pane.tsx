@@ -28,7 +28,6 @@ const RecordingSettings = (): React.JSX.Element => {
 		setRawFramesDirectory,
 		recordingConfig,
 		updateRecordingConfig,
-		projectId,
 		wiggleDirectoryKey,
 	} = useEditorContext()
 	const [directoryError, setDirectoryError] = useState<string | null>(null)
@@ -56,7 +55,7 @@ const RecordingSettings = (): React.JSX.Element => {
 		}
 
 		try {
-			const handle = await pickRawFramesDirectory(projectId)
+			const handle = await pickRawFramesDirectory()
 			if (handle) {
 				setRawFramesDirectory(handle)
 			}
@@ -67,7 +66,7 @@ const RecordingSettings = (): React.JSX.Element => {
 					: translations("recording.directoryError"),
 			)
 		}
-	}, [projectId, setRawFramesDirectory, translations])
+	}, [setRawFramesDirectory, translations])
 
 	const handleRemoveDirectory = useCallback(() => {
 		setRawFramesDirectory(null)

@@ -210,11 +210,11 @@
 			"none": "None"
 		},
 		"recording": {
-			"recordNew": "Record new fragment...",
+			"recordNew": "Record to new layer",
 			"recording": "Recording",
 			"paused": "Paused",
 			"start": "Start Recording",
-			"startWithLayer": "Record to layer",
+			"startWithLayer": "Record",
 			"stop": "Stop",
 			"pause": "Pause",
 			"resume": "Resume",

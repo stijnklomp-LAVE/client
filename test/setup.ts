@@ -53,12 +53,16 @@ globalThis.HTMLCanvasElement = window.HTMLCanvasElement
 globalThis.URL = window.URL
 globalThis.URLSearchParams = window.URLSearchParams
 
+/* eslint-disable @typescript-eslint/no-empty-function */
+
 const loggerMocks = {
 	debug: mock(() => {}),
 	error: mock(() => {}),
 	info: mock(() => {}),
 	warn: mock(() => {}),
 }
+
+/* eslint-enable @typescript-eslint/no-empty-function */
 
 await mock.module("@/lib/logger", () => ({
 	logger: {

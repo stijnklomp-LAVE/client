@@ -228,8 +228,8 @@ const startSendFlow = async (
 	abortSignal: AbortSignal,
 	updateTransfer: (id: string, partial: Partial<ActiveTransfer>) => void,
 	requestId: string,
-	fragmentIds: string[],
-	fragmentNames: string[],
+	_fragmentIds: string[],
+	_fragmentNames: string[],
 ): Promise<void> => {
 	const iceAbort = new AbortController()
 

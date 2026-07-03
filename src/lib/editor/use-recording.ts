@@ -1,12 +1,17 @@
 import { useCallback, useEffect, useRef, useState } from "react"
 import {
-	BufferTarget,
 	MediaStreamVideoTrackSource,
 	Output,
+	StreamTarget,
 	WebMOutputFormat,
+	type VideoSample,
 } from "mediabunny"
 
-import { saveFrameToDirectory } from "./raw-frames-directory"
+import {
+	saveFrame,
+	createWebmStream,
+	getWebmSize,
+} from "./raw-frames-directory"
 
 export type RecordingConfig = {
 	fps: number
@@ -20,6 +25,11 @@ export type RecordingState = {
 	frameCount: number
 	isRecording: boolean
 	recordingDurationSec: number
+}
+
+export type RecordingResult = {
+	recordingId: string
+	size: number
 }
 
 const DEFAULT_CONFIG: RecordingConfig = {
@@ -41,104 +51,92 @@ export const useRecording = () => {
 	const configRef = useRef<RecordingConfig>(DEFAULT_CONFIG)
 
 	const streamRef = useRef<MediaStream | null>(null)
-	const dirHandleRef = useRef<FileSystemDirectoryHandle | null>(null)
+	const rootDirHandleRef = useRef<FileSystemDirectoryHandle | null>(null)
+	const projectIdRef = useRef<string>("")
+	const recordingIdRef = useRef<string>("")
+	const sourceRef = useRef<MediaStreamVideoTrackSource | null>(null)
 	const outputRef = useRef<Output | null>(null)
-	const startTimeRef = useRef<number>(0)
-	const frameCountRef = useRef<number>(0)
-	const rafRef = useRef<number>(0)
-	const lastFrameTimeRef = useRef<number>(0)
 	const canvasRef = useRef<OffscreenCanvas | null>(null)
-	const videoRef = useRef<HTMLVideoElement | null>(null)
+	const startTimeRef = useRef<number>(0)
+	const lastSavedTimeRef = useRef<number>(0)
+	const frameCountRef = useRef<number>(0)
 	const isRecordingRef = useRef(false)
-	const isPausedRef = useRef(false)
-	const pauseStartRef = useRef(0)
 
-	const frameLoop = useCallback((timestamp: number) => {
-		if (!isRecordingRef.current) return
+	const saveFrameIfNeeded = useCallback(
+		async (sample: VideoSample): Promise<void> => {
+			const now = sample.timestamp
+			const interval = 1 / configRef.current.fps
 
-		if (!isPausedRef.current) {
-			const elapsed = timestamp - startTimeRef.current
-			const frameInterval = 1000 / configRef.current.fps
+			if (now - lastSavedTimeRef.current < interval) return
+			lastSavedTimeRef.current = now
 
-			if (timestamp - lastFrameTimeRef.current >= frameInterval) {
-				lastFrameTimeRef.current = timestamp
+			const rootDir = rootDirHandleRef.current
+			const projectId = projectIdRef.current
+			const recordingId = recordingIdRef.current
 
-				const video = videoRef.current
-				const dirHandle = dirHandleRef.current
+			if (!rootDir || !projectId || !recordingId) return
 
-				if (video && dirHandle && canvasRef.current) {
-					const ctx = canvasRef.current.getContext("2d")
+			const canvas = canvasRef.current
 
-					if (ctx) {
-						canvasRef.current.width = video.videoWidth
-						canvasRef.current.height = video.videoHeight
-						ctx.drawImage(
-							video,
-							0,
-							0,
-							canvasRef.current.width,
-							canvasRef.current.height,
-						)
+			if (!canvas) return
 
-						const format = configRef.current.format
-						const quality = configRef.current.jpegQuality / 100
+			const ctx = canvas.getContext("2d")
 
-						canvasRef.current
-							.convertToBlob({
-								quality,
-								type:
-									format === "jpeg"
-										? "image/jpeg"
-										: "image/png",
-							})
-							.then((blob) => {
-								const idx = frameCountRef.current
-								frameCountRef.current++
+			if (!ctx) return
 
-								return saveFrameToDirectory(
-									dirHandle,
-									idx,
-									blob,
-									format,
-								)
-							})
-							.catch(() => {
-								// frame save failed silently
-							})
-					}
-				}
-
+			try {
+				canvas.width = sample.codedWidth
+				canvas.height = sample.codedHeight
+				sample.draw(ctx, 0, 0, canvas.width, canvas.height)
+				const format = configRef.current.format
+				const quality = configRef.current.jpegQuality / 100
+				const blob = await canvas.convertToBlob({
+					quality,
+					type: format === "jpeg" ? "image/jpeg" : "image/png",
+				})
+				const idx = frameCountRef.current
+				frameCountRef.current++
+				await saveFrame(
+					rootDir,
+					projectId,
+					recordingId,
+					idx,
+					blob,
+					format,
+				)
 				setState((prev) => ({
 					...prev,
-					elapsedMs: elapsed,
 					frameCount: frameCountRef.current,
-					recordingDurationSec: elapsed / 1000,
 				}))
+			} catch {
+				// frame save failed silently
 			}
-		}
-
-		rafRef.current = requestAnimationFrame(frameLoop)
-	}, [])
+		},
+		[],
+	)
 
 	const startRecording = useCallback(
 		async (
 			stream: MediaStream,
-			dirHandle: FileSystemDirectoryHandle,
-			videoElement: HTMLVideoElement,
+			rootDirHandle: FileSystemDirectoryHandle,
+			projectId: string,
+			recordingId: string,
 			config?: Partial<RecordingConfig>,
-		) => {
+		): Promise<void> => {
 			if (config) {
 				configRef.current = {
 					...configRef.current,
 					...config,
 				}
+				setConfig({ ...configRef.current })
 			}
 
 			streamRef.current = stream
-			dirHandleRef.current = dirHandle
-			videoRef.current = videoElement
+			rootDirHandleRef.current = rootDirHandle
+			projectIdRef.current = projectId
+			recordingIdRef.current = recordingId
 			frameCountRef.current = 0
-			lastFrameTimeRef.current = 0
+			lastSavedTimeRef.current = -Infinity
 
 			canvasRef.current = new OffscreenCanvas(640, 480)
 
@@ -154,9 +152,18 @@ export const useRecording = () => {
 			}
 
 			try {
+				const webmStream = await createWebmStream(
+					rootDirHandle,
+					projectId,
+					recordingId,
+				)
+
 				const source = new MediaStreamVideoTrackSource(videoTrack, {
 					bitrate: 5_000_000,
 					codec: "vp9",
+					onEncodedSample: (sample: VideoSample) => {
+						void saveFrameIfNeeded(sample)
+					},
 				})
 
 				source.errorPromise.catch((err: unknown) => {
@@ -169,11 +176,14 @@ export const useRecording = () => {
 					}))
 				})
 
+				sourceRef.current = source
+
+				const target = new StreamTarget(webmStream)
+
 				const output = new Output({
 					format: new WebMOutputFormat(),
-					target: new BufferTarget(),
+					target,
 				})
-
 				output.addVideoTrack(source)
 				outputRef.current = output
 				await output.start()
@@ -198,63 +208,90 @@ export const useRecording = () => {
 				isRecording: true,
 				recordingDurationSec: 0,
 			}))
-
 			isRecordingRef.current = true
-
-			rafRef.current = requestAnimationFrame(frameLoop)
 		},
-		[frameLoop],
+		[saveFrameIfNeeded],
 	)
 
-	const stopRecording = useCallback(async () => {
-		isRecordingRef.current = false
+	const elapsedTimerRef = useRef<ReturnType<typeof setInterval>>(undefined)
 
-		setState((prev) => ({
-			...prev,
-			isRecording: false,
-		}))
+	useEffect(() => {
+		if (state.isRecording) {
+			elapsedTimerRef.current = setInterval(() => {
+				if (!isRecordingRef.current) return
+				setState((prev) => {
+					const elapsed = performance.now() - startTimeRef.current
 
-		cancelAnimationFrame(rafRef.current)
-
-		if (streamRef.current) {
-			streamRef.current.getTracks().forEach((track) => {
-				track.stop()
-			})
-			streamRef.current = null
+					return {
+						...prev,
+						elapsedMs: elapsed,
+						recordingDurationSec: elapsed / 1000,
+					}
+				})
+			}, 100)
 		}
 
-		let videoBuffer: ArrayBuffer | null = null
+		return () => {
+			clearInterval(elapsedTimerRef.current)
+		}
+	}, [state.isRecording])
 
-		if (outputRef.current) {
-			try {
-				await outputRef.current.finalize()
-				const target = outputRef.current.target as BufferTarget
-				videoBuffer = target.buffer
-			} catch {
-				// finalize failed silently
+	const stopRecording =
+		useCallback(async (): Promise<RecordingResult | null> => {
+			const rootDir = rootDirHandleRef.current
+			const projectId = projectIdRef.current
+			const recordingId = recordingIdRef.current
+
+			isRecordingRef.current = false
+			setState((prev) => ({
+				...prev,
+				isRecording: false,
+			}))
+
+			if (outputRef.current) {
+				try {
+					await outputRef.current.finalize()
+				} catch {
+					// finalize failed silently
+				}
+
+				outputRef.current = null
 			}
 
-			outputRef.current = null
-		}
+			sourceRef.current = null
 
-		videoRef.current = null
-		canvasRef.current = null
+			if (streamRef.current) {
+				streamRef.current.getTracks().forEach((track) => {
+					track.stop()
+				})
+				streamRef.current = null
+			}
 
-		return videoBuffer
-	}, [])
+			canvasRef.current = null
+
+			if (rootDir && projectId && recordingId) {
+				try {
+					const size = await getWebmSize(
+						rootDir,
+						projectId,
+						recordingId,
+					)
+
+					return { recordingId, size }
+				} catch {
+					return { recordingId, size: 0 }
+				}
+			}
+
+			return null
+		}, [])
 
 	const pauseRecording = useCallback(() => {
-		isPausedRef.current = true
-		pauseStartRef.current = performance.now()
+		sourceRef.current?.pause()
 	}, [])
 
 	const resumeRecording = useCallback(() => {
-		isPausedRef.current = false
-
-		if (pauseStartRef.current > 0) {
-			startTimeRef.current += performance.now() - pauseStartRef.current
-			pauseStartRef.current = 0
-		}
+		sourceRef.current?.resume()
 	}, [])
 
 	const updateConfig = useCallback((partial: Partial<RecordingConfig>) => {
@@ -268,12 +305,10 @@ export const useRecording = () => {
 	useEffect(() => {
 		return () => {
 			isRecordingRef.current = false
-			cancelAnimationFrame(rafRef.current)
+			clearInterval(elapsedTimerRef.current)
 
-			if (streamRef.current) {
-				streamRef.current.getTracks().forEach((track) => {
-					track.stop()
-				})
+			if (outputRef.current) {
+				void outputRef.current.finalize()
 			}
 		}
 	}, [])

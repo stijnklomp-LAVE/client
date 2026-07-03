@@ -210,11 +210,11 @@
 			"none": "Geen"
 		},
 		"recording": {
-			"recordNew": "Nieuw fragment opnemen...",
+			"recordNew": "Opnemen naar nieuwe laag",
 			"recording": "Opnemen",
 			"paused": "Gepauzeerd",
 			"start": "Start opname",
-			"startWithLayer": "Opnemen naar laag",
+			"startWithLayer": "Opnemen",
 			"stop": "Stop",
 			"pause": "Pauze",
 			"resume": "Hervat",

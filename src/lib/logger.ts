@@ -1,3 +1,5 @@
+/* eslint-disable no-console, no-restricted-syntax */
+
 export const logger = {
 	debug: (...args: unknown[]) => {
 		console.debug(...args)
