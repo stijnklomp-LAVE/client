@@ -4,6 +4,8 @@ const mockUserCreate = mock()
 const mockUserFindUnique = mock()
 const mockVerificationTokenCreate = mock()
 
+const mockSendEmail = mock()
+
 await mock.module("@/lib/db/prisma", () => ({
 	prismaClient: {
 		user: {
@@ -22,6 +24,10 @@ await mock.module("bcryptjs", () => ({
 	default: { hash: mockHash },
 }))
 
+await mock.module("@/lib/email/send", () => ({
+	sendEmail: mockSendEmail,
+}))
+
 const { POST } = await import("./route")
 
 const mockRequest = (body: Record<string, unknown>): Request =>
@@ -34,6 +40,7 @@ const mockRequest = (body: Record<string, unknown>): Request =>
 describe("POST /api/register", () => {
 	beforeEach(() => {
 		mockHash.mockResolvedValue("$2a$12$hashedpassword")
+		mockSendEmail.mockResolvedValue(undefined)
 	})
 
 	afterEach(() => {
@@ -85,7 +92,7 @@ describe("POST /api/register", () => {
 		expect(body.error).toBe("An account with this email already exists")
 	})
 
-	test("returns 201 and creates user and verification token on success", async () => {
+	test("returns 201 and sends verification email on success", async () => {
 		mockUserFindUnique.mockResolvedValue(null)
 		mockUserCreate.mockResolvedValue({
 			email: "test@test.com",
@@ -131,6 +138,12 @@ describe("POST /api/register", () => {
 				token: expect.any(String),
 			},
 		})
+
+		expect(mockSendEmail).toHaveBeenCalledWith(
+			"test@test.com",
+			"Verify your email address",
+			expect.stringContaining("Verify your email address"),
+		)
 	})
 
 	test("returns 201 with null name when name is not provided", async () => {
@@ -159,6 +172,37 @@ describe("POST /api/register", () => {
 				password: expect.any(String),
 			},
 		})
+	})
+
+	test("returns 201 and falls back to console when email sending fails", async () => {
+		mockUserFindUnique.mockResolvedValue(null)
+		mockUserCreate.mockResolvedValue({
+			email: "test@test.com",
+			id: "new-user-id",
+		})
+		mockVerificationTokenCreate.mockResolvedValue({
+			expires: new Date(),
+			identifier: "test@test.com",
+			token: "uuid-token",
+		})
+		mockSendEmail.mockRejectedValue(new Error("SMTP connection failed"))
+
+		const response = await POST(
+			mockRequest({
+				email: "test@test.com",
+				name: "Test User",
+				password: "password123",
+			}),
+		)
+
+		const body = (await response.json()) as {
+			message: string
+			verifyUrl: string
+		}
+
+		expect(response.status).toBe(201)
+		expect(body.message).toContain("Account created")
+		expect(body.verifyUrl).toContain("/api/verify-email?token=")
 	})
 
 	test("returns 500 when database operation fails", async () => {

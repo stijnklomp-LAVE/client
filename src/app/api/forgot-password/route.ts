@@ -2,6 +2,8 @@ import crypto from "node:crypto"
 
 import { NextResponse } from "next/server"
 
+import { renderPasswordResetEmail } from "@/lib/email/templates"
+import { sendEmail } from "@/lib/email/send"
 import { logger } from "@/lib/logger"
 import { prismaClient } from "@/lib/db/prisma"
 
@@ -39,7 +41,15 @@ export const POST = async (request: Request) => {
 			const origin = new URL(request.url).origin
 			const resetUrl = `${origin}/en/reset-password?token=${resetToken}`
 
-			console.warn(`[DEV] Password reset link for ${email}: ${resetUrl}`)
+			try {
+				const html = await renderPasswordResetEmail(email, resetUrl)
+
+				await sendEmail(email, "Reset your password", html)
+			} catch {
+				console.warn(
+					`[DEV] Password reset link for ${email}: ${resetUrl}`,
+				)
+			}
 		}
 
 		return NextResponse.json({

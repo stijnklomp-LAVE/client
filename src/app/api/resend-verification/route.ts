@@ -2,6 +2,8 @@ import crypto from "node:crypto"
 
 import { NextResponse } from "next/server"
 
+import { renderVerificationEmail } from "@/lib/email/templates"
+import { sendEmail } from "@/lib/email/send"
 import { logger } from "@/lib/logger"
 import { prismaClient } from "@/lib/db/prisma"
 
@@ -52,7 +54,15 @@ export const POST = async (request: Request) => {
 
 		const verifyUrl = `${origin}/api/verify-email?token=${verificationToken}`
 
-		console.warn(`[DEV] New verification link for ${email}: ${verifyUrl}`)
+		try {
+			const html = await renderVerificationEmail(email, verifyUrl)
+
+			await sendEmail(email, "Verify your email address", html)
+		} catch {
+			console.warn(
+				`[DEV] New verification link for ${email}: ${verifyUrl}`,
+			)
+		}
 
 		return NextResponse.json({
 			message: "Verification email resent",

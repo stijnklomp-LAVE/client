@@ -279,3 +279,29 @@
 	text-overflow: ellipsis;
 	white-space: nowrap;
 }
+
+.deleteLayerButton {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 24px;
+	height: 24px;
+	border: 1px solid transparent;
+	border-radius: 4px;
+	background: transparent;
+	color: var(--text-secondary);
+	cursor: pointer;
+	flex-shrink: 0;
+	opacity: 0.5;
+	transition:
+		opacity 0.15s ease,
+		background-color 0.15s ease,
+		color 0.15s ease;
+
+	&:hover {
+		opacity: 1;
+		background: rgba(224, 49, 49, 0.15);
+		color: #e03131;
+		border-color: rgba(224, 49, 49, 0.3);
+	}
+}

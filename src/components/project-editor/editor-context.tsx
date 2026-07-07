@@ -73,6 +73,7 @@ interface EditorContextValue {
 	projectId: string
 	addLayer: () => Promise<TimelineLayer | null>
 	addSegment: (layerId: string, fragmentId: string) => Promise<void>
+	deleteLayer: (layerId: string) => Promise<boolean>
 	isRecording: boolean
 	recordingLayerId: string | null
 	isPaused: boolean
@@ -225,6 +226,22 @@ export const EditorProvider = ({
 						: l,
 				),
 			)
+		},
+		[projectId],
+	)
+
+	const deleteLayer = useCallback(
+		async (layerId: string): Promise<boolean> => {
+			const res = await fetch(
+				`/api/projects/${projectId}/layers/${layerId}`,
+				{ method: "DELETE" },
+			)
+
+			if (!res.ok) return false
+
+			setLayers((prev) => prev.filter((l) => l.id !== layerId))
+
+			return true
 		},
 		[projectId],
 	)
@@ -400,6 +417,7 @@ export const EditorProvider = ({
 				projectId,
 				addLayer,
 				addSegment,
+				deleteLayer,
 				isRecording: recording.isRecording,
 				recordingLayerId,
 				isPaused,

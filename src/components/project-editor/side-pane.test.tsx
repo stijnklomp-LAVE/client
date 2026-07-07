@@ -72,6 +72,7 @@ const defaultContextValue = {
 	projectId: "test-project",
 	addLayer: mockAddLayer,
 	addSegment: mockAddSegment,
+	deleteLayer: vi.fn(),
 	isRecording: false,
 	recordingLayerId: null,
 	isPaused: false,

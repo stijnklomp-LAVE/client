@@ -1,7 +1,12 @@
 "use client"
 
 import { useCallback, useEffect, useRef, useState } from "react"
-import { IconChevronDown, IconChevronUp, IconPlus } from "@tabler/icons-react"
+import {
+	IconChevronDown,
+	IconChevronUp,
+	IconPlus,
+	IconTrash,
+} from "@tabler/icons-react"
 import { Modal } from "@mantine/core"
 import { useTranslations } from "next-intl"
 
@@ -22,6 +27,7 @@ export const TimelinePanel = (): React.JSX.Element => {
 		layers,
 		addLayer,
 		addSegment,
+		deleteLayer,
 		fragments,
 		isRecording,
 		recordingLayerId,
@@ -210,6 +216,15 @@ export const TimelinePanel = (): React.JSX.Element => {
 												Fragment
 											</button>
 										</div>
+										<button
+											className={styles.deleteLayerButton}
+											onClick={() =>
+												deleteLayer(layer.id)
+											}
+											type="button"
+											aria-label={`Delete layer ${layer.name}`}>
+											<IconTrash size={14} />
+										</button>
 									</div>
 								)
 							})}

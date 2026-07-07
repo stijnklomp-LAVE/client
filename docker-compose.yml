@@ -18,6 +18,9 @@ x-app: &app
   environment:
     RABBIT_HOST: rabbitmq
     DATABASE_URL: "postgresql://dev:admin123@db:5432/video-editor?schema=public"
+    SMTP_HOST: mailpit
+    SMTP_PORT: "1025"
+    EMAIL_FROM: "noreply@video-editor.local"
   env_file:
     - path: .env.development
   ports:
@@ -37,6 +40,13 @@ x-app-shared: &app-shared
         - client
 
 services:
+  mailpit:
+    image: axllent/mailpit:latest
+    ports:
+      - "1025:1025"
+      - "8025:8025"
+    profiles: [dev, local, test]
+
   db:
     image: postgres:latest
     restart: always

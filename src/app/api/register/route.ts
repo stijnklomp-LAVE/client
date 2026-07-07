@@ -4,6 +4,8 @@ import { NextResponse } from "next/server"
 import bcrypt from "bcryptjs"
 
 import { logger } from "@/lib/logger"
+import { renderVerificationEmail } from "@/lib/email/templates"
+import { sendEmail } from "@/lib/email/send"
 import { prismaClient } from "@/lib/db/prisma"
 
 type RegisterBody = {
@@ -66,7 +68,13 @@ export const POST = async (request: Request) => {
 
 		const verifyUrl = `${origin}/api/verify-email?token=${verificationToken}`
 
-		console.warn(`[DEV] Verification link for ${email}: ${verifyUrl}`)
+		try {
+			const html = await renderVerificationEmail(email, verifyUrl)
+
+			await sendEmail(email, "Verify your email address", html)
+		} catch {
+			console.warn(`[DEV] Verification link for ${email}: ${verifyUrl}`)
+		}
 
 		return NextResponse.json(
 			{
