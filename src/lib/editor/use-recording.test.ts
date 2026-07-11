@@ -309,6 +309,96 @@ describe("useRecording", () => {
 		})
 	})
 
+	test("startRecording after stopRecording resets state correctly", async () => {
+		const { result } = renderHook(() => useRecording())
+
+		await act(async () => {
+			await result.current.startRecording(
+				createMockStream(),
+				createMockDirHandle(),
+				"proj-123",
+				"rec-456",
+			)
+		})
+
+		expect(result.current.isRecording).toBe(true)
+		expect(result.current.frameCount).toBe(0)
+		expect(result.current.elapsedMs).toBe(0)
+
+		await act(async () => {
+			await result.current.stopRecording()
+		})
+
+		expect(result.current.isRecording).toBe(false)
+
+		await act(async () => {
+			await result.current.startRecording(
+				createMockStream(),
+				createMockDirHandle(),
+				"proj-123",
+				"rec-789",
+			)
+		})
+
+		expect(result.current.isRecording).toBe(true)
+		expect(result.current.frameCount).toBe(0)
+		expect(result.current.elapsedMs).toBe(0)
+	})
+
+	test("timer resumes after pause-stop-start cycle", async () => {
+		vi.useFakeTimers()
+		const { result } = renderHook(() => useRecording())
+
+		await act(async () => {
+			await result.current.startRecording(
+				createMockStream(),
+				createMockDirHandle(),
+				"proj-123",
+				"rec-456",
+			)
+		})
+
+		act(() => {
+			vi.advanceTimersByTime(200)
+		})
+		expect(result.current.elapsedMs).toBeGreaterThan(0)
+
+		act(() => {
+			result.current.pauseRecording()
+		})
+
+		act(() => {
+			vi.advanceTimersByTime(500)
+		})
+
+		await act(async () => {
+			await result.current.stopRecording()
+		})
+		expect(result.current.isRecording).toBe(false)
+
+		act(() => {
+			vi.advanceTimersByTime(300)
+		})
+
+		await act(async () => {
+			await result.current.startRecording(
+				createMockStream(),
+				createMockDirHandle(),
+				"proj-123",
+				"rec-789",
+			)
+		})
+
+		expect(result.current.elapsedMs).toBe(0)
+
+		act(() => {
+			vi.advanceTimersByTime(200)
+		})
+		expect(result.current.elapsedMs).toBeGreaterThan(0)
+
+		vi.useRealTimers()
+	})
+
 	test("pauseRecording delegates to source.pause", async () => {
 		const { result } = renderHook(() => useRecording())
 
@@ -434,6 +524,65 @@ describe("useRecording", () => {
 
 		expect(mockSaveFrame).toHaveBeenCalledTimes(1)
 		expect(result.current.frameCount).toBe(1)
+	})
+
+	test("uses fidelity thresholds for frame count display updates", async () => {
+		const { result } = renderHook(() => useRecording())
+
+		await act(async () => {
+			await result.current.startRecording(
+				createMockStream(),
+				createMockDirHandle(),
+				"proj-123",
+				"rec-456",
+			)
+		})
+
+		const cb = getEncodingConfig().onEncodedSample
+
+		await act(async () => {
+			cb(createSample(0))
+			await Promise.resolve()
+		})
+		expect(result.current.frameCount).toBe(1)
+
+		await act(async () => {
+			cb(createSample(1))
+			await Promise.resolve()
+		})
+		expect(result.current.frameCount).toBe(2)
+
+		for (let i = 2; i < 9; i++) {
+			await act(async () => {
+				cb(createSample(i))
+				await Promise.resolve()
+			})
+		}
+
+		expect(result.current.frameCount).toBe(9)
+
+		await act(async () => {
+			cb(createSample(9))
+			await Promise.resolve()
+		})
+		expect(result.current.frameCount).toBe(10)
+
+		const frameCountAt10 = result.current.frameCount
+
+		for (let i = 10; i < 19; i++) {
+			await act(async () => {
+				cb(createSample(i))
+				await Promise.resolve()
+			})
+		}
+
+		expect(result.current.frameCount).toBe(frameCountAt10)
+
+		await act(async () => {
+			cb(createSample(19))
+			await Promise.resolve()
+		})
+		expect(result.current.frameCount).toBe(20)
 	})
 
 	test("throttles frame saving by configured fps", async () => {

@@ -1,4 +1,15 @@
 import { useCallback, useEffect, useRef, useState } from "react"
+
+const getDisplayStep = (count: number): number => {
+	if (count < 10) return 1
+
+	if (count < 50) return 10
+
+	if (count < 100) return 20
+
+	return 30
+}
+
 import {
 	MediaStreamVideoTrackSource,
 	Output,
@@ -63,6 +74,7 @@ export const useRecording = () => {
 	const isRecordingRef = useRef(false)
 	const pauseStartTimeRef = useRef<number>(0)
 	const pausedRef = useRef(false)
+	const lastDisplayedFrameCountRef = useRef<number>(0)
 
 	const saveFrameIfNeeded = useCallback(
 		async (sample: VideoSample): Promise<void> => {
@@ -106,10 +118,17 @@ export const useRecording = () => {
 					blob,
 					format,
 				)
-				setState((prev) => ({
-					...prev,
-					frameCount: frameCountRef.current,
-				}))
+				const actualCount = frameCountRef.current
+				const step = getDisplayStep(actualCount)
+				const milestone = Math.floor(actualCount / step) * step
+
+				if (milestone !== lastDisplayedFrameCountRef.current) {
+					lastDisplayedFrameCountRef.current = milestone
+					setState((prev) => ({
+						...prev,
+						frameCount: actualCount,
+					}))
+				}
 			} catch {
 				// frame save failed silently
 			}
@@ -138,8 +157,10 @@ export const useRecording = () => {
 			projectIdRef.current = projectId
 			recordingIdRef.current = recordingId
 			frameCountRef.current = 0
+			lastDisplayedFrameCountRef.current = 0
 			lastSavedTimeRef.current = -Infinity
 			pauseStartTimeRef.current = 0
+			pausedRef.current = false
 
 			canvasRef.current = new OffscreenCanvas(640, 480)
 

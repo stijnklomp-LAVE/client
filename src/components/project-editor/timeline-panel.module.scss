@@ -269,6 +269,7 @@
 	align-items: center;
 	padding: 0 6px;
 	flex-shrink: 0;
+	transition: width 1s linear;
 }
 
 .recordingLabel {

@@ -277,7 +277,14 @@ export const EditorProvider = ({
 	const startRecording = useCallback(
 		async (layerId: string | null, stream?: MediaStream) => {
 			try {
-				if (!stream) {
+				setIsPaused(false)
+
+				if (
+					!stream ||
+					stream
+						.getVideoTracks()
+						.every((track) => track.readyState !== "live")
+				) {
 					stream = await navigator.mediaDevices.getUserMedia({
 						video: {
 							deviceId: selectedCameraId
@@ -333,6 +340,7 @@ export const EditorProvider = ({
 			setModeState,
 			clearPendingRecordingLayerId,
 			notifyNoDirectory,
+			setIsPaused,
 		],
 	)
 

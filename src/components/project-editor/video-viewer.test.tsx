@@ -441,6 +441,68 @@ describe("VideoViewer", () => {
 			)
 		})
 
+		it("shows record button again after recording stops", async () => {
+			mockEnumerateDevices.mockResolvedValue([])
+			mockGetUserMedia.mockResolvedValue(createMockStream())
+
+			const startRecording = vi.fn()
+			const user = userEvent.setup()
+
+			renderWithContext({
+				selectedCameraId: "cam-1",
+				layers: [
+					{
+						id: "layer-1",
+						name: "Layer 1",
+						createdAt: "",
+						projectId: "p1",
+						segments: [] as TimelineSegment[],
+						zIndex: 0,
+					},
+				],
+				rawFramesDirectoryHandle: mockDirHandle,
+				startRecording,
+				isRecording: false,
+			})
+
+			await waitFor(() => {
+				expect(mockGetUserMedia).toHaveBeenCalled()
+			})
+
+			expect(
+				screen.getByText("recording.startWithLayer"),
+			).toBeInTheDocument()
+
+			await user.click(screen.getByText("recording.startWithLayer"))
+			expect(startRecording).toHaveBeenCalled()
+
+			cleanup()
+
+			mockGetUserMedia.mockResolvedValue(createMockStream())
+			renderWithContext({
+				selectedCameraId: "cam-1",
+				layers: [
+					{
+						id: "layer-1",
+						name: "Layer 1",
+						createdAt: "",
+						projectId: "p1",
+						segments: [] as TimelineSegment[],
+						zIndex: 0,
+					},
+				],
+				rawFramesDirectoryHandle: mockDirHandle,
+				startRecording,
+				isRecording: false,
+			})
+
+			await waitFor(() => {
+				expect(
+					screen.getByText("recording.startWithLayer"),
+				).toBeInTheDocument()
+			})
+		})
+
 		it("creates a new layer when no layers exist and record is clicked", async () => {
 			mockEnumerateDevices.mockResolvedValue([])
 			mockGetUserMedia.mockResolvedValue(createMockStream())
