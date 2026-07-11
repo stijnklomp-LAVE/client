@@ -1,7 +1,14 @@
 "use client"
 
+import { Menu } from "@mantine/core"
+import {
+	IconCheck,
+	IconChevronDown,
+	IconPlayerRecord,
+	IconPlus,
+	IconVideo,
+} from "@tabler/icons-react"
 import { useCallback, useEffect, useRef, useState } from "react"
-import { IconPlayerRecord, IconVideo } from "@tabler/icons-react"
 import { useTranslations } from "next-intl"
 
 import { useEditorContext } from "./editor-context"
@@ -21,13 +28,16 @@ export const VideoViewer = (): React.JSX.Element => {
 		layers,
 		addLayer,
 		startRecording,
+		setRecordingLayerId,
 		rawFramesDirectoryHandle,
 		notifyNoDirectory,
 	} = useEditorContext()
 	const videoRef = useRef<HTMLVideoElement>(null)
 	const streamRef = useRef<MediaStream | null>(null)
-	const [showLayerPicker, setShowLayerPicker] = useState(false)
-	const [creatingLayer, setCreatingLayer] = useState(false)
+	const [selectedLayerId, setSelectedLayerId] = useState<string | null>(() =>
+		layers.length > 0 ? layers[0]!.id : "__new__",
+	)
+	const [dropdownOpened, setDropdownOpened] = useState(false)
 
 	useEffect(() => {
 		if (mode !== "capture") {
@@ -110,50 +120,48 @@ export const VideoViewer = (): React.JSX.Element => {
 		}
 	}, [mode, selectedCameraId, setAvailableCameras, setCameraError])
 
-	const handleStartRecording = useCallback(
-		async (layerId: string) => {
-			await startRecording(layerId, streamRef.current ?? undefined)
-		},
-		[startRecording],
-	)
-
-	const handleRecordClick = useCallback(() => {
+	const handleRecordClick = useCallback(async () => {
 		if (!rawFramesDirectoryHandle) {
 			notifyNoDirectory()
 			return
 		}
 
 		if (pendingRecordingLayerId) {
-			handleStartRecording(pendingRecordingLayerId)
+			await startRecording(
+				pendingRecordingLayerId,
+				streamRef.current ?? undefined,
+			)
 			clearPendingRecordingLayerId()
+			return
+		}
+
+		const targetLayerId =
+			selectedLayerId === "__new__"
+				? null
+				: (selectedLayerId ?? layers[0]?.id)
+
+		if (targetLayerId) {
+			await startRecording(targetLayerId, streamRef.current ?? undefined)
 		} else {
-			setShowLayerPicker((prev) => !prev)
+			await startRecording(null, streamRef.current ?? undefined)
+
+			addLayer().then((layer) => {
+				if (layer) {
+					setRecordingLayerId(layer.id)
+				}
+			})
 		}
 	}, [
 		rawFramesDirectoryHandle,
 		pendingRecordingLayerId,
-		handleStartRecording,
+		selectedLayerId,
+		layers,
 		clearPendingRecordingLayerId,
 		notifyNoDirectory,
+		startRecording,
+		addLayer,
+		setRecordingLayerId,
 	])
-
-	const handleLayerSelect = useCallback(
-		async (layerId: string) => {
-			setShowLayerPicker(false)
-			handleStartRecording(layerId)
-		},
-		[handleStartRecording],
-	)
-
-	const handleNewLayer = useCallback(async () => {
-		setCreatingLayer(true)
-		const layer = await addLayer()
-		setCreatingLayer(false)
-		if (layer) {
-			setShowLayerPicker(false)
-			handleStartRecording(layer.id)
-		}
-	}, [addLayer, handleStartRecording])
 
 	if (mode === "capture") {
 		const hasActiveCamera = Boolean(selectedCameraId) && !cameraError
@@ -181,52 +189,87 @@ export const VideoViewer = (): React.JSX.Element => {
 					)}
 					{showRecordButton && (
 						<div className={styles.recordOverlay}>
-							<button
-								className={styles.recordButton}
-								onClick={handleRecordClick}
-								type="button">
-								<IconPlayerRecord size={20} />
-								<span>
-									{pendingRecordingLayerId
-										? translations("recording.start")
-										: translations(
-												"recording.startWithLayer",
-											)}
-								</span>
-							</button>
-							{showLayerPicker && (
-								<select
-									className={styles.layerPicker}
-									defaultValue=""
-									disabled={creatingLayer}
-									onChange={(e) => {
-										const value = e.currentTarget.value
-										e.currentTarget.value = ""
-										if (value === "__new__") {
-											handleNewLayer()
-										} else if (value) {
-											handleLayerSelect(value)
-										}
-									}}>
-									<option value="" disabled>
-										{creatingLayer
-											? translations(
-													"recording.recording",
-												)
+							<div className={styles.recordButtonContainer}>
+								<button
+									className={styles.recordButtonMain}
+									onClick={handleRecordClick}
+									type="button">
+									<IconPlayerRecord size={20} />
+									<span>
+										{pendingRecordingLayerId
+											? translations("recording.start")
 											: translations(
+													"recording.startWithLayer",
+												)}
+									</span>
+								</button>
+								{pendingRecordingLayerId ? null : (
+									<Menu
+										opened={dropdownOpened}
+										onChange={setDropdownOpened}
+										position="top-end"
+										withinPortal={false}
+										offset={4}>
+										<Menu.Target>
+											<button
+												className={
+													styles.recordButtonDropdown
+												}
+												type="button"
+												aria-label="Select layer">
+												<IconChevronDown size={16} />
+											</button>
+										</Menu.Target>
+										<Menu.Dropdown>
+											<Menu.Label>
+												{translations(
+													"recording.recordTo",
+												)}
+											</Menu.Label>
+											{layers.map((layer) => (
+												<Menu.Item
+													key={layer.id}
+													leftSection={
+														selectedLayerId ===
+														layer.id ? (
+															<IconCheck
+																size={16}
+															/>
+														) : undefined
+													}
+													onClick={() => {
+														setSelectedLayerId(
+															layer.id,
+														)
+														setDropdownOpened(false)
+													}}>
+													{layer.name}
+												</Menu.Item>
+											))}
+											<Menu.Divider />
+											<Menu.Item
+												leftSection={
+													selectedLayerId ===
+													"__new__" ? (
+														<IconCheck size={16} />
+													) : (
+														<IconPlus size={16} />
+													)
+												}
+												onClick={() => {
+													setSelectedLayerId(
+														"__new__",
+													)
+													setDropdownOpened(false)
+												}}>
+												{translations(
 													"recording.recordNew",
 												)}
-									</option>
-									<option value="__new__">
-										+ {translations("recording.recordNew")}
-									</option>
-									{layers.map((layer) => (
-										<option key={layer.id} value={layer.id}>
-											{layer.name}
-										</option>
-									))}
-								</select>
-							)}
+											</Menu.Item>
+										</Menu.Dropdown>
+									</Menu>
+								)}
+							</div>
 						</div>
 					)}
 				</div>

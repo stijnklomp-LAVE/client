@@ -135,27 +135,31 @@ ESLint uses `stijnklomp-linting-formatting-config` with strict TypeScript and Re
 
 ### Testing
 
+Tests are split into two categories by file extension (see [testing skill](../testing/SKILL.md) for details):
+- `*.test.ts` — business logic tests (hooks, utilities, API routes)
+- `*.test.tsx` — UI/element tests (component rendering, user interaction)
+
 **Preferred — Docker Compose:**
 
 ```bash
-# Unit tests
+# Run all tests
 docker compose --profile dev run --rm dev bun run test
-docker compose --profile dev run --rm dev bun run test:unit
 
-# Feature tests
-docker compose --profile dev run --rm dev bun run test:feature
+# Run tests matching a pattern
+docker compose --profile dev run --rm dev bun run test --test-name-pattern "RecordingControls"
+
+# Run a specific test file
+docker compose --profile dev run --rm dev bun run test src/components/project-editor/recording-controls.test.tsx
 ```
 
 **Fallback — only if no Docker configuration exists:**
 
 ```bash
-# Unit tests
+# Run all tests
 bun run test
-bun run test:unit
-bun run test:coverage
 
-# Feature tests
-bun run test:feature
+# Run with coverage
+bun run test:coverage
 ```
 
 ### Documentation

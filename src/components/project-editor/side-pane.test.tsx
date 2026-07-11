@@ -89,6 +89,7 @@ const defaultContextValue = {
 	setPendingRecordingLayerId: vi.fn(),
 	clearPendingRecordingLayerId: vi.fn(),
 	startRecording: mockStartRecording,
+	setRecordingLayerId: vi.fn(),
 	stopRecording: mockStopRecording,
 	pauseRecording: mockPauseRecording,
 	resumeRecording: mockResumeRecording,

@@ -1,82 +1,99 @@
 ---
 name: testing
-description: MUST USE when writing, running, or debugging tests in this Next.js + Bun project. The project currently has no test suite, but this skill covers what testing would look like if added.
+description: MUST USE when writing, running, or debugging tests in this Next.js + Bun project. Tests use Bun's test runner (`bun:test`) with Testing Library for component tests.
 ---
 
 # Project Testing
 
-This skill describes the testing state of this Next.js + Bun project.
+This skill describes the testing conventions for this Next.js + Bun project.
 
-## Current State
+## Test Runner
 
-**This project currently has no test suite configured.**
+- **Bun's built-in test runner** (`bun:test`) — no additional dependencies needed
+- **Testing Library** (`@testing-library/react`) — for UI/component tests
+- **user-event** (`@testing-library/user-event`) — for realistic user interactions in UI tests
 
-The `package.json` has no test scripts:
+## Test Organization
 
-- No `test`, `test:unit`, `test:feature`, or `test:acceptance` scripts
-- No test framework dependencies (no `bun:test` is used yet, though Bun has it built-in)
-- No `test/` directory exists
+Tests are **co-located** with the source file they test. Two categories exist, distinguished by file extension:
 
-## Recommended Testing Strategy (If Adding)
+| Extension | Category | What it tests |
+|-----------|----------|---------------|
+| `*.test.ts` | Business logic | Pure functions, hooks (via `renderHook`), utilities, API route handlers |
+| `*.test.tsx` | UI / elements | Component rendering, user interactions, visual states |
 
-If you want to add tests, here is the recommended approach:
+This maps naturally: business logic never imports JSX (`.ts`), while UI tests always render components (`.tsx`).
 
-### 1. Unit Tests
+### Business Logic Tests (`*.test.ts`)
 
-Use Bun's built-in test runner (`bun:test`):
+Test non-UI code — functions, hooks, utilities, API routes.
 
-```typescript
-import { describe, test, expect } from "bun:test"
+**Patterns:**
+- Use `renderHook` from `@testing-library/react` for custom hooks
+- Mock external dependencies (mediabunny, filesystem, etc.) with `vi.mock`
+- No `MantineProvider` or component wrappers needed
+- Mock `next-intl` if the code under test uses translations
 
-describe("Theme utilities", () => {
-	test("should toggle theme", () => {
-		// Test theme toggle logic
-	})
-})
+**Examples:**
+```
+src/lib/editor/use-recording.test.ts          — recording pipeline logic
+src/app/api/forgot-password/route.test.ts     — API route handler
 ```
 
-### 2. E2E Tests
+### UI / Element Tests (`*.test.tsx`)
 
-A Playwright service is commented out in `docker-compose.yml`. To enable it:
+Test component rendering, user interaction, and visual states.
 
-1. Uncomment the `playwright` service in `docker-compose.yml`
-2. Add Playwright as a dev dependency:
-    ```bash
-    bun add --dev @playwright/test
-    ```
-3. Create `playwright.config.ts`
+**Patterns:**
+- Wrap in `MantineProvider` + relevant context providers (e.g., `EditorContext.Provider`)
+- Mock `next-intl` with `useTranslations: () => (key: string) => key`
+- Assert on rendered output (`getByText`, `getByLabelText`) and `data-` attributes
+- Test label/button visibility via CSS attribute checks (`toHaveAttribute("data-hidden")`), not DOM presence — elements may exist in the DOM while hidden via CSS
+- Use `userEvent.setup()` for click/input interactions
+- Mock browser APIs (`navigator.mediaDevices`) in `beforeEach`
+- Call `cleanup()` in `afterEach`
 
-Run Playwright inside Docker:
+**Examples:**
+```
+src/components/project-editor/recording-controls.test.tsx   — recording UI controls
+src/components/project-editor/video-viewer.test.tsx          — video viewer + split button
+src/components/project-editor/side-pane.test.tsx             — side pane
+```
+
+### Both Categories
+
+- Tests are placed **next to the file they test** (same directory)
+- Import `describe`, `test`, `expect`, `vi`, `mock`, `beforeEach`, `afterEach` from `bun:test`
+- Run `bun run lint:fix` after writing tests to auto-fix issues
+
+## Running Tests
 
 ```bash
-docker compose --profile dev exec playwright npx playwright test
+# Run all tests
+docker compose --profile dev run --rm dev bun run test
+
+# Run tests matching a pattern
+docker compose --profile dev run --rm dev bun run test --test-name-pattern "RecordingControls"
+
+# Run a specific test file
+docker compose --profile dev run --rm dev bun run test src/components/project-editor/recording-controls.test.tsx
+
+# Run tests with coverage
+docker compose --profile dev run --rm dev bun run test:coverage
 ```
 
-### 3. Component Tests
-
-For React component testing, consider:
-
-- **Testing Library** (`@testing-library/react`) with Bun test runner
-- Or **Storybook** for visual component testing
-
-## Code Coverage (If Adding Tests)
-
-If tests are added, configure coverage in `bunfig.toml`:
-
-```toml
-[test]
-coverageDir = "test/coverage"
-coverageSkipTestFiles = true
-coverageThreshold = 1
-coveragePathIgnorePatterns = [
-  "test/**",
-  ".next/**",
-  "src/app/**",
-]
+**Fallback (host, no Docker):**
+```bash
+bun run test
+bun run test --test-name-pattern "useRecording"
 ```
+
+## E2E Tests
+
+A Playwright service is commented out in `docker-compose.yml`. Not currently active — no Playwright tests exist yet.
 
 ## Important Rules
 
-1. **If adding tests**, create the test infrastructure first (scripts, directories, config) before writing test files
-2. **Do not write test files** for this project unless the user explicitly asks for tests to be added
-3. **Run `bun run lint:fix` after writing tests** to auto-fix any lint issues before committing. Prefer this over manual fixes.
+1. **Do not write test files** unless the user explicitly asks
+2. **Run `bun run lint:fix` after writing tests** — prefer auto-fix over manual fixes
+3. **Never add `eslint-disable` comments** — fix code to satisfy lint rules instead

@@ -328,6 +328,49 @@ describe("useRecording", () => {
 		expect(mockSourceInstance.pause).toHaveBeenCalled()
 	})
 
+	test("elapsedMs does not increase while paused", async () => {
+		vi.useFakeTimers()
+		const { result } = renderHook(() => useRecording())
+
+		await act(async () => {
+			await result.current.startRecording(
+				createMockStream(),
+				createMockDirHandle(),
+				"proj-123",
+				"rec-456",
+			)
+		})
+
+		act(() => {
+			vi.advanceTimersByTime(300)
+		})
+
+		const elapsedBefore = result.current.elapsedMs
+		expect(elapsedBefore).toBeGreaterThan(0)
+
+		act(() => {
+			result.current.pauseRecording()
+		})
+
+		act(() => {
+			vi.advanceTimersByTime(500)
+		})
+
+		expect(result.current.elapsedMs).toBe(elapsedBefore)
+
+		act(() => {
+			result.current.resumeRecording()
+		})
+
+		act(() => {
+			vi.advanceTimersByTime(200)
+		})
+
+		expect(result.current.elapsedMs).toBeGreaterThan(elapsedBefore)
+
+		vi.useRealTimers()
+	})
+
 	test("resumeRecording delegates to source.resume", async () => {
 		const { result } = renderHook(() => useRecording())
 

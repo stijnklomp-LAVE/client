@@ -61,6 +61,8 @@ export const useRecording = () => {
 	const lastSavedTimeRef = useRef<number>(0)
 	const frameCountRef = useRef<number>(0)
 	const isRecordingRef = useRef(false)
+	const pauseStartTimeRef = useRef<number>(0)
+	const pausedRef = useRef(false)
 
 	const saveFrameIfNeeded = useCallback(
 		async (sample: VideoSample): Promise<void> => {
@@ -137,6 +139,7 @@ export const useRecording = () => {
 			recordingIdRef.current = recordingId
 			frameCountRef.current = 0
 			lastSavedTimeRef.current = -Infinity
+			pauseStartTimeRef.current = 0
 
 			canvasRef.current = new OffscreenCanvas(640, 480)
 
@@ -218,7 +221,7 @@ export const useRecording = () => {
 	useEffect(() => {
 		if (state.isRecording) {
 			elapsedTimerRef.current = setInterval(() => {
-				if (!isRecordingRef.current) return
+				if (!isRecordingRef.current || pausedRef.current) return
 				setState((prev) => {
 					const elapsed = performance.now() - startTimeRef.current
 
@@ -287,10 +290,14 @@ export const useRecording = () => {
 		}, [])
 
 	const pauseRecording = useCallback(() => {
+		pausedRef.current = true
+		pauseStartTimeRef.current = performance.now()
 		sourceRef.current?.pause()
 	}, [])
 
 	const resumeRecording = useCallback(() => {
+		startTimeRef.current += performance.now() - pauseStartTimeRef.current
+		pausedRef.current = false
 		sourceRef.current?.resume()
 	}, [])
 

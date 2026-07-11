@@ -42,12 +42,12 @@ export const RecordingControls = (): React.JSX.Element | null => {
 					<div className={styles.labelWrapper}>
 						<span
 							className={styles.label}
-							data-hidden={!isPaused || undefined}>
+							data-hidden={isPaused || undefined}>
 							{translations("recording.recording")}
 						</span>
 						<span
 							className={styles.label}
-							data-hidden={isPaused || undefined}>
+							data-hidden={!isPaused || undefined}>
 							{translations("recording.paused")}
 						</span>
 					</div>

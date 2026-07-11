@@ -89,7 +89,11 @@ interface EditorContextValue {
 	pendingRecordingLayerId: string | null
 	setPendingRecordingLayerId: (layerId: string) => void
 	clearPendingRecordingLayerId: () => void
-	startRecording: (layerId: string, stream?: MediaStream) => Promise<void>
+	startRecording: (
+		layerId: string | null,
+		stream?: MediaStream,
+	) => Promise<void>
+	setRecordingLayerId: (layerId: string | null) => void
 	stopRecording: () => Promise<void>
 	pauseRecording: () => void
 	resumeRecording: () => void
@@ -161,8 +165,13 @@ export const EditorProvider = ({
 		})
 		setWiggleDirectoryKey((k) => k + 1)
 	}, [translations])
-	const [recordingLayerId, setRecordingLayerId] = useState<string | null>(
-		null,
+	const [recordingLayerId, setRecordingLayerIdState] = useState<
+		string | null
+	>(null)
+
+	const setRecordingLayerId = useCallback(
+		(layerId: string | null) => setRecordingLayerIdState(layerId),
+		[setRecordingLayerIdState],
 	)
 	const [isPaused, setIsPaused] = useState(false)
 	const [pendingRecordingLayerId, setPendingRecordingLayerIdState] = useState<
@@ -266,7 +275,7 @@ export const EditorProvider = ({
 	)
 
 	const startRecording = useCallback(
-		async (layerId: string, stream?: MediaStream) => {
+		async (layerId: string | null, stream?: MediaStream) => {
 			try {
 				if (!stream) {
 					stream = await navigator.mediaDevices.getUserMedia({
@@ -289,7 +298,9 @@ export const EditorProvider = ({
 				await video.play()
 				videoRef.current = video
 
-				setRecordingLayerId(layerId)
+				if (layerId !== null) {
+					setRecordingLayerIdState(layerId)
+				}
 
 				if (!rawFramesDirectoryHandle) {
 					notifyNoDirectory()
@@ -306,8 +317,6 @@ export const EditorProvider = ({
 					projectId,
 					recordingId,
 				)
-				recording.pauseRecording()
-				setIsPaused(true)
 			} catch (err) {
 				setCameraError(
 					err instanceof Error
@@ -324,7 +333,6 @@ export const EditorProvider = ({
 			setModeState,
 			clearPendingRecordingLayerId,
 			notifyNoDirectory,
-			setIsPaused,
 		],
 	)
 
@@ -380,7 +388,14 @@ export const EditorProvider = ({
 				logger.error("Failed to save recording", err)
 			}
 		}
-	}, [recording, recordingLayerId, projectId, addSegment, setModeState])
+	}, [
+		recording,
+		recordingLayerId,
+		projectId,
+		addSegment,
+		setModeState,
+		setRecordingLayerId,
+	])
 
 	const pauseRecording = useCallback(() => {
 		recording.pauseRecording()
@@ -434,6 +449,7 @@ export const EditorProvider = ({
 				setPendingRecordingLayerId,
 				clearPendingRecordingLayerId,
 				startRecording,
+				setRecordingLayerId,
 				stopRecording,
 				pauseRecording,
 				resumeRecording,
