@@ -95,6 +95,14 @@ const defaultContextValue = {
 	resumeRecording: mockResumeRecording,
 	recordingConfig: { fps: 1, format: "jpeg" as const, jpegQuality: 80 },
 	updateRecordingConfig: mockUpdateRecordingConfig,
+	currentTime: 0,
+	duration: 120,
+	isPlaying: false,
+	playbackSpeed: 1,
+	play: vi.fn(),
+	pause: vi.fn(),
+	seek: vi.fn(),
+	setPlaybackSpeed: vi.fn(),
 }
 
 const renderWithContext = (

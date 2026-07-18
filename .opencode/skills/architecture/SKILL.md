@@ -141,6 +141,7 @@ export function useToggle() { ... }
 ```
 
 This applies to all function forms:
+
 - `function name() {}` → `const name = () => {}`
 - `async function name() {}` → `const name = async () => {}`
 - `export function name() {}` → `export const name = () => {}`

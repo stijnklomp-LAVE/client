@@ -5,6 +5,7 @@ import {
 	useCallback,
 	useContext,
 	useEffect,
+	useMemo,
 	useRef,
 	useState,
 	type ReactNode,
@@ -15,6 +16,8 @@ import { useTranslations } from "next-intl"
 import type { TimelineLayer, TimelineSegment } from "@/lib/editor/types"
 import { logger } from "@/lib/logger"
 import { useRecording, type RecordingConfig } from "@/lib/editor/use-recording"
+import { computeDuration } from "@/lib/editor/compositor"
+import { getPersistedDirectoryHandle } from "@/lib/editor/raw-frames-directory"
 
 const STORAGE_PREFIX = "editor."
 
@@ -99,6 +102,14 @@ interface EditorContextValue {
 	resumeRecording: () => void
 	recordingConfig: RecordingConfig
 	updateRecordingConfig: (config: Partial<RecordingConfig>) => void
+	currentTime: number
+	duration: number
+	isPlaying: boolean
+	playbackSpeed: number
+	play: () => void
+	pause: () => void
+	seek: (time: number) => void
+	setPlaybackSpeed: (speed: number) => void
 }
 
 export const EditorContext = createContext<EditorContextValue | null>(null)
@@ -135,14 +146,6 @@ export const EditorProvider = ({
 	const [activeTab, setActiveTab] = useState<TabId>("settings")
 	const [timelineExpanded, { toggle: toggleTimeline }] = useDisclosure(false)
 	const [mode, setModeState] = useState<EditorMode>("editing")
-
-	useEffect(() => {
-		if (getStored("sidePaneOpen", false)) openSidePane()
-		const storedMode = getStored<EditorMode>("mode", "editing")
-		if (storedMode !== "editing") {
-			setTimeout(() => setModeState(storedMode))
-		}
-	}, [openSidePane])
 	const [selectedCameraId, setSelectedCameraId] = useState<string>("")
 	const [availableCameras, setAvailableCameras] = useState<MediaDeviceInfo[]>(
 		[],
@@ -157,6 +160,21 @@ export const EditorProvider = ({
 		string | null
 	>(null)
 	const [wiggleDirectoryKey, setWiggleDirectoryKey] = useState(0)
+
+	useEffect(() => {
+		if (getStored("sidePaneOpen", false)) openSidePane()
+		const storedMode = getStored<EditorMode>("mode", "editing")
+		if (storedMode !== "editing") {
+			setTimeout(() => setModeState(storedMode))
+		}
+
+		getPersistedDirectoryHandle().then((handle) => {
+			if (handle) {
+				setRawFramesDirectoryHandle(handle)
+				setRawFramesDirectoryName(handle.name)
+			}
+		})
+	}, [openSidePane])
 	const notifyNoDirectory = useCallback(() => {
 		notifications.show({
 			color: "red",
@@ -190,6 +208,56 @@ export const EditorProvider = ({
 	const recording = useRecording()
 	const streamRef = useRef<MediaStream | null>(null)
 	const videoRef = useRef<HTMLVideoElement | null>(null)
+
+	const [currentTime, setCurrentTime] = useState(0)
+	const [isPlaying, setIsPlaying] = useState(false)
+	const [playbackSpeed, setPlaybackSpeed] = useState(1)
+
+	const duration = useMemo(() => computeDuration(layers), [layers])
+
+	const play = useCallback(() => {
+		setCurrentTime((prev) => {
+			if (prev >= duration) return 0
+			return prev
+		})
+		setIsPlaying(true)
+	}, [duration])
+	const pause = useCallback(() => setIsPlaying(false), [])
+	const seek = useCallback(
+		(time: number) => {
+			setCurrentTime(Math.max(0, Math.min(time, duration)))
+		},
+		[duration],
+	)
+
+	useEffect(() => {
+		if (!isPlaying || duration <= 0) return
+
+		let rafId: number
+		let lastTime = performance.now()
+
+		const tick = (now: number) => {
+			const delta = ((now - lastTime) / 1000) * playbackSpeed
+			lastTime = now
+
+			setCurrentTime((prev) => {
+				const newTime = prev + delta
+
+				if (newTime >= duration) {
+					setIsPlaying(false)
+					return prev
+				}
+
+				return newTime
+			})
+
+			rafId = requestAnimationFrame(tick)
+		}
+
+		rafId = requestAnimationFrame(tick)
+
+		return () => cancelAnimationFrame(rafId)
+	}, [isPlaying, playbackSpeed, duration])
 
 	const addLayer = useCallback(async (): Promise<TimelineLayer | null> => {
 		const res = await fetch(`/api/projects/${projectId}/layers`, {
@@ -463,6 +531,14 @@ export const EditorProvider = ({
 				resumeRecording,
 				recordingConfig: recording.config,
 				updateRecordingConfig: recording.updateConfig,
+				currentTime,
+				duration,
+				isPlaying,
+				playbackSpeed,
+				play,
+				pause,
+				seek,
+				setPlaybackSpeed,
 			}}>
 			{children}
 		</EditorContext.Provider>

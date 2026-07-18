@@ -53,11 +53,13 @@ ALTER TABLE "NewTable" ADD COLUMN IF NOT EXISTS "createdAt" TIMESTAMP(3) NOT NUL
 The two-step pattern enforces **service autonomy over a shared schema**. Multiple services may share the same database but each independently owns the columns it needs. No service should assume another service will add or maintain a column it relies on.
 
 The pattern prevents:
+
 - **Tight coupling** — a service would break if another stops adding a column it depended on
 - **Migration conflicts** — multiple services trying to create the same table with different column sets
 - **Unnecessary dependencies** — a service shouldn't need to know about columns it never reads
 
 This ensures:
+
 - If the table already exists (created by another service in a previous deployment), only the columns this service cares about are added
 - If the table doesn't exist yet (e.g., a fresh database), it's created with only the columns this service cares about
 - No columns from other services are touched or required

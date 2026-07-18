@@ -17,10 +17,10 @@ This skill describes the testing conventions for this Next.js + Bun project.
 
 Tests are **co-located** with the source file they test. Two categories exist, distinguished by file extension:
 
-| Extension | Category | What it tests |
-|-----------|----------|---------------|
-| `*.test.ts` | Business logic | Pure functions, hooks (via `renderHook`), utilities, API route handlers |
-| `*.test.tsx` | UI / elements | Component rendering, user interactions, visual states |
+| Extension    | Category       | What it tests                                                           |
+| ------------ | -------------- | ----------------------------------------------------------------------- |
+| `*.test.ts`  | Business logic | Pure functions, hooks (via `renderHook`), utilities, API route handlers |
+| `*.test.tsx` | UI / elements  | Component rendering, user interactions, visual states                   |
 
 This maps naturally: business logic never imports JSX (`.ts`), while UI tests always render components (`.tsx`).
 
@@ -29,12 +29,14 @@ This maps naturally: business logic never imports JSX (`.ts`), while UI tests al
 Test non-UI code — functions, hooks, utilities, API routes.
 
 **Patterns:**
+
 - Use `renderHook` from `@testing-library/react` for custom hooks
 - Mock external dependencies (mediabunny, filesystem, etc.) with `vi.mock`
 - No `MantineProvider` or component wrappers needed
 - Mock `next-intl` if the code under test uses translations
 
 **Examples:**
+
 ```
 src/lib/editor/use-recording.test.ts          — recording pipeline logic
 src/app/api/forgot-password/route.test.ts     — API route handler
@@ -45,6 +47,7 @@ src/app/api/forgot-password/route.test.ts     — API route handler
 Test component rendering, user interaction, and visual states.
 
 **Patterns:**
+
 - Wrap in `MantineProvider` + relevant context providers (e.g., `EditorContext.Provider`)
 - Mock `next-intl` with `useTranslations: () => (key: string) => key`
 - Assert on rendered output (`getByText`, `getByLabelText`) and `data-` attributes
@@ -54,6 +57,7 @@ Test component rendering, user interaction, and visual states.
 - Call `cleanup()` in `afterEach`
 
 **Examples:**
+
 ```
 src/components/project-editor/recording-controls.test.tsx   — recording UI controls
 src/components/project-editor/video-viewer.test.tsx          — video viewer + split button
@@ -83,6 +87,7 @@ docker compose --profile dev run --rm dev bun run test:coverage
 ```
 
 **Fallback (host, no Docker):**
+
 ```bash
 bun run test
 bun run test --test-name-pattern "useRecording"

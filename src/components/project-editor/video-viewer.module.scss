@@ -40,6 +40,14 @@
 	object-fit: contain;
 }
 
+.compositorCanvas {
+	position: absolute;
+	inset: 0;
+	width: 100%;
+	height: 100%;
+	display: block;
+}
+
 .recordOverlay {
 	position: absolute;
 	bottom: 24px;

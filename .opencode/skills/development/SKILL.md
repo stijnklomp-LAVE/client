@@ -136,6 +136,7 @@ ESLint uses `stijnklomp-linting-formatting-config` with strict TypeScript and Re
 ### Testing
 
 Tests are split into two categories by file extension (see [testing skill](../testing/SKILL.md) for details):
+
 - `*.test.ts` — business logic tests (hooks, utilities, API routes)
 - `*.test.tsx` — UI/element tests (component rendering, user interaction)
 
@@ -196,7 +197,7 @@ docker compose --profile dev run --rm dev bunx --bun prisma migrate dev --name <
 
 **Fallback — only if no Docker configuration exists:**
 
-```bash
+````bash
 # Generate Prisma client
 bun run prisma:generate
 
@@ -221,7 +222,7 @@ bunx --bun prisma migrate dev --name <migration_name>
 
 ```bash
 docker compose --profile dev up --build
-```
+````
 
 This mounts the current directory into the container and runs `bun run dev`.
 

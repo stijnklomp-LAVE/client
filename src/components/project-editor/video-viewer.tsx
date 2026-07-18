@@ -12,6 +12,8 @@ import { useCallback, useEffect, useRef, useState } from "react"
 import { useTranslations } from "next-intl"
 
 import { useEditorContext } from "./editor-context"
+import { useCompositor } from "@/lib/editor/use-compositor"
+import { PlaybackControls } from "./playback-controls"
 import styles from "./video-viewer.module.scss"
 
 export const VideoViewer = (): React.JSX.Element => {
@@ -31,6 +33,16 @@ export const VideoViewer = (): React.JSX.Element => {
 		setRecordingLayerId,
 		rawFramesDirectoryHandle,
 		notifyNoDirectory,
+		fragments,
+		projectId,
+		currentTime,
+		isPlaying,
+		duration,
+		play,
+		pause,
+		seek,
+		playbackSpeed,
+		setPlaybackSpeed,
 	} = useEditorContext()
 	const videoRef = useRef<HTMLVideoElement>(null)
 	const streamRef = useRef<MediaStream | null>(null)
@@ -38,6 +50,14 @@ export const VideoViewer = (): React.JSX.Element => {
 		layers.length > 0 ? layers[0]!.id : "__new__",
 	)
 	const [dropdownOpened, setDropdownOpened] = useState(false)
+
+	const { canvasRef: compositorCanvasRef } = useCompositor({
+		layers,
+		fragments,
+		projectId,
+		rootDirHandle: rawFramesDirectoryHandle,
+		currentTime,
+	})
 
 	useEffect(() => {
 		if (mode !== "capture") {
@@ -277,13 +297,34 @@ export const VideoViewer = (): React.JSX.Element => {
 		)
 	}
 
+	const hasTimelineContent = layers.some((l) => l.segments.length > 0)
+
 	return (
 		<div className={styles.wrapper}>
 			<div className={styles.viewport}>
-				<div className={styles.placeholder}>
-					<IconVideo size={48} stroke={1} />
-					<span>{translations("videoPreview")}</span>
-				</div>
+				{hasTimelineContent ? (
+					<>
+						<canvas
+							ref={compositorCanvasRef}
+							className={styles.compositorCanvas}
+						/>
+						<PlaybackControls
+							currentTime={currentTime}
+							duration={duration}
+							isPlaying={isPlaying}
+							playbackSpeed={playbackSpeed}
+							onPlay={play}
+							onPause={pause}
+							onSeek={seek}
+							onSpeedChange={setPlaybackSpeed}
+						/>
+					</>
+				) : (
+					<div className={styles.placeholder}>
+						<IconVideo size={48} stroke={1} />
+						<span>{translations("videoPreview")}</span>
+					</div>
+				)}
 			</div>
 		</div>
 	)
