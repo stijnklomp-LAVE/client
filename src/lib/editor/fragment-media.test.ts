@@ -1,4 +1,4 @@
-import { describe, test, expect, mock, beforeEach, type Mock } from "bun:test"
+import { describe, test, expect, mock, beforeEach } from "bun:test"
 
 type MockFileHandle = FileSystemFileHandle & {
 	move: (name: string) => Promise<void>
@@ -374,13 +374,9 @@ describe("resolveFragmentMedia", () => {
 	})
 
 	test("handles directory permission errors gracefully", async () => {
+		const err = new DOMException("Permission denied", "NotAllowedError")
 		const rootDir = createMockDirectoryHandle("root")
-		const getDirMock = rootDir.getDirectoryHandle.bind(rootDir) as Mock<
-			(...args: unknown[]) => unknown
-		>
-		getDirMock.mockRejectedValue(
-			new DOMException("Permission denied", "NotAllowedError") as never,
-		)
+		rootDir.getDirectoryHandle = mock(() => Promise.reject(err))
 
 		const { resolveFragmentMedia } = await import("./fragment-media")
 		const result = await resolveFragmentMedia(
@@ -393,13 +389,9 @@ describe("resolveFragmentMedia", () => {
 	})
 
 	test("handles webm file read errors gracefully", async () => {
+		const err = new DOMException("File not found", "NotFoundError")
 		const recordingDir = createMockDirectoryHandle(RECORDING_ID, {})
-		const getFileMock = recordingDir.getFileHandle.bind(
-			recordingDir,
-		) as Mock<(...args: unknown[]) => unknown>
-		getFileMock.mockRejectedValue(
-			new DOMException("File not found", "NotFoundError") as never,
-		)
+		recordingDir.getFileHandle = mock(() => Promise.reject(err))
 		const projectDir = createMockDirectoryHandle(PROJECT_ID, {
 			[RECORDING_ID]: recordingDir,
 		})

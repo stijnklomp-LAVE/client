@@ -88,6 +88,15 @@ export type FrameProvider = {
 	) => Promise<FrameBuffer | null>
 }
 
+const drawFallback = (
+	ctx: OffscreenCanvasRenderingContext2D | CanvasRenderingContext2D,
+	width: number,
+	height: number,
+): void => {
+	ctx.fillStyle = "#1a1a2e"
+	ctx.fillRect(0, 0, width, height)
+}
+
 export const composeFrame = async (
 	ctx: OffscreenCanvasRenderingContext2D | CanvasRenderingContext2D,
 	canvasWidth: number,
@@ -105,64 +114,81 @@ export const composeFrame = async (
 ): Promise<void> => {
 	if (canvasWidth < 1 || canvasHeight < 1) return
 
-	ctx.clearRect(0, 0, canvasWidth, canvasHeight)
+	try {
+		ctx.clearRect(0, 0, canvasWidth, canvasHeight)
 
-	const sortedLayers = [...layers].sort((a, b) => a.zIndex - b.zIndex)
+		const sortedLayers = [...layers].sort((a, b) => a.zIndex - b.zIndex)
 
-	let drewSomething = false
+		let drewSomething = false
 
-	for (const layer of sortedLayers) {
-		const active = getActiveSegment(layer, currentTime)
+		for (const layer of sortedLayers) {
+			const active = getActiveSegment(layer, currentTime)
 
-		if (!active) continue
+			if (!active) continue
 
-		drewSomething = true
+			drewSomething = true
 
-		const seekTime = computeSeekTime(
-			active.segment,
-			currentTime,
-			active.timelineOffset,
-		)
-
-		const frame = await frameProvider.getFrame(
-			active.segment.fragmentId,
-			seekTime,
-		)
-
-		if (frame) {
-			ctx.drawImage(
-				frame.canvas,
-				0,
-				0,
-				frame.canvas.width,
-				frame.canvas.height,
-				0,
-				0,
-				canvasWidth,
-				canvasHeight,
+			const seekTime = computeSeekTime(
+				active.segment,
+				currentTime,
+				active.timelineOffset,
 			)
-		} else {
-			onMissingFragment(
-				ctx,
-				active.segment.fragmentId,
-				layer.zIndex,
-				canvasWidth,
-				canvasHeight,
+
+			try {
+				const frame = await frameProvider.getFrame(
+					active.segment.fragmentId,
+					seekTime,
+				)
+
+				if (
+					frame?.canvas &&
+					frame.canvas.width > 0 &&
+					frame.canvas.height > 0
+				) {
+					ctx.drawImage(
+						frame.canvas,
+						0,
+						0,
+						frame.canvas.width,
+						frame.canvas.height,
+						0,
+						0,
+						canvasWidth,
+						canvasHeight,
+					)
+				} else {
+					onMissingFragment(
+						ctx,
+						active.segment.fragmentId,
+						layer.zIndex,
+						canvasWidth,
+						canvasHeight,
+					)
+				}
+			} catch {
+				onMissingFragment(
+					ctx,
+					active.segment.fragmentId,
+					layer.zIndex,
+					canvasWidth,
+					canvasHeight,
+				)
+			}
+		}
+
+		if (!drewSomething && layers.length > 0) {
+			drawFallback(ctx, canvasWidth, canvasHeight)
+			ctx.fillStyle = "rgba(255, 255, 255, 0.6)"
+			ctx.font = "14px sans-serif"
+			ctx.textAlign = "center"
+			ctx.fillText(
+				"No active segment at current time",
+				canvasWidth / 2,
+				canvasHeight / 2,
 			)
 		}
-	}
-
-	if (!drewSomething && layers.length > 0) {
-		ctx.fillStyle = "#1a1a2e"
-		ctx.fillRect(0, 0, canvasWidth, canvasHeight)
-		ctx.fillStyle = "rgba(255, 255, 255, 0.6)"
-		ctx.font = "14px sans-serif"
-		ctx.textAlign = "center"
-		ctx.fillText(
-			"No active segment at current time",
-			canvasWidth / 2,
-			canvasHeight / 2,
-		)
+	} catch {
+		drawFallback(ctx, canvasWidth, canvasHeight)
 	}
 }
 

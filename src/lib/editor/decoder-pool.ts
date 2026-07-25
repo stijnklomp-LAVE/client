@@ -99,7 +99,7 @@ export class DecoderPool {
 		const entry = this.entries.get(fragmentId)
 
 		if (!entry) return
-		;(entry.input as unknown as { close: () => void }).close()
+		entry.input.dispose()
 		this.entries.delete(fragmentId)
 	}
 

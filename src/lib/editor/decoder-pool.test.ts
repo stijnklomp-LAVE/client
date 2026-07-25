@@ -68,7 +68,7 @@ const mockCanvasSink = {
 }
 
 const mockInputInstance = {
-	close: mock(() => Promise.resolve()),
+	dispose: mock(() => undefined),
 	getPrimaryVideoTrack: mock(() => Promise.resolve({})),
 }
 
@@ -201,7 +201,7 @@ describe("DecoderPool", () => {
 		await pool.open("frag-2", file)
 		pool.closeAll()
 
-		expect(mockInputInstance.close).toHaveBeenCalledTimes(2)
+		expect(mockInputInstance.dispose).toHaveBeenCalledTimes(2)
 		expect(pool.size).toBe(0)
 	})
 

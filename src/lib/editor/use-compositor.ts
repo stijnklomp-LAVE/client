@@ -6,8 +6,9 @@ import { DecoderPool } from "./decoder-pool"
 import {
 	composeFrame,
 	defaultMissingFragment,
-	type GenericLayer,
+	type FrameBuffer,
 	type FrameProvider,
+	type GenericLayer,
 } from "./compositor"
 import {
 	resolveFragmentsMedia,
@@ -122,17 +123,43 @@ export const useCompositor = ({
 			observer.observe(parent)
 		}
 
+		const FRAME_DURATION = 1 / 30
+		const frameCache = new Map<
+			string,
+			{ quantizedTime: number; frame: FrameBuffer }
+		>()
+
+		const quantize = (t: number): number =>
+			Math.floor(t / FRAME_DURATION) * FRAME_DURATION
+
 		const frameProvider: FrameProvider = {
 			getFrame: async (fragmentId, seekTime) => {
+				const qtime = quantize(seekTime)
+				const cached = frameCache.get(fragmentId)
+
+				if (cached?.quantizedTime === qtime) {
+					return cached.frame
+				}
+
 				try {
-					return (
+					const frame =
 						(await decoderRef.current?.seekToFrame(
 							fragmentId,
-							seekTime,
+							qtime,
 						)) ?? null
-					)
+
+					if (frame) {
+						frameCache.set(fragmentId, {
+							frame,
+							quantizedTime: qtime,
+						})
+
+						return frame
+					}
+
+					return cached?.frame ?? null
 				} catch {
-					return null
+					return cached?.frame ?? null
 				}
 			},
 		}
@@ -166,6 +193,7 @@ export const useCompositor = ({
 
 		return () => {
 			cancelAnimationFrame(rafRef.current)
+			frameCache.clear()
 			observer.disconnect()
 		}
 	}, [hasContent])
