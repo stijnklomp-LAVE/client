@@ -8,7 +8,6 @@ export type CanvasFrame = {
 
 type DecoderEntry = {
 	canvasSink: CanvasSink
-	generator: AsyncGenerator<CanvasFrame> | null
 	input: Input
 	lastAccess: number
 }
@@ -43,7 +42,6 @@ export class DecoderPool {
 
 		this.entries.set(fragmentId, {
 			canvasSink,
-			generator: null,
 			input,
 			lastAccess: Date.now(),
 		})
@@ -64,35 +62,6 @@ export class DecoderPool {
 		} catch {
 			return null
 		}
-	}
-
-	startSequential(fragmentId: string, startTimestamp: number): void {
-		const entry = this.entries.get(fragmentId)
-
-		if (!entry) return
-
-		entry.lastAccess = Date.now()
-		entry.generator = entry.canvasSink.canvases(
-			startTimestamp,
-		) as AsyncGenerator<CanvasFrame>
-	}
-
-	async nextFrame(fragmentId: string): Promise<CanvasFrame | null> {
-		const entry = this.entries.get(fragmentId)
-
-		if (!entry?.generator) return null
-
-		entry.lastAccess = Date.now()
-
-		const result = await entry.generator.next()
-
-		if (result.done ?? false) {
-			entry.generator = null
-
-			return null
-		}
-
-		return result.value
 	}
 
 	close(fragmentId: string): void {

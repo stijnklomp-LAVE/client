@@ -191,24 +191,3 @@ export const composeFrame = async (
 		drawFallback(ctx, canvasWidth, canvasHeight)
 	}
 }
-
-const PLACEHOLDER_COLORS = [
-	"#e53935", // red
-	"#43a047", // green
-	"#1e88e5", // blue
-	"#fb8c00", // orange
-	"#8e24aa", // purple
-	"#00acc1", // cyan
-]
-
-export const defaultMissingFragment = (
-	ctx: OffscreenCanvasRenderingContext2D | CanvasRenderingContext2D,
-	_fragmentId: string,
-	zIndex: number,
-	width: number,
-	height: number,
-): void => {
-	const color = PLACEHOLDER_COLORS[zIndex % PLACEHOLDER_COLORS.length]
-	ctx.fillStyle = color ?? "#333"
-	ctx.fillRect(0, 0, width, height)
-}

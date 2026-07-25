@@ -103,6 +103,9 @@ const defaultContextValue = {
 	pause: vi.fn(),
 	seek: vi.fn(),
 	setPlaybackSpeed: vi.fn(),
+	onTimeUpdate: vi.fn(),
+	onPlaybackEnd: vi.fn(),
+	seekImplRef: { current: null },
 }
 
 const renderWithContext = (

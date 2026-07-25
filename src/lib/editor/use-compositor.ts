@@ -1,12 +1,10 @@
 "use client"
 
-import { useRef, useEffect } from "react"
-
+import { useRef, useEffect, useCallback, type RefObject } from "react"
+import { logger } from "@/lib/logger"
 import { DecoderPool } from "./decoder-pool"
 import {
 	composeFrame,
-	defaultMissingFragment,
-	type FrameBuffer,
 	type FrameProvider,
 	type GenericLayer,
 } from "./compositor"
@@ -20,38 +18,69 @@ type UseCompositorOptions = {
 	fragments: FragmentDescriptor[]
 	projectId: string
 	rootDirHandle: FileSystemDirectoryHandle | null
-	currentTime: number
+	isPlaying: boolean
+	playbackSpeed: number
+	duration: number
+	onTimeUpdate?: (time: number) => void
+	onPlaybackEnd?: () => void
 }
 
 type UseCompositorResult = {
-	canvasRef: React.RefObject<HTMLCanvasElement | null>
+	canvasRef: RefObject<HTMLCanvasElement | null>
+	seek: (time: number) => void
 }
+
+const PLACEHOLDER_COLORS = [
+	"#e53935",
+	"#43a047",
+	"#1e88e5",
+	"#fb8c00",
+	"#8e24aa",
+	"#00acc1",
+]
 
 export const useCompositor = ({
 	layers,
 	fragments,
 	projectId,
 	rootDirHandle,
-	currentTime,
+	isPlaying,
+	playbackSpeed,
+	duration,
+	onTimeUpdate,
+	onPlaybackEnd,
 }: UseCompositorOptions): UseCompositorResult => {
 	const canvasRef = useRef<HTMLCanvasElement | null>(null)
 	const decoderRef = useRef<DecoderPool | null>(null)
-	const rafRef = useRef<number>(0)
+	const seekRef = useRef<((time: number) => void) | null>(null)
+
+	const layersRef = useRef(layers)
+	layersRef.current = layers
+
+	const isPlayingRef = useRef(isPlaying)
+	isPlayingRef.current = isPlaying
+
+	const playbackSpeedRef = useRef(playbackSpeed)
+	playbackSpeedRef.current = playbackSpeed
+
+	const durationRef = useRef(duration)
+	durationRef.current = duration
+
+	const onTimeUpdateRef = useRef(onTimeUpdate)
+	onTimeUpdateRef.current = onTimeUpdate
+
+	const onPlaybackEndRef = useRef(onPlaybackEnd)
+	onPlaybackEndRef.current = onPlaybackEnd
 
 	const hasContent = layers.some((l) => l.segments.length > 0)
-	const layersRef = useRef(layers)
-	const currentTimeRef = useRef(currentTime)
-
-	useEffect(() => {
-		layersRef.current = layers
-	}, [layers])
-
-	useEffect(() => {
-		currentTimeRef.current = currentTime
-	}, [currentTime])
 
 	useEffect(() => {
 		decoderRef.current ??= new DecoderPool(10)
+
+		return () => {
+			decoderRef.current?.closeAll()
+			decoderRef.current = null
+		}
 	}, [])
 
 	useEffect(() => {
@@ -71,15 +100,15 @@ export const useCompositor = ({
 
 				for (const [id, result] of results) {
 					if (result.webmFile && decoderRef.current) {
-						void decoderRef.current.open(id, result.webmFile)
+						await decoderRef.current.open(id, result.webmFile)
 					}
 				}
-			} catch {
-				// will retry on next prop change
+			} catch (err) {
+				logger.error(err, "Failed to open fragment decoders")
 			}
 		}
 
-		void init()
+		init()
 
 		return () => {
 			cancelled = true
@@ -95,6 +124,10 @@ export const useCompositor = ({
 
 		if (!ctx) return
 
+		let rafId: number
+		let lastTime = performance.now()
+		let currentTime = 0
+
 		const syncSize = () => {
 			const parent = canvas.parentElement
 
@@ -107,103 +140,91 @@ export const useCompositor = ({
 			if (w < 1 || h < 1) return
 
 			if (canvas.width !== w) canvas.width = w
-
 			if (canvas.height !== h) canvas.height = h
 		}
 
 		syncSize()
 
-		const observer = new ResizeObserver(() => {
-			syncSize()
-		})
-
+		const observer = new ResizeObserver(() => syncSize())
 		const parent = canvas.parentElement
 
 		if (parent) {
 			observer.observe(parent)
 		}
 
-		const FRAME_DURATION = 1 / 30
-		const frameCache = new Map<
-			string,
-			{ quantizedTime: number; frame: FrameBuffer }
-		>()
-
-		const quantize = (t: number): number =>
-			Math.floor(t / FRAME_DURATION) * FRAME_DURATION
+		seekRef.current = (time: number) => {
+			currentTime = Math.max(0, Math.min(time, durationRef.current))
+			lastTime = performance.now()
+			onTimeUpdateRef.current?.(currentTime)
+		}
 
 		const frameProvider: FrameProvider = {
 			getFrame: async (fragmentId, seekTime) => {
-				const qtime = quantize(seekTime)
-				const cached = frameCache.get(fragmentId)
-
-				if (cached?.quantizedTime === qtime) {
-					return cached.frame
-				}
-
 				try {
-					const frame =
+					return (
 						(await decoderRef.current?.seekToFrame(
 							fragmentId,
-							qtime,
+							seekTime,
 						)) ?? null
-
-					if (frame) {
-						frameCache.set(fragmentId, {
-							frame,
-							quantizedTime: qtime,
-						})
-
-						return frame
-					}
-
-					return cached?.frame ?? null
+					)
 				} catch {
-					return cached?.frame ?? null
+					return null
 				}
 			},
 		}
 
-		const tick = () => {
-			const layersNow = layersRef.current
-			const timeNow = currentTimeRef.current
-
+		const tick = (now: number) => {
 			syncSize()
 
 			if (canvas.width < 1 || canvas.height < 1) {
-				rafRef.current = requestAnimationFrame(tick)
+				rafId = requestAnimationFrame(tick)
 
 				return
+			}
+
+			if (isPlayingRef.current && currentTime < durationRef.current) {
+				const delta =
+					((now - lastTime) / 1000) * playbackSpeedRef.current
+				lastTime = now
+				currentTime = Math.min(currentTime + delta, durationRef.current)
+
+				if (currentTime >= durationRef.current) {
+					isPlayingRef.current = false
+					onPlaybackEndRef.current?.()
+				}
+
+				onTimeUpdateRef.current?.(currentTime)
 			}
 
 			composeFrame(
 				ctx,
 				canvas.width,
 				canvas.height,
-				layersNow,
-				timeNow,
+				layersRef.current,
+				currentTime,
 				frameProvider,
-				defaultMissingFragment,
-			).catch(() => void 0)
+				(_ctx, _fragmentId, zIndex, width, height) => {
+					const color =
+						PLACEHOLDER_COLORS[
+							zIndex % PLACEHOLDER_COLORS.length
+						] ?? "#333"
+					_ctx.fillStyle = color
+					_ctx.fillRect(0, 0, width, height)
+				},
+			).catch((err) => logger.error(err, "composeFrame failed"))
 
-			rafRef.current = requestAnimationFrame(tick)
+			rafId = requestAnimationFrame(tick)
 		}
 
-		rafRef.current = requestAnimationFrame(tick)
+		rafId = requestAnimationFrame(tick)
 
 		return () => {
-			cancelAnimationFrame(rafRef.current)
-			frameCache.clear()
+			cancelAnimationFrame(rafId)
 			observer.disconnect()
 		}
 	}, [hasContent])
 
-	useEffect(() => {
-		return () => {
-			decoderRef.current?.closeAll()
-			decoderRef.current = null
-		}
-	}, [])
+	const seek = useCallback((time: number) => seekRef.current?.(time), [])
 
-	return { canvasRef }
+	return { canvasRef, seek }
 }

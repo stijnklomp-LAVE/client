@@ -43,6 +43,9 @@ export const VideoViewer = (): React.JSX.Element => {
 		seek,
 		playbackSpeed,
 		setPlaybackSpeed,
+		onTimeUpdate,
+		onPlaybackEnd,
+		seekImplRef,
 	} = useEditorContext()
 	const videoRef = useRef<HTMLVideoElement>(null)
 	const streamRef = useRef<MediaStream | null>(null)
@@ -51,13 +54,20 @@ export const VideoViewer = (): React.JSX.Element => {
 	)
 	const [dropdownOpened, setDropdownOpened] = useState(false)
 
-	const { canvasRef: compositorCanvasRef } = useCompositor({
-		layers,
-		fragments,
-		projectId,
-		rootDirHandle: rawFramesDirectoryHandle,
-		currentTime,
-	})
+	const { canvasRef: compositorCanvasRef, seek: compositorSeek } =
+		useCompositor({
+			layers,
+			fragments,
+			projectId,
+			rootDirHandle: rawFramesDirectoryHandle,
+			isPlaying,
+			playbackSpeed,
+			duration,
+			onTimeUpdate,
+			onPlaybackEnd,
+		})
+
+	seekImplRef.current = compositorSeek
 
 	useEffect(() => {
 		if (mode !== "capture") {

@@ -110,6 +110,9 @@ interface EditorContextValue {
 	pause: () => void
 	seek: (time: number) => void
 	setPlaybackSpeed: (speed: number) => void
+	onTimeUpdate: (time: number) => void
+	onPlaybackEnd: () => void
+	seekImplRef: React.MutableRefObject<((time: number) => void) | null>
 }
 
 export const EditorContext = createContext<EditorContextValue | null>(null)
@@ -212,52 +215,40 @@ export const EditorProvider = ({
 	const [currentTime, setCurrentTime] = useState(0)
 	const [isPlaying, setIsPlaying] = useState(false)
 	const [playbackSpeed, setPlaybackSpeed] = useState(1)
+	const seekImplRef = useRef<((time: number) => void) | null>(null)
 
 	const duration = useMemo(() => computeDuration(layers), [layers])
 
 	const play = useCallback(() => {
-		setCurrentTime((prev) => {
-			if (prev >= duration) return 0
-			return prev
-		})
+		if (currentTime >= duration) {
+			if (seekImplRef.current) {
+				seekImplRef.current(0)
+			}
+			setCurrentTime(0)
+		}
 		setIsPlaying(true)
-	}, [duration])
+	}, [currentTime, duration])
+
 	const pause = useCallback(() => setIsPlaying(false), [])
+
 	const seek = useCallback(
 		(time: number) => {
-			setCurrentTime(Math.max(0, Math.min(time, duration)))
+			if (seekImplRef.current) {
+				seekImplRef.current(time)
+			} else {
+				setCurrentTime(Math.max(0, Math.min(time, duration)))
+			}
 		},
 		[duration],
 	)
 
-	useEffect(() => {
-		if (!isPlaying || duration <= 0) return
+	const onTimeUpdate = useCallback((time: number) => {
+		setCurrentTime(time)
+	}, [])
 
-		let rafId: number
-		let lastTime = performance.now()
-
-		const tick = (now: number) => {
-			const delta = ((now - lastTime) / 1000) * playbackSpeed
-			lastTime = now
-
-			setCurrentTime((prev) => {
-				const newTime = prev + delta
-
-				if (newTime >= duration) {
-					setIsPlaying(false)
-					return prev
-				}
-
-				return newTime
-			})
-
-			rafId = requestAnimationFrame(tick)
-		}
-
-		rafId = requestAnimationFrame(tick)
-
-		return () => cancelAnimationFrame(rafId)
-	}, [isPlaying, playbackSpeed, duration])
+	const onPlaybackEnd = useCallback(() => {
+		setIsPlaying(false)
+	}, [])
 
 	const addLayer = useCallback(async (): Promise<TimelineLayer | null> => {
 		const res = await fetch(`/api/projects/${projectId}/layers`, {
@@ -539,6 +530,9 @@ export const EditorProvider = ({
 				pause,
 				seek,
 				setPlaybackSpeed,
+				onTimeUpdate,
+				onPlaybackEnd,
+				seekImplRef,
 			}}>
 			{children}
 		</EditorContext.Provider>
