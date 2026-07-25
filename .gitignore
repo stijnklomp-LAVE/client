@@ -12,6 +12,10 @@
 /coverage
 test/e2e/test-results/
 test/e2e/reports/
+test-results/
+
+# e2e test fixtures (generated via test/fixtures/generate.sh)
+test/fixtures/*.webm
 
 # next.js
 /.next/

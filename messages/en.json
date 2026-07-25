@@ -228,7 +228,9 @@
 			"quality": "JPEG quality",
 			"directoryBrowserUnsupported": "Your browser doesn't support directory access. Use Chrome/Edge with HTTPS or localhost.",
 			"directoryError": "Failed to access directory. Please try again.",
-			"noDirectory": "Select a raw frames directory in settings before recording"
+			"noDirectory": "Select a raw frames directory in settings before recording",
+			"directoryNeededTitle": "Directory access needed",
+			"directoryNeeded": "Select the \"{name}\" directory in settings to enable playback"
 		}
 	},
 	"nav": {

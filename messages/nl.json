@@ -228,7 +228,9 @@
 			"quality": "JPEG-kwaliteit",
 			"directoryBrowserUnsupported": "Je browser ondersteunt geen map-toegang. Gebruik Chrome/Edge met HTTPS of localhost.",
 			"directoryError": "Toegang tot map mislukt. Probeer het opnieuw.",
-			"noDirectory": "Selecteer een raw frames map in de instellingen voor het opnemen"
+			"noDirectory": "Selecteer een raw frames map in de instellingen voor het opnemen",
+			"directoryNeededTitle": "Maptoegang nodig",
+			"directoryNeeded": "Selecteer de \"{name}\" map in de instellingen om afspelen mogelijk te maken"
 		}
 	},
 	"nav": {

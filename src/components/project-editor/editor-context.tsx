@@ -17,7 +17,11 @@ import type { TimelineLayer, TimelineSegment } from "@/lib/editor/types"
 import { logger } from "@/lib/logger"
 import { useRecording, type RecordingConfig } from "@/lib/editor/use-recording"
 import { computeDuration } from "@/lib/editor/compositor"
-import { getPersistedDirectoryHandle } from "@/lib/editor/raw-frames-directory"
+import {
+	getPersistedDirectoryHandle,
+	getStoredDirectoryName,
+	setStoredDirectoryName,
+} from "@/lib/editor/raw-frames-directory"
 
 const STORAGE_PREFIX = "editor."
 
@@ -164,6 +168,15 @@ export const EditorProvider = ({
 	>(null)
 	const [wiggleDirectoryKey, setWiggleDirectoryKey] = useState(0)
 
+	const notifyNoDirectory = useCallback(() => {
+		notifications.show({
+			color: "red",
+			message: translations("recording.noDirectory"),
+			title: "No directory configured",
+		})
+		setWiggleDirectoryKey((k) => k + 1)
+	}, [translations])
+
 	useEffect(() => {
 		if (getStored("sidePaneOpen", false)) openSidePane()
 		const storedMode = getStored<EditorMode>("mode", "editing")
@@ -175,17 +188,25 @@ export const EditorProvider = ({
 			if (handle) {
 				setRawFramesDirectoryHandle(handle)
 				setRawFramesDirectoryName(handle.name)
+				setStoredDirectoryName(handle.name)
+			} else {
+				const prevName = getStoredDirectoryName()
+				if (prevName) {
+					if (initialFragments.length > 0) {
+						notifications.show({
+							color: "yellow",
+							message: translations("recording.directoryNeeded", {
+								name: prevName,
+							}),
+							title: translations(
+								"recording.directoryNeededTitle",
+							),
+						})
+					}
+				}
 			}
 		})
-	}, [openSidePane])
-	const notifyNoDirectory = useCallback(() => {
-		notifications.show({
-			color: "red",
-			message: translations("recording.noDirectory"),
-			title: "No directory configured",
-		})
-		setWiggleDirectoryKey((k) => k + 1)
-	}, [translations])
+	}, [openSidePane, initialFragments.length, translations, notifyNoDirectory])
 	const [recordingLayerId, setRecordingLayerIdState] = useState<
 		string | null
 	>(null)
@@ -329,6 +350,7 @@ export const EditorProvider = ({
 		(handle: FileSystemDirectoryHandle | null) => {
 			setRawFramesDirectoryHandle(handle)
 			setRawFramesDirectoryName(handle?.name ?? null)
+			setStoredDirectoryName(handle?.name ?? null)
 		},
 		[],
 	)
@@ -373,7 +395,7 @@ export const EditorProvider = ({
 					return
 				}
 
-				setModeState("capture")
+				setMode("capture")
 
 				const recordingId = crypto.randomUUID()
 
@@ -396,7 +418,7 @@ export const EditorProvider = ({
 			rawFramesDirectoryHandle,
 			projectId,
 			recording,
-			setModeState,
+			setMode,
 			clearPendingRecordingLayerId,
 			notifyNoDirectory,
 			setIsPaused,
@@ -419,11 +441,11 @@ export const EditorProvider = ({
 
 		const layerId = recordingLayerId
 		setRecordingLayerId(null)
-		setModeState("editing")
+		setMode("editing")
 
 		if (result && layerId) {
 			try {
-				const fragmentName = `Recording ${new Date().toLocaleTimeString()}`
+				const fragmentName = new Date().toLocaleTimeString()
 				const res = await fetch(
 					`/api/projects/${projectId}/fragments`,
 					{
@@ -460,7 +482,7 @@ export const EditorProvider = ({
 		recordingLayerId,
 		projectId,
 		addSegment,
-		setModeState,
+		setMode,
 		setRecordingLayerId,
 	])
 

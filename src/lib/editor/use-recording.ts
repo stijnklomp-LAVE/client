@@ -1,14 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react"
 
-const getDisplayStep = (count: number): number => {
-	if (count < 10) return 1
-
-	if (count < 50) return 10
-
-	if (count < 100) return 20
-
-	return 30
-}
+export const getDisplayStep = (fps: number): number =>
+	Math.max(1, Math.round(fps))
 
 import {
 	MediaStreamVideoTrackSource,
@@ -119,7 +112,7 @@ export const useRecording = () => {
 					format,
 				)
 				const actualCount = frameCountRef.current
-				const step = getDisplayStep(actualCount)
+				const step = getDisplayStep(configRef.current.fps)
 				const milestone = Math.floor(actualCount / step) * step
 
 				if (milestone !== lastDisplayedFrameCountRef.current) {

@@ -30,15 +30,6 @@ type UseCompositorResult = {
 	seek: (time: number) => void
 }
 
-const PLACEHOLDER_COLORS = [
-	"#e53935",
-	"#43a047",
-	"#1e88e5",
-	"#fb8c00",
-	"#8e24aa",
-	"#00acc1",
-]
-
 export const useCompositor = ({
 	layers,
 	fragments,
@@ -55,22 +46,27 @@ export const useCompositor = ({
 	const seekRef = useRef<((time: number) => void) | null>(null)
 
 	const layersRef = useRef(layers)
-	layersRef.current = layers
-
 	const isPlayingRef = useRef(isPlaying)
-	isPlayingRef.current = isPlaying
-
 	const playbackSpeedRef = useRef(playbackSpeed)
-	playbackSpeedRef.current = playbackSpeed
-
 	const durationRef = useRef(duration)
-	durationRef.current = duration
-
 	const onTimeUpdateRef = useRef(onTimeUpdate)
-	onTimeUpdateRef.current = onTimeUpdate
-
 	const onPlaybackEndRef = useRef(onPlaybackEnd)
-	onPlaybackEndRef.current = onPlaybackEnd
+
+	useEffect(() => {
+		layersRef.current = layers
+		isPlayingRef.current = isPlaying
+		playbackSpeedRef.current = playbackSpeed
+		durationRef.current = duration
+		onTimeUpdateRef.current = onTimeUpdate
+		onPlaybackEndRef.current = onPlaybackEnd
+	}, [
+		layers,
+		isPlaying,
+		playbackSpeed,
+		duration,
+		onTimeUpdate,
+		onPlaybackEnd,
+	])
 
 	const hasContent = layers.some((l) => l.segments.length > 0)
 
@@ -103,12 +99,12 @@ export const useCompositor = ({
 						await decoderRef.current.open(id, result.webmFile)
 					}
 				}
-			} catch (err) {
+			} catch (err: unknown) {
 				logger.error(err, "Failed to open fragment decoders")
 			}
 		}
 
-		init()
+		void init()
 
 		return () => {
 			cancelled = true
@@ -140,12 +136,15 @@ export const useCompositor = ({
 			if (w < 1 || h < 1) return
 
 			if (canvas.width !== w) canvas.width = w
+
 			if (canvas.height !== h) canvas.height = h
 		}
 
 		syncSize()
 
-		const observer = new ResizeObserver(() => syncSize())
+		const observer = new ResizeObserver(() => {
+			syncSize()
+		})
 		const parent = canvas.parentElement
 
 		if (parent) {
@@ -185,7 +184,6 @@ export const useCompositor = ({
 			if (isPlayingRef.current && currentTime < durationRef.current) {
 				const delta =
 					((now - lastTime) / 1000) * playbackSpeedRef.current
-				lastTime = now
 				currentTime = Math.min(currentTime + delta, durationRef.current)
 
 				if (currentTime >= durationRef.current) {
@@ -196,6 +194,8 @@ export const useCompositor = ({
 				onTimeUpdateRef.current?.(currentTime)
 			}
 
+			lastTime = now
+
 			composeFrame(
 				ctx,
 				canvas.width,
@@ -203,15 +203,14 @@ export const useCompositor = ({
 				layersRef.current,
 				currentTime,
 				frameProvider,
-				(_ctx, _fragmentId, zIndex, width, height) => {
-					const color =
-						PLACEHOLDER_COLORS[
-							zIndex % PLACEHOLDER_COLORS.length
-						] ?? "#333"
-					_ctx.fillStyle = color
+				(_ctx, _fragmentId, _zIndex, width, height) => {
+					const hue = (currentTime * 60) % 360
+					_ctx.fillStyle = `hsl(${hue}, 70%, 50%)`
 					_ctx.fillRect(0, 0, width, height)
 				},
-			).catch((err) => logger.error(err, "composeFrame failed"))
+			).catch((err: unknown) => {
+				logger.error(err, "composeFrame failed")
+			})
 
 			rafId = requestAnimationFrame(tick)
 		}

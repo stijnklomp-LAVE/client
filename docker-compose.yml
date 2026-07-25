@@ -184,25 +184,6 @@ services:
     profiles:
       - test
 
-  e2e:
-    image: mcr.microsoft.com/playwright:v1.60.0
-    volumes:
-      - .:/src
-    working_dir: /src
-    user: "${HOST_UID:-1000}:${HOST_GID:-1000}"
-    command: |
-      sh -c "
-        if [ ! -d node_modules ]; then
-          bun install --frozen-lockfile --ignore-scripts --no-optional 2>/dev/null
-        fi
-        bun run prisma:generate
-        bun run test:e2e
-      "
-    depends_on:
-      - dev
-    profiles:
-      - test
-
   acceptance:
     <<: *acceptance
     depends_on:

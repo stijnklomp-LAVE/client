@@ -18,8 +18,8 @@
 		"sort": "./node_modules/stijnklomp-linting-formatting-config/sortJson.sh ./tsconfig.json ./.lintstagedrc.json ./pacts/*",
 		"start": "node .next/standalone/server.js",
 		"test": "bun test src/",
-		"test:e2e": "playwright test",
-		"test:e2e:ui": "playwright test --ui",
+		"test:e2e": "bun run test:e2e:check-fixtures && playwright test",
+		"test:e2e:check-fixtures": "bun scripts/check-e2e-fixtures.ts",
 		"test:unit": "bun test src/",
 		"test:unit:ci": "bun test --coverage src/ --coverage-reporter text --coverage-reporter lcov",
 		"test:unit:coverage": "bun test --coverage src/ --coverage-reporter text"

@@ -42,7 +42,11 @@ void vi.mock("mediabunny", () => {
 	return mocks
 })
 
-import { useRecording, type RecordingConfig } from "./use-recording"
+import {
+	useRecording,
+	getDisplayStep,
+	type RecordingConfig,
+} from "./use-recording"
 
 const createMockVideoTrack = () =>
 	({
@@ -526,7 +530,7 @@ describe("useRecording", () => {
 		expect(result.current.frameCount).toBe(1)
 	})
 
-	test("uses fidelity thresholds for frame count display updates", async () => {
+	test("updates frame count display every frame at 1 FPS", async () => {
 		const { result } = renderHook(() => useRecording())
 
 		await act(async () => {
@@ -535,6 +539,53 @@ describe("useRecording", () => {
 				createMockDirHandle(),
 				"proj-123",
 				"rec-456",
+				{ fps: 1 },
+			)
+		})
+
+		const cb = getEncodingConfig().onEncodedSample
+
+		for (let i = 0; i < 5; i++) {
+			await act(async () => {
+				cb(createSample(i))
+				await Promise.resolve()
+			})
+			expect(result.current.frameCount).toBe(i + 1)
+		}
+	})
+
+	test("getDisplayStep returns 1 at sub-1 FPS", () => {
+		expect(getDisplayStep(0.5)).toBe(1)
+	})
+
+	test("getDisplayStep returns fps rounded at 1 FPS", () => {
+		expect(getDisplayStep(1)).toBe(1)
+		expect(getDisplayStep(1.4)).toBe(1)
+		expect(getDisplayStep(1.5)).toBe(2)
+	})
+
+	test("getDisplayStep returns fps rounded at higher FPS", () => {
+		expect(getDisplayStep(5)).toBe(5)
+		expect(getDisplayStep(10)).toBe(10)
+		expect(getDisplayStep(30)).toBe(30)
+	})
+
+	test("getDisplayStep never returns less than 1", () => {
+		expect(getDisplayStep(0)).toBe(1)
+		expect(getDisplayStep(0.1)).toBe(1)
+		expect(getDisplayStep(0.9)).toBe(1)
+	})
+
+	test("updates frame count display every frame at 0.5 FPS (sub-1 FPS)", async () => {
+		const { result } = renderHook(() => useRecording())
+
+		await act(async () => {
+			await result.current.startRecording(
+				createMockStream(),
+				createMockDirHandle(),
+				"proj-123",
+				"rec-456",
+				{ fps: 0.5 },
 			)
 		})
 
@@ -547,42 +598,10 @@ describe("useRecording", () => {
 		expect(result.current.frameCount).toBe(1)
 
 		await act(async () => {
-			cb(createSample(1))
+			cb(createSample(2))
 			await Promise.resolve()
 		})
 		expect(result.current.frameCount).toBe(2)
-
-		for (let i = 2; i < 9; i++) {
-			await act(async () => {
-				cb(createSample(i))
-				await Promise.resolve()
-			})
-		}
-
-		expect(result.current.frameCount).toBe(9)
-
-		await act(async () => {
-			cb(createSample(9))
-			await Promise.resolve()
-		})
-		expect(result.current.frameCount).toBe(10)
-
-		const frameCountAt10 = result.current.frameCount
-
-		for (let i = 10; i < 19; i++) {
-			await act(async () => {
-				cb(createSample(i))
-				await Promise.resolve()
-			})
-		}
-
-		expect(result.current.frameCount).toBe(frameCountAt10)
-
-		await act(async () => {
-			cb(createSample(19))
-			await Promise.resolve()
-		})
-		expect(result.current.frameCount).toBe(20)
 	})
 
 	test("throttles frame saving by configured fps", async () => {

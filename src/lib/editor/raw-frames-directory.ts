@@ -39,6 +39,15 @@ export const persistDirectoryHandle = async (
 
 export const getPersistedDirectoryHandle =
 	async (): Promise<FileSystemDirectoryHandle | null> => {
+		// E2E test escape hatch — mock handle injected via addInitScript
+		if (
+			typeof window !== "undefined" &&
+			(window as unknown as Record<string, unknown>).__mockRootDirHandle
+		) {
+			return (window as unknown as Record<string, unknown>)
+				.__mockRootDirHandle as FileSystemDirectoryHandle
+		}
+
 		try {
 			const db = await openDb()
 			const handle = await new Promise<FileSystemDirectoryHandle | null>(

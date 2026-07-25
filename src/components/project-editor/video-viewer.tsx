@@ -67,7 +67,9 @@ export const VideoViewer = (): React.JSX.Element => {
 			onPlaybackEnd,
 		})
 
-	seekImplRef.current = compositorSeek
+	useEffect(() => {
+		seekImplRef.current = compositorSeek
+	}, [compositorSeek, seekImplRef])
 
 	useEffect(() => {
 		if (mode !== "capture") {
