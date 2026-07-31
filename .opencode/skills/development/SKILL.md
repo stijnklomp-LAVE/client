@@ -44,12 +44,20 @@ DATABASE_DB=video-editor
 DATABASE_USERNAME=dev
 DATABASE_PASSWORD=admin123
 
-# Queue (RabbitMQ)
-RABBIT_HOST=rabbitmq
-RABBIT_PORT=5672
-RABBIT_USER=guest
-RABBIT_PASSWORD=guest
+# Auth
+AUTH_SECRET="dev-secret-change-in-production-at-least-32-chars-long"
+AUTH_URL="http://localhost:3000"
+JWT_SECRET="dev-jwt-secret-shared-between-services-at-least-32-chars"
+
+# Email (Mailpit)
+SMTP_HOST=mailpit
+SMTP_PORT=1025
+SMTP_USER=
+SMTP_PASS=
+SMTP_SECURE=false
 ```
+
+> `RABBIT_*` vars still present in `.env.development` are unused leftovers — there is no RabbitMQ service in `docker-compose.yml`.
 
 ## Development Commands
 
@@ -160,7 +168,7 @@ docker compose --profile dev run --rm dev bun run test src/components/project-ed
 bun run test
 
 # Run with coverage
-bun run test:coverage
+bun run test:unit:coverage
 ```
 
 ### Documentation
@@ -190,22 +198,19 @@ docker compose --profile dev run --rm dev bun run prisma:generate
 
 # Deploy migrations
 docker compose --profile dev run --rm dev bun run migrate
-
-# Create a new migration (development)
-docker compose --profile dev run --rm dev bunx --bun prisma migrate dev --name <migration_name>
 ```
+
+> **Schema changes never create new migration files** — this project uses a single consolidated `migration.sql`. See the [database skill](../database/SKILL.md).
 
 **Fallback — only if no Docker configuration exists:**
 
-````bash
+```bash
 # Generate Prisma client
 bun run prisma:generate
 
 # Deploy migrations
 bun run migrate
-
-# Create a new migration (development)
-bunx --bun prisma migrate dev --name <migration_name>
+```
 
 ## Docker Compose Workflows
 
@@ -213,16 +218,18 @@ bunx --bun prisma migrate dev --name <migration_name>
 
 ### Profiles
 
-| Profile | Services                          | Purpose                                |
-| ------- | --------------------------------- | -------------------------------------- |
-| `dev`   | dev, db, rabbitmq, db-migration   | Local development with hot reload      |
-| `local` | local, db, rabbitmq, db-migration | Build and run production image locally |
+| Profile   | Services                                                  | Purpose                                           |
+| --------- | --------------------------------------------------------- | ------------------------------------------------- |
+| `dev`     | dev, db, mailpit, db-migration, acceptance                | Local development with hot reload                 |
+| `local`   | local, db, mailpit, db-migration, acceptance              | Build and run production image locally            |
+| `test`    | test, test-coverage, local, db, mailpit, db-migration, acceptance-once | Unit tests, coverage, and acceptance runs |
+| `shared`  | shared                                                    | App service on the shared `platform` network      |
 
 ### Start Development Environment
 
 ```bash
 docker compose --profile dev up --build
-````
+```
 
 This mounts the current directory into the container and runs `bun run dev`.
 
@@ -235,9 +242,12 @@ docker compose --profile dev exec dev <COMMAND>
 ### Services in Docker Compose
 
 - `db` — PostgreSQL with healthcheck
-- `rabbitmq` — RabbitMQ with healthcheck (management UI at `http://localhost:15672`)
-- `db-migration` — Runs placeholder migration script after DB is healthy
-- `dev` / `local` — The Next.js app
+- `mailpit` — SMTP test server for outgoing email (UI at `http://localhost:8025`)
+- `db-migration` — Runs `prisma migrate deploy` after DB is healthy
+- `dev` / `local` — The Next.js app (hot reload / built image)
+- `test` / `test-coverage` — Run unit tests and coverage (profile `test`)
+- `acceptance` / `acceptance-once` — Acceptance test containers (profile `dev`/`local` vs one-off in `test`)
+- `shared` — App service joined to the shared `platform` network (profile `shared`)
 
 ## Build Configuration
 
@@ -260,14 +270,22 @@ docker compose --profile dev exec dev <COMMAND>
 ### Next.js Config (`next.config.mjs`)
 
 ```javascript
+import createNextIntlPlugin from "next-intl/plugin"
+
+const withNextIntl = createNextIntlPlugin()
+
 const nextConfig = {
 	output: "standalone",
+	allowedDevOrigins: ["*.*.*.*"],
 	experimental: {
 		optimizePackageImports: ["@mantine/core", "@mantine/hooks"],
 	},
 }
+
+export default withNextIntl(nextConfig)
 ```
 
+- Wrapped with the next-intl plugin — all routes live under `src/app/[locale]/`
 - Outputs standalone build for Docker deployment
 - Optimizes Mantine package imports for faster builds
 
@@ -313,11 +331,6 @@ Pre-commit runs `lint-staged` with `.lintstagedrc.json`:
 All staged JS/TS/TSX/JSON/YAML files are auto-formatted with Prettier on commit.
 
 ## Troubleshooting
-
-### "RabbitMQ connection refused"
-
-- The RabbitMQ service is available via Docker Compose but not yet wired in the application code
-- Management UI is at `http://localhost:15672`
 
 ### "DATABASE_URL environment variable is not defined"
 

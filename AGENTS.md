@@ -15,6 +15,7 @@ Web editor of the location-agnostic video editor. Next.js 16 App Router + Bun + 
 | `.opencode/skills/testing/SKILL.md` | Writing/running tests |
 | `.opencode/skills/database/SKILL.md` | Any schema/migration change |
 | `.opencode/skills/dependency-management/SKILL.md` | Adding/upgrading dependencies |
+| `.opencode/skills/accessibility/SKILL.md` | Auditing/improving accessibility (WCAG 2.2) |
 
 ## Stack
 
@@ -30,7 +31,7 @@ Web editor of the location-agnostic video editor. Next.js 16 App Router + Bun + 
 
 ## Commands
 
-Docker Compose is the **primary** execution environment. Run commands inside the `dev` service; host is a last resort. Profiles: `dev` (hot reload, mounts repo), `local` (built image), both include `db`, `rabbitmq`, `db-migration`.
+Docker Compose is the **primary** execution environment. Run commands inside the `dev` service; host is a last resort. Profiles: `dev` (hot reload, mounts repo), `local` (built image), `test` (unit/coverage/acceptance), `shared` (platform network). Services: `db`, `mailpit`, `db-migration`.
 
 | Task | Command (inside Docker) |
 |------|-------------------------|
@@ -50,10 +51,6 @@ Docker Compose is the **primary** execution environment. Run commands inside the
 | TypeDoc | `docker compose --profile dev run --rm dev bun run doc` |
 
 Host fallbacks (same commands without `docker compose ... run --rm dev`). `bun run lint` = ESLint + `tsc --noEmit` — both must pass.
-
-## Architecture
-
-Directory structure and source layout: see `.opencode/skills/architecture/SKILL.md`.
 
 ## Conventions (non-negotiable)
 

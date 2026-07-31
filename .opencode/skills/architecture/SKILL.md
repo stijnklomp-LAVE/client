@@ -1,6 +1,6 @@
 ---
 name: architecture
-description: MUST USE when working with this Next.js + Bun + Mantine project. Understands the Next.js App Router conventions, file organization, Mantine component patterns, and code conventions. Use when reading, writing, or modifying any source code in this project.
+description: MUST USE when working with this Next.js + Bun + Mantine + Prisma + next-intl project. Understands the Next.js App Router conventions, file organization, Mantine component patterns, and code conventions. Use when reading, writing, or modifying any source code in this project.
 ---
 
 # Project Architecture
@@ -10,12 +10,14 @@ This skill describes the architecture, patterns, and conventions used in this Ne
 ## Tech Stack
 
 - **Runtime**: Bun
-- **Framework**: Next.js with App Router
-- **Language**: TypeScript (strict mode, ES2017, Bundler module resolution)
-- **UI Library**: Mantine with PostCSS-based styling
-- **Styling**: PostCSS with `postcss-preset-mantine` and `postcss-simple-vars`
-- **Queue**: RabbitMQ (available via Docker Compose, not yet wired in code)
-- **Database**: PostgreSQL (available via Docker Compose, no ORM configured yet)
+- **Framework**: Next.js 16 with App Router (all routes under `src/app/[locale]/`), `output: "standalone"`
+- **Language**: TypeScript (strict, ES2017, Bundler module resolution, `verbatimModuleSyntax`)
+- **UI Library**: Mantine 9 with PostCSS-based styling, Tabler icons
+- **i18n**: next-intl (`src/i18n/`) — user-facing strings come from message catalogs, never hardcoded
+- **Auth**: next-auth v5 (credentials + Prisma adapter, bcrypt, JWT) — `src/auth.ts`
+- **Database**: PostgreSQL via Prisma 7 (`@prisma/client` + `@prisma/adapter-pg`), generated client in `generated/`
+- **Media**: mediabunny (decoder/compositor) in `src/lib/editor/`; WebRTC P2P device transfer in `src/lib/devices/`
+- **Email**: React Email templates in `src/emails/`, sent via `src/lib/email/`
 
 ## Directory Structure
 
@@ -23,25 +25,32 @@ The project follows Next.js App Router conventions:
 
 | Directory / Pattern | Purpose                                                                             |
 | ------------------- | ----------------------------------------------------------------------------------- |
-| `src/app/`          | Next.js App Router pages and layouts (root layout, page, error, loading, not-found) |
-| `src/components/`   | React components (UI components, reusable parts)                                    |
-| `src/lib/`          | Library code: theme system, utilities, shared logic                                 |
-| `public/`           | Static assets (images, fonts, SVGs)                                                 |
-| `*.test.ts`         | Business logic unit tests, co-located with source (in `src/lib/`, `src/app/api/`)   |
-| `*.test.tsx`        | UI/element tests, co-located with source (in `src/components/`)                     |
+| `src/app/[locale]/` | Locale-scoped routes; `(with-nav)` / `(without-nav)` route groups for layout variants |
+| `src/app/[locale]/(with-nav)/` | Pages with navigation: home, login, register, profile, projects, devices, forgot/reset-password |
+| `src/app/[locale]/(without-nav)/` | Full-screen pages: `editor/` |
+| `src/app/api/`       | Route handlers (auth, devices, projects, profile, transfer-requests, signaling, verify-email, ...) |
+| `src/components/`    | React components by domain: `auth/`, `devices/`, `project-editor/`, `projects/`, `providers/`, `ui/` |
+| `src/lib/`           | Non-component logic: `api/` (fragment-composer client, JWT), `db/` (Prisma client), `devices/` (WebRTC P2P), `editor/` (mediabunny compositor, recording), `email/`, `theme/`, `utils/` |
+| `src/emails/`        | React Email templates (verification, password reset)                                |
+| `src/i18n/`          | next-intl routing/request/messages configuration                                    |
+| `src/auth.ts`        | next-auth configuration                                                             |
+| `src/proxy.ts`       | Proxy configuration                                                                 |
+| `src/pact/`          | Pact consumer contract tests                                                        |
+| `test/e2e/`          | Playwright E2E tests                                                                |
+| `prisma/`            | `schema.prisma` + single consolidated `migration.sql` (see database skill)          |
+| `public/`            | Static assets (images, fonts, SVGs)                                                 |
+| `*.test.ts` / `*.test.tsx` | Tests co-located with source (`*.test.ts` = no JSX, `*.test.tsx` = rendered components) |
 
 ### Key Files
 
-- `src/app/layout.tsx` — Root layout with Mantine theme provider
-- `src/app/page.tsx` — Home page
-- `src/app/error.tsx` — Error boundary
-- `src/app/global-error.tsx` — Global error boundary
-- `src/app/loading.tsx` — Loading state
-- `src/app/not-found.tsx` — 404 page
-- `src/app/globals.css` — Global styles
-- `src/lib/theme/` — Theme system (context, provider, hook, types)
-- `src/lib/utils.ts` — Utility functions (currently empty)
-- `src/components/ui/theme-toggle/` — Theme toggle UI component
+- `src/app/layout.tsx` — Root layout (Mantine provider, locale routing)
+- `src/app/[locale]/(with-nav)/page.tsx` — Home page
+- `src/app/[locale]/(with-nav)/login/`, `register/`, `profile/`, `projects/`, `devices/`, `forgot-password/`, `reset-password/` — Auth and app pages
+- `src/app/[locale]/(without-nav)/editor/` — Full-screen project editor (recording, compositor)
+- `src/lib/theme/` — Mantine theme system (`context.ts`, `provider.tsx`, `types.ts`, `index.ts`)
+- `src/lib/db/prisma.ts` — Prisma client singleton
+- `src/lib/editor/` — mediabunny compositor/decoder pool, recording hooks, fragment media
+- `src/lib/devices/` — WebRTC P2P transfer, signaling, heartbeat
 
 ## Path Aliases
 
@@ -64,22 +73,23 @@ Configured in `tsconfig.json` paths and `bunfig.toml` resolve alias.
 
 ### Theming with Mantine
 
-The theme system uses a custom React context with PostCSS-based dark/light mode:
+The theme system is built on Mantine's theming with a light/dark mode persisted via `localStorage` + cookie:
 
 - `src/lib/theme/context.ts` — React context for theme state
-- `src/lib/theme/provider.tsx` — Theme provider component (wraps children with context)
-- `src/lib/theme/use-theme.ts` — Hook to consume theme context
+- `src/lib/theme/provider.tsx` — Theme provider component (wraps children with `MantineProvider`)
 - `src/lib/theme/types.ts` — Theme types (`TTheme`, `TThemeModel`, etc.)
+- `src/lib/theme/index.ts` — Re-exports for clean imports
 
-The theme is currently hardcoded to `dark` mode in `ThemeModel`. The `theme-toggle` component can be used to switch modes.
+The default mode is `dark` (`ThemeModel.currentColourMode`); the `theme-toggle` component switches modes, persisting the choice.
 
 ### Layout Pattern
 
 Root layout (`src/app/layout.tsx`):
 
 - Imports `@mantine/core/styles.css` for base Mantine styles
-- Imports `globals.css` for custom styles
+- Imports `globals.scss` for custom styles
 - Wraps children with `ThemeProvider`
+- Sets up next-intl locale routing (pages live under `src/app/[locale]/`)
 
 ## Error Handling
 
@@ -99,12 +109,13 @@ PostCSS is configured in `postcss.config.cjs`:
 
 Follow this order when adding a new page:
 
-1. **Create the page** — Add `src/app/<route>/page.tsx`
-2. **Add layout** (if needed) — Add `src/app/<route>/layout.tsx`
-3. **Add loading state** (if needed) — Add `src/app/<route>/loading.tsx`
-4. **Add error boundary** (if needed) — Add `src/app/<route>/error.tsx`
+1. **Create the page** — Add `src/app/[locale]/<route>/page.tsx` (inside `(with-nav)` or `(without-nav)` depending on the layout variant)
+2. **Add layout** (if needed) — Add `src/app/[locale]/<route>/layout.tsx`
+3. **Add loading state** (if needed) — Add `src/app/[locale]/<route>/loading.tsx`
+4. **Add error boundary** (if needed) — Add `src/app/[locale]/<route>/error.tsx`
 5. **Add components** — Create components in `src/components/` if reusable
 6. **Add styles** — Use Mantine components or add CSS modules
+7. **Add i18n messages** — User-facing strings go into the next-intl message catalogs (`src/i18n/`)
 
 ## Adding a New Component
 
