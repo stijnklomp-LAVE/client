@@ -123,57 +123,6 @@ const getDir = async (
 ): Promise<FileSystemDirectoryHandle> =>
 	parent.getDirectoryHandle(name, { create: true })
 
-const MAX_RETRIES = 3
-const RETRY_DELAYS = [100, 500, 1_000]
-
-const retry = async <T>(fn: () => Promise<T>, attempt = 0): Promise<T> => {
-	try {
-		return await fn()
-	} catch (err) {
-		if (attempt < MAX_RETRIES - 1) {
-			await new Promise((r) => setTimeout(r, RETRY_DELAYS[attempt]))
-
-			return retry(fn, attempt + 1)
-		}
-
-		throw err
-	}
-}
-
-export const saveFrame = async (
-	rootDir: FileSystemDirectoryHandle,
-	projectId: string,
-	recordingId: string,
-	frameIndex: number,
-	blob: Blob,
-	format: "jpeg" | "png" = "jpeg",
-): Promise<string> => {
-	const ext = format === "jpeg" ? "jpg" : "png"
-	const padded = String(frameIndex).padStart(6, "0")
-	const fileName = `frame_${padded}.${ext}`
-	const tmpName = `frame_${padded}.tmp`
-
-	return retry(async () => {
-		const projectDir = await getDir(rootDir, projectId)
-		const recordingDir = await getDir(projectDir, recordingId)
-		const framesDir = await getDir(recordingDir, "frames")
-
-		const tmpHandle = await framesDir.getFileHandle(tmpName, {
-			create: true,
-		})
-		const writable = await tmpHandle.createWritable()
-		await writable.write(blob)
-		await writable.close()
-		await (
-			tmpHandle as FileSystemFileHandle & {
-				move: (name: string) => Promise<void>
-			}
-		).move(fileName)
-
-		return fileName
-	})
-}
-
 export const createWebmStream = async (
 	rootDir: FileSystemDirectoryHandle,
 	projectId: string,

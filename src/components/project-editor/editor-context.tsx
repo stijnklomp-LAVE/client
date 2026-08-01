@@ -85,7 +85,6 @@ interface EditorContextValue {
 	recordingLayerId: string | null
 	isPaused: boolean
 	recordingElapsedMs: number
-	recordingFrameCount: number
 	recordingError: string | null
 	recordingDurationSec: number
 	rawFramesDirectoryHandle: FileSystemDirectoryHandle | null
@@ -526,7 +525,6 @@ export const EditorProvider = ({
 				recordingLayerId,
 				isPaused,
 				recordingElapsedMs: recording.elapsedMs,
-				recordingFrameCount: recording.frameCount,
 				recordingError: recording.error,
 				recordingDurationSec: recording.recordingDurationSec,
 				rawFramesDirectoryHandle,

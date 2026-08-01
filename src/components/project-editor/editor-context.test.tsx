@@ -16,10 +16,9 @@ vi.mock("@/lib/editor/compositor", () => ({
 
 vi.mock("@/lib/editor/use-recording", () => ({
 	useRecording: () => ({
-		config: { fps: 1, format: "jpeg" as const, jpegQuality: 80 },
+		config: { codec: "vp9" as const, fps: 30, quality: 80 },
 		elapsedMs: 0,
 		error: null,
-		frameCount: 0,
 		isRecording: false,
 		pauseRecording: vi.fn(),
 		recordingDurationSec: 5.432,

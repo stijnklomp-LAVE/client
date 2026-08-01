@@ -6,7 +6,6 @@ import {
 	Drawer,
 	NativeSelect,
 	NumberInput,
-	Select,
 	Slider,
 } from "@mantine/core"
 import { useMediaQuery } from "@mantine/hooks"
@@ -122,39 +121,16 @@ const RecordingSettings = (): React.JSX.Element => {
 			/>
 
 			<p className={styles.settingLabel}>
-				{translations("recording.format")}
+				{translations("recording.quality")}
 			</p>
-			<Select
-				data={[
-					{ label: "JPEG", value: "jpeg" },
-					{ label: "PNG", value: "png" },
-				]}
-				value={recordingConfig.format}
-				onChange={(value) => {
-					if (value === "jpeg" || value === "png") {
-						updateRecordingConfig({ format: value })
-					}
-				}}
+			<Slider
+				value={recordingConfig.quality}
+				onChange={(value) => updateRecordingConfig({ quality: value })}
+				min={1}
+				max={100}
+				label={(v) => `${v}%`}
 				size="xs"
 			/>
-
-			{recordingConfig.format === "jpeg" && (
-				<>
-					<p className={styles.settingLabel}>
-						{translations("recording.quality")}
-					</p>
-					<Slider
-						value={recordingConfig.jpegQuality}
-						onChange={(value) =>
-							updateRecordingConfig({ jpegQuality: value })
-						}
-						min={1}
-						max={100}
-						label={(v) => `${v}%`}
-						size="xs"
-					/>
-				</>
-			)}
 		</div>
 	)
 }

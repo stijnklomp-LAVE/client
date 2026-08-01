@@ -1,7 +1,6 @@
 import { describe, test, expect, mock, vi, beforeEach } from "bun:test"
 import { renderHook, act } from "@testing-library/react"
 
-const mockSaveFrame = mock(() => Promise.resolve("frame_000000.jpg"))
 const mockCreateWebmStream = mock(() =>
 	Promise.resolve({ close: mock(), write: mock() }),
 )
@@ -20,7 +19,8 @@ const mockOutputInstance = {
 }
 
 const MockMediaStreamVideoTrackSource = mock(
-	(_track: unknown, _config: unknown) => mockSourceInstance,
+	(_track: unknown, _config: unknown, _options: unknown) =>
+		mockSourceInstance,
 )
 const MockOutput = mock(() => mockOutputInstance)
 const MockStreamTarget = mock()
@@ -29,7 +29,6 @@ const MockWebMOutputFormat = mock()
 void vi.mock("./raw-frames-directory", () => ({
 	createWebmStream: mockCreateWebmStream,
 	getWebmSize: mockGetWebmSize,
-	saveFrame: mockSaveFrame,
 }))
 
 void vi.mock("mediabunny", () => {
@@ -42,11 +41,7 @@ void vi.mock("mediabunny", () => {
 	return mocks
 })
 
-import {
-	useRecording,
-	getDisplayStep,
-	type RecordingConfig,
-} from "./use-recording"
+import { useRecording, bitrateFromQuality } from "./use-recording"
 
 const createMockVideoTrack = () =>
 	({
@@ -74,68 +69,41 @@ const createMockDirHandle = () =>
 		name: "test-dir",
 	}) as unknown as FileSystemDirectoryHandle
 
-type SampleShape = {
-	codedHeight: number
-	codedWidth: number
-	draw: ReturnType<typeof vi.fn>
-	timestamp: number
+type EncodingConfig = {
+	bitrate: number
+	codec: "vp9"
 }
 
-type EncodingConfigWithCallback = RecordingConfig & {
-	onEncodedSample: (sample: SampleShape) => void
+type SourceArgs = {
+	config: EncodingConfig
+	options: { frameRate: number }
 }
 
-let capturedEncodingConfig: EncodingConfigWithCallback | null = null
+let capturedSourceArgs: SourceArgs | null = null
 
-const getEncodingConfig = (): EncodingConfigWithCallback => {
-	if (!capturedEncodingConfig)
-		throw new Error("Encoding config not set by startRecording")
+const getSourceArgs = (): SourceArgs => {
+	if (!capturedSourceArgs)
+		throw new Error("Source args not set by startRecording")
 
-	return capturedEncodingConfig
+	return capturedSourceArgs
 }
 
 beforeEach(() => {
 	vi.clearAllMocks()
-	capturedEncodingConfig = null
+	capturedSourceArgs = null
 
 	MockMediaStreamVideoTrackSource.mockImplementation(
-		(_track: unknown, encodingConfig: unknown) => {
-			capturedEncodingConfig =
-				encodingConfig as typeof capturedEncodingConfig
+		(_track: unknown, config: unknown, options: unknown) => {
+			capturedSourceArgs = {
+				config: config as SourceArgs["config"],
+				options: options as SourceArgs["options"],
+			}
 
 			return mockSourceInstance
 		},
 	)
 
 	mockSourceInstance.errorPromise.catch = mock()
-
-	class MockOffscreenCanvas {
-		width = 640
-		height = 480
-		getContext() {
-			return {
-				drawImage: mock(),
-			}
-		}
-		convertToBlob() {
-			return Promise.resolve(
-				new Blob(["fake-image"], { type: "image/jpeg" }),
-			)
-		}
-	}
-
-	Object.defineProperty(globalThis, "OffscreenCanvas", {
-		configurable: true,
-		value: MockOffscreenCanvas,
-		writable: true,
-	})
-})
-
-const createSample = (timestamp: number) => ({
-	codedHeight: 1080,
-	codedWidth: 1920,
-	draw: mock(),
-	timestamp,
 })
 
 describe("useRecording", () => {
@@ -145,12 +113,11 @@ describe("useRecording", () => {
 		expect(result.current.isRecording).toBe(false)
 		expect(result.current.error).toBeNull()
 		expect(result.current.elapsedMs).toBe(0)
-		expect(result.current.frameCount).toBe(0)
 		expect(result.current.recordingDurationSec).toBe(0)
 		expect(result.current.config).toEqual({
-			format: "jpeg",
-			fps: 1,
-			jpegQuality: 80,
+			codec: "vp9",
+			fps: 30,
+			quality: 80,
 		})
 	})
 
@@ -180,6 +147,27 @@ describe("useRecording", () => {
 		expect(result.current.isRecording).toBe(true)
 	})
 
+	test("maps config onto the video source encoding config", async () => {
+		const { result } = renderHook(() => useRecording())
+
+		await act(async () => {
+			await result.current.startRecording(
+				createMockStream(),
+				createMockDirHandle(),
+				"proj-123",
+				"rec-456",
+				{ fps: 24, quality: 80 },
+			)
+		})
+
+		const args = getSourceArgs()
+		expect(args.config).toEqual({
+			bitrate: 5_000_000,
+			codec: "vp9",
+		})
+		expect(args.options).toEqual({ frameRate: 24 })
+	})
+
 	test("startRecording with partial config merges with defaults", async () => {
 		const { result } = renderHook(() => useRecording())
 
@@ -194,8 +182,8 @@ describe("useRecording", () => {
 		})
 
 		expect(result.current.config.fps).toBe(5)
-		expect(result.current.config.format).toBe("jpeg")
-		expect(result.current.config.jpegQuality).toBe(80)
+		expect(result.current.config.codec).toBe("vp9")
+		expect(result.current.config.quality).toBe(80)
 	})
 
 	test("startRecording sets error when no video track", async () => {
@@ -238,6 +226,32 @@ describe("useRecording", () => {
 		expect(result.current.isRecording).toBe(false)
 	})
 
+	test("surfaces source errorPromise rejections as recording errors", async () => {
+		let errorHandler: ((err: unknown) => void) | null = null
+		mockSourceInstance.errorPromise.catch = mock(
+			(fn: (err: unknown) => void) => {
+				errorHandler = fn
+			},
+		)
+
+		const { result } = renderHook(() => useRecording())
+
+		await act(async () => {
+			await result.current.startRecording(
+				createMockStream(),
+				createMockDirHandle(),
+				"proj-123",
+				"rec-456",
+			)
+		})
+
+		act(() => {
+			errorHandler?.(new Error("Encoder died"))
+		})
+
+		expect(result.current.error).toBe("Encoder died")
+	})
+
 	test("stopRecording finalizes output and returns recording result", async () => {
 		const { result } = renderHook(() => useRecording())
 
@@ -267,6 +281,34 @@ describe("useRecording", () => {
 			size: 2048,
 		})
 		expect(result.current.isRecording).toBe(false)
+	})
+
+	test("stopRecording surfaces finalize failures and returns null", async () => {
+		mockOutputInstance.finalize.mockRejectedValueOnce(
+			new Error("Muxer error"),
+		)
+
+		const { result } = renderHook(() => useRecording())
+
+		await act(async () => {
+			await result.current.startRecording(
+				createMockStream(),
+				createMockDirHandle(),
+				"proj-123",
+				"rec-456",
+			)
+		})
+
+		let recordingResult: Awaited<
+			ReturnType<typeof result.current.stopRecording>
+		> | null = null
+
+		await act(async () => {
+			recordingResult = await result.current.stopRecording()
+		})
+
+		expect(recordingResult).toBeNull()
+		expect(result.current.error).toBe("Muxer error")
 	})
 
 	test("stopRecording returns null when nothing was recorded", async () => {
@@ -326,7 +368,6 @@ describe("useRecording", () => {
 		})
 
 		expect(result.current.isRecording).toBe(true)
-		expect(result.current.frameCount).toBe(0)
 		expect(result.current.elapsedMs).toBe(0)
 
 		await act(async () => {
@@ -345,7 +386,6 @@ describe("useRecording", () => {
 		})
 
 		expect(result.current.isRecording).toBe(true)
-		expect(result.current.frameCount).toBe(0)
 		expect(result.current.elapsedMs).toBe(0)
 	})
 
@@ -488,221 +528,24 @@ describe("useRecording", () => {
 		const { result } = renderHook(() => useRecording())
 
 		act(() => {
-			result.current.updateConfig({ format: "png", fps: 15 })
+			result.current.updateConfig({ fps: 15 })
 		})
 
 		expect(result.current.config.fps).toBe(15)
-		expect(result.current.config.format).toBe("png")
-		expect(result.current.config.jpegQuality).toBe(80)
+		expect(result.current.config.codec).toBe("vp9")
+		expect(result.current.config.quality).toBe(80)
 	})
 
 	test("updateConfig only changes specified fields", () => {
 		const { result } = renderHook(() => useRecording())
 
 		act(() => {
-			result.current.updateConfig({ jpegQuality: 50 })
+			result.current.updateConfig({ quality: 50 })
 		})
 
-		expect(result.current.config.fps).toBe(1)
-		expect(result.current.config.format).toBe("jpeg")
-		expect(result.current.config.jpegQuality).toBe(50)
-	})
-
-	test("tracks frame count and updates state via onEncodedSample", async () => {
-		const { result } = renderHook(() => useRecording())
-
-		await act(async () => {
-			await result.current.startRecording(
-				createMockStream(),
-				createMockDirHandle(),
-				"proj-123",
-				"rec-456",
-			)
-		})
-
-		const config = getEncodingConfig()
-		await act(async () => {
-			config.onEncodedSample(createSample(0))
-			await Promise.resolve()
-		})
-
-		expect(mockSaveFrame).toHaveBeenCalledTimes(1)
-		expect(result.current.frameCount).toBe(1)
-	})
-
-	test("updates frame count display every frame at 1 FPS", async () => {
-		const { result } = renderHook(() => useRecording())
-
-		await act(async () => {
-			await result.current.startRecording(
-				createMockStream(),
-				createMockDirHandle(),
-				"proj-123",
-				"rec-456",
-				{ fps: 1 },
-			)
-		})
-
-		const cb = getEncodingConfig().onEncodedSample
-
-		for (let i = 0; i < 5; i++) {
-			await act(async () => {
-				cb(createSample(i))
-				await Promise.resolve()
-			})
-			expect(result.current.frameCount).toBe(i + 1)
-		}
-	})
-
-	test("getDisplayStep returns 1 at sub-1 FPS", () => {
-		expect(getDisplayStep(0.5)).toBe(1)
-	})
-
-	test("getDisplayStep returns fps rounded at 1 FPS", () => {
-		expect(getDisplayStep(1)).toBe(1)
-		expect(getDisplayStep(1.4)).toBe(1)
-		expect(getDisplayStep(1.5)).toBe(2)
-	})
-
-	test("getDisplayStep returns fps rounded at higher FPS", () => {
-		expect(getDisplayStep(5)).toBe(5)
-		expect(getDisplayStep(10)).toBe(10)
-		expect(getDisplayStep(30)).toBe(30)
-	})
-
-	test("getDisplayStep never returns less than 1", () => {
-		expect(getDisplayStep(0)).toBe(1)
-		expect(getDisplayStep(0.1)).toBe(1)
-		expect(getDisplayStep(0.9)).toBe(1)
-	})
-
-	test("updates frame count display every frame at 0.5 FPS (sub-1 FPS)", async () => {
-		const { result } = renderHook(() => useRecording())
-
-		await act(async () => {
-			await result.current.startRecording(
-				createMockStream(),
-				createMockDirHandle(),
-				"proj-123",
-				"rec-456",
-				{ fps: 0.5 },
-			)
-		})
-
-		const cb = getEncodingConfig().onEncodedSample
-
-		await act(async () => {
-			cb(createSample(0))
-			await Promise.resolve()
-		})
-		expect(result.current.frameCount).toBe(1)
-
-		await act(async () => {
-			cb(createSample(2))
-			await Promise.resolve()
-		})
-		expect(result.current.frameCount).toBe(2)
-	})
-
-	test("throttles frame saving by configured fps", async () => {
-		const { result } = renderHook(() => useRecording())
-
-		await act(async () => {
-			await result.current.startRecording(
-				createMockStream(),
-				createMockDirHandle(),
-				"proj-123",
-				"rec-456",
-				{ fps: 2 },
-			)
-		})
-
-		const cb = getEncodingConfig().onEncodedSample
-		const asample = (t: number) => createSample(t)
-
-		await act(async () => {
-			cb(asample(0))
-			await Promise.resolve()
-		})
-		expect(mockSaveFrame).toHaveBeenCalledTimes(1)
-
-		await act(async () => {
-			cb(asample(0.3))
-			await Promise.resolve()
-		})
-		expect(mockSaveFrame).toHaveBeenCalledTimes(1)
-
-		await act(async () => {
-			cb(asample(0.5))
-			await Promise.resolve()
-		})
-		expect(mockSaveFrame).toHaveBeenCalledTimes(2)
-
-		await act(async () => {
-			cb(asample(0.7))
-			await Promise.resolve()
-		})
-		expect(mockSaveFrame).toHaveBeenCalledTimes(2)
-
-		await act(async () => {
-			cb(asample(1.0))
-			await Promise.resolve()
-		})
-		expect(mockSaveFrame).toHaveBeenCalledTimes(3)
-	})
-
-	test("captures first frame even at very low fps", async () => {
-		const { result } = renderHook(() => useRecording())
-
-		await act(async () => {
-			await result.current.startRecording(
-				createMockStream(),
-				createMockDirHandle(),
-				"proj-123",
-				"rec-456",
-				{ fps: 0.1 },
-			)
-		})
-
-		const cb = getEncodingConfig().onEncodedSample
-
-		await act(async () => {
-			cb(createSample(0))
-			await Promise.resolve()
-		})
-
-		expect(mockSaveFrame).toHaveBeenCalledTimes(1)
-	})
-
-	test("draws sample to OffscreenCanvas and converts to blob", async () => {
-		const { result } = renderHook(() => useRecording())
-
-		await act(async () => {
-			await result.current.startRecording(
-				createMockStream(),
-				createMockDirHandle(),
-				"proj-123",
-				"rec-456",
-			)
-		})
-
-		const sample = createSample(0)
-		const cb = getEncodingConfig().onEncodedSample
-
-		await act(async () => {
-			cb(sample)
-			await Promise.resolve()
-		})
-
-		expect(sample.draw).toHaveBeenCalled()
-		expect(mockSaveFrame).toHaveBeenCalledWith(
-			expect.anything(),
-			"proj-123",
-			"rec-456",
-			0,
-			expect.any(Blob),
-			"jpeg",
-		)
+		expect(result.current.config.fps).toBe(30)
+		expect(result.current.config.codec).toBe("vp9")
+		expect(result.current.config.quality).toBe(50)
 	})
 
 	test("cleanup on unmount finalizes output", async () => {
@@ -720,5 +563,11 @@ describe("useRecording", () => {
 		unmount()
 
 		expect(mockOutputInstance.finalize).toHaveBeenCalled()
+	})
+
+	test("bitrateFromQuality maps quality to bitrate", () => {
+		expect(bitrateFromQuality(80)).toBe(5_000_000)
+		expect(bitrateFromQuality(100)).toBe(6_250_000)
+		expect(bitrateFromQuality(1)).toBe(62_500)
 	})
 })

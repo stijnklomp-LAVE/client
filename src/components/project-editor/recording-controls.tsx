@@ -15,7 +15,7 @@ export const RecordingControls = (): React.JSX.Element | null => {
 	const {
 		isRecording,
 		recordingElapsedMs,
-		recordingFrameCount,
+		recordingError,
 		stopRecording,
 		pauseRecording,
 		resumeRecording,
@@ -33,6 +33,11 @@ export const RecordingControls = (): React.JSX.Element | null => {
 
 	return (
 		<div className={styles.overlay}>
+			{recordingError && (
+				<div className={styles.errorBanner} role="alert">
+					{recordingError}
+				</div>
+			)}
 			<div className={styles.bar}>
 				<div className={styles.statusGroup}>
 					<span
@@ -55,11 +60,6 @@ export const RecordingControls = (): React.JSX.Element | null => {
 				<div className={styles.infoGroup}>
 					<span className={styles.timer}>
 						{formatTime(recordingElapsedMs)}
-					</span>
-					<span className={styles.frameCount}>
-						{translations("recording.framesCaptured", {
-							count: recordingFrameCount,
-						})}
 					</span>
 				</div>
 				<div className={styles.actions}>

@@ -1,32 +1,23 @@
 import { useCallback, useEffect, useRef, useState } from "react"
 
-export const getDisplayStep = (fps: number): number =>
-	Math.max(1, Math.round(fps))
-
 import {
 	MediaStreamVideoTrackSource,
 	Output,
 	StreamTarget,
 	WebMOutputFormat,
-	type VideoSample,
 } from "mediabunny"
 
-import {
-	saveFrame,
-	createWebmStream,
-	getWebmSize,
-} from "./raw-frames-directory"
+import { createWebmStream, getWebmSize } from "./raw-frames-directory"
 
 export type RecordingConfig = {
+	codec: "vp9"
 	fps: number
-	format: "jpeg" | "png"
-	jpegQuality: number
+	quality: number
 }
 
 export type RecordingState = {
 	elapsedMs: number
 	error: string | null
-	frameCount: number
 	isRecording: boolean
 	recordingDurationSec: number
 }
@@ -37,16 +28,20 @@ export type RecordingResult = {
 }
 
 const DEFAULT_CONFIG: RecordingConfig = {
-	format: "jpeg",
-	fps: 1,
-	jpegQuality: 80,
+	codec: "vp9",
+	fps: 30,
+	quality: 80,
 }
+
+const MAX_BITRATE = 6_250_000
+
+export const bitrateFromQuality = (quality: number): number =>
+	Math.round((quality / 100) * MAX_BITRATE)
 
 export const useRecording = () => {
 	const [state, setState] = useState<RecordingState>({
 		elapsedMs: 0,
 		error: null,
-		frameCount: 0,
 		isRecording: false,
 		recordingDurationSec: 0,
 	})
@@ -60,74 +55,17 @@ export const useRecording = () => {
 	const recordingIdRef = useRef<string>("")
 	const sourceRef = useRef<MediaStreamVideoTrackSource | null>(null)
 	const outputRef = useRef<Output | null>(null)
-	const canvasRef = useRef<OffscreenCanvas | null>(null)
 	const startTimeRef = useRef<number>(0)
-	const lastSavedTimeRef = useRef<number>(0)
-	const frameCountRef = useRef<number>(0)
 	const isRecordingRef = useRef(false)
 	const pauseStartTimeRef = useRef<number>(0)
 	const pausedRef = useRef(false)
-	const lastDisplayedFrameCountRef = useRef<number>(0)
 
-	const saveFrameIfNeeded = useCallback(
-		async (sample: VideoSample): Promise<void> => {
-			const now = sample.timestamp
-			const interval = 1 / configRef.current.fps
-
-			if (now - lastSavedTimeRef.current < interval) return
-			lastSavedTimeRef.current = now
-
-			const rootDir = rootDirHandleRef.current
-			const projectId = projectIdRef.current
-			const recordingId = recordingIdRef.current
-
-			if (!rootDir || !projectId || !recordingId) return
-
-			const canvas = canvasRef.current
-
-			if (!canvas) return
-
-			const ctx = canvas.getContext("2d")
-
-			if (!ctx) return
-
-			try {
-				canvas.width = sample.codedWidth
-				canvas.height = sample.codedHeight
-				sample.draw(ctx, 0, 0, canvas.width, canvas.height)
-				const format = configRef.current.format
-				const quality = configRef.current.jpegQuality / 100
-				const blob = await canvas.convertToBlob({
-					quality,
-					type: format === "jpeg" ? "image/jpeg" : "image/png",
-				})
-				const idx = frameCountRef.current
-				frameCountRef.current++
-				await saveFrame(
-					rootDir,
-					projectId,
-					recordingId,
-					idx,
-					blob,
-					format,
-				)
-				const actualCount = frameCountRef.current
-				const step = getDisplayStep(configRef.current.fps)
-				const milestone = Math.floor(actualCount / step) * step
-
-				if (milestone !== lastDisplayedFrameCountRef.current) {
-					lastDisplayedFrameCountRef.current = milestone
-					setState((prev) => ({
-						...prev,
-						frameCount: actualCount,
-					}))
-				}
-			} catch {
-				// frame save failed silently
-			}
-		},
-		[],
-	)
+	const setError = useCallback((err: unknown, fallback: string) => {
+		setState((prev) => ({
+			...prev,
+			error: err instanceof Error ? err.message : fallback,
+		}))
+	}, [])
 
 	const startRecording = useCallback(
 		async (
@@ -149,21 +87,16 @@ export const useRecording = () => {
 			rootDirHandleRef.current = rootDirHandle
 			projectIdRef.current = projectId
 			recordingIdRef.current = recordingId
-			frameCountRef.current = 0
-			lastDisplayedFrameCountRef.current = 0
-			lastSavedTimeRef.current = -Infinity
 			pauseStartTimeRef.current = 0
 			pausedRef.current = false
-
-			canvasRef.current = new OffscreenCanvas(640, 480)
 
 			const videoTrack = stream.getVideoTracks()[0]
 
 			if (!videoTrack) {
-				setState((prev) => ({
-					...prev,
-					error: "No video track available",
-				}))
+				setError(
+					new Error("No video track available"),
+					"No video track available",
+				)
 
 				return
 			}
@@ -175,22 +108,17 @@ export const useRecording = () => {
 					recordingId,
 				)
 
-				const source = new MediaStreamVideoTrackSource(videoTrack, {
-					bitrate: 5_000_000,
-					codec: "vp9",
-					onEncodedSample: (sample: VideoSample) => {
-						void saveFrameIfNeeded(sample)
+				const source = new MediaStreamVideoTrackSource(
+					videoTrack,
+					{
+						bitrate: bitrateFromQuality(configRef.current.quality),
+						codec: configRef.current.codec,
 					},
-				})
+					{ frameRate: configRef.current.fps },
+				)
 
 				source.errorPromise.catch((err: unknown) => {
-					setState((prev) => ({
-						...prev,
-						error:
-							err instanceof Error
-								? err.message
-								: "Encoding error",
-					}))
+					setError(err, "Encoding error")
 				})
 
 				sourceRef.current = source
@@ -205,13 +133,7 @@ export const useRecording = () => {
 				outputRef.current = output
 				await output.start()
 			} catch (err) {
-				setState((prev) => ({
-					...prev,
-					error:
-						err instanceof Error
-							? err.message
-							: "Failed to start recording",
-				}))
+				setError(err, "Failed to start recording")
 
 				return
 			}
@@ -221,13 +143,12 @@ export const useRecording = () => {
 				...prev,
 				elapsedMs: 0,
 				error: null,
-				frameCount: 0,
 				isRecording: true,
 				recordingDurationSec: 0,
 			}))
 			isRecordingRef.current = true
 		},
-		[saveFrameIfNeeded],
+		[setError],
 	)
 
 	const elapsedTimerRef = useRef<ReturnType<typeof setInterval>>(undefined)
@@ -268,8 +189,11 @@ export const useRecording = () => {
 			if (outputRef.current) {
 				try {
 					await outputRef.current.finalize()
-				} catch {
-					// finalize failed silently
+				} catch (err) {
+					outputRef.current = null
+					setError(err, "Failed to finalize recording")
+
+					return null
 				}
 
 				outputRef.current = null
@@ -283,8 +207,6 @@ export const useRecording = () => {
 				})
 				streamRef.current = null
 			}
-
-			canvasRef.current = null
 
 			if (rootDir && projectId && recordingId) {
 				try {
@@ -301,7 +223,7 @@ export const useRecording = () => {
 			}
 
 			return null
-		}, [])
+		}, [setError])
 
 	const pauseRecording = useCallback(() => {
 		pausedRef.current = true
@@ -329,7 +251,7 @@ export const useRecording = () => {
 			clearInterval(elapsedTimerRef.current)
 
 			if (outputRef.current) {
-				void outputRef.current.finalize()
+				void outputRef.current.finalize().catch(() => undefined)
 			}
 		}
 	}, [])

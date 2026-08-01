@@ -39,7 +39,6 @@ const defaultContextValue = {
 	recordingLayerId: "layer-1",
 	isPaused: false,
 	recordingElapsedMs: 65432,
-	recordingFrameCount: 42,
 	recordingError: null,
 	recordingDurationSec: 65.432,
 	rawFramesDirectoryHandle: null,
@@ -55,7 +54,7 @@ const defaultContextValue = {
 	stopRecording: vi.fn(),
 	pauseRecording: vi.fn(),
 	resumeRecording: vi.fn(),
-	recordingConfig: { fps: 1, format: "jpeg" as const, jpegQuality: 80 },
+	recordingConfig: { codec: "vp9" as const, fps: 30, quality: 80 },
 	updateRecordingConfig: vi.fn(),
 	currentTime: 0,
 	duration: 120,
@@ -171,18 +170,16 @@ describe("RecordingControls", () => {
 			expect(screen.getByText("01:05")).toBeInTheDocument()
 		})
 
-		it("displays frame count", () => {
-			renderWithContext({ recordingFrameCount: 42 })
-
-			expect(
-				screen.getByText("recording.framesCaptured"),
-			).toBeInTheDocument()
-		})
-
 		it("shows zero-padded timer for sub-minute durations", () => {
 			renderWithContext({ recordingElapsedMs: 5000 })
 
 			expect(screen.getByText("00:05")).toBeInTheDocument()
+		})
+
+		it("shows the recording error when one is set", () => {
+			renderWithContext({ recordingError: "Encoder died" })
+
+			expect(screen.getByText("Encoder died")).toBeInTheDocument()
 		})
 	})
 })
