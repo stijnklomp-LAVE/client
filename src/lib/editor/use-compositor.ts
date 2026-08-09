@@ -1,6 +1,6 @@
 "use client"
 
-import { useRef, useEffect, useCallback, type RefObject } from "react"
+import { useRef, useEffect, useCallback, useState, type Ref } from "react"
 import { logger } from "@/lib/logger"
 import { DecoderPool } from "./decoder-pool"
 import {
@@ -26,7 +26,7 @@ type UseCompositorOptions = {
 }
 
 type UseCompositorResult = {
-	canvasRef: RefObject<HTMLCanvasElement | null>
+	canvasRef: Ref<HTMLCanvasElement>
 	seek: (time: number) => void
 }
 
@@ -42,6 +42,11 @@ export const useCompositor = ({
 	onPlaybackEnd,
 }: UseCompositorOptions): UseCompositorResult => {
 	const canvasRef = useRef<HTMLCanvasElement | null>(null)
+	const [canvasMountKey, setCanvasMountKey] = useState(0)
+	const canvasRefCallback = useCallback((node: HTMLCanvasElement | null) => {
+		canvasRef.current = node
+		setCanvasMountKey((key) => key + 1)
+	}, [])
 	const decoderRef = useRef<DecoderPool | null>(null)
 	const seekRef = useRef<((time: number) => void) | null>(null)
 
@@ -123,6 +128,7 @@ export const useCompositor = ({
 		let rafId: number
 		let lastTime = performance.now()
 		let currentTime = 0
+		let composing = false
 
 		const syncSize = () => {
 			const parent = canvas.parentElement
@@ -196,21 +202,28 @@ export const useCompositor = ({
 
 			lastTime = now
 
-			composeFrame(
-				ctx,
-				canvas.width,
-				canvas.height,
-				layersRef.current,
-				currentTime,
-				frameProvider,
-				(_ctx, _fragmentId, _zIndex, width, height) => {
-					const hue = (currentTime * 60) % 360
-					_ctx.fillStyle = `hsl(${hue}, 70%, 50%)`
-					_ctx.fillRect(0, 0, width, height)
-				},
-			).catch((err: unknown) => {
-				logger.error(err, "composeFrame failed")
-			})
+			if (!composing) {
+				composing = true
+				composeFrame(
+					ctx,
+					canvas.width,
+					canvas.height,
+					layersRef.current,
+					currentTime,
+					frameProvider,
+					(_ctx, _fragmentId, _zIndex, width, height) => {
+						const hue = (currentTime * 60) % 360
+						_ctx.fillStyle = `hsl(${String(hue)}, 70%, 50%)`
+						_ctx.fillRect(0, 0, width, height)
+					},
+				)
+					.finally(() => {
+						composing = false
+					})
+					.catch((err: unknown) => {
+						logger.error(err, "composeFrame failed")
+					})
+			}
 
 			rafId = requestAnimationFrame(tick)
 		}
@@ -221,9 +234,9 @@ export const useCompositor = ({
 			cancelAnimationFrame(rafId)
 			observer.disconnect()
 		}
-	}, [hasContent])
+	}, [hasContent, canvasMountKey])
 
 	const seek = useCallback((time: number) => seekRef.current?.(time), [])
 
-	return { canvasRef, seek }
+	return { canvasRef: canvasRefCallback, seek }
 }

@@ -39,7 +39,7 @@ const createMockCanvas = () => {
 		fillText: mock(),
 		font: "",
 		textAlign: "",
-	}))
+	})) as unknown as typeof canvas.getContext
 
 	return canvas
 }

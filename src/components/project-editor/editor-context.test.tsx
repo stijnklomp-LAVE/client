@@ -1,7 +1,9 @@
 import { vi } from "bun:test"
 
 const mocks = {
-	getPersistedDirectoryHandle: vi.fn(() => Promise.resolve(null)),
+	getPersistedDirectoryHandle: vi.fn<
+		() => Promise<FileSystemDirectoryHandle | null>
+	>(() => Promise.resolve(null)),
 	getStoredDirectoryName: vi.fn(() => null),
 	setStoredDirectoryName: vi.fn(),
 }
@@ -32,12 +34,10 @@ vi.mock("@/lib/editor/use-recording", () => ({
 }))
 
 vi.mock("@/lib/editor/raw-frames-directory", () => ({
-	getPersistedDirectoryHandle: (...args: unknown[]) =>
-		mocks.getPersistedDirectoryHandle(...args),
-	getStoredDirectoryName: (...args: unknown[]) =>
-		mocks.getStoredDirectoryName(...args),
-	setStoredDirectoryName: (...args: unknown[]) =>
-		mocks.setStoredDirectoryName(...args),
+	getPersistedDirectoryHandle: () => mocks.getPersistedDirectoryHandle(),
+	getStoredDirectoryName: () => mocks.getStoredDirectoryName(),
+	setStoredDirectoryName: (name: string | null) =>
+		mocks.setStoredDirectoryName(name),
 }))
 
 import "@testing-library/jest-dom"

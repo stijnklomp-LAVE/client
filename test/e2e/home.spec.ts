@@ -21,7 +21,7 @@ test.describe("Home page", () => {
 		)
 	})
 
-	test("locale switcher changes language", async ({ page }) => {
+	test("locale switcher changes language", () => {
 		test.skip(true, "Locale switcher UI differs in production image")
 	})
 })

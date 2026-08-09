@@ -2,8 +2,8 @@ import { Client } from "pg"
 import bcrypt from "bcryptjs"
 
 const TEST_USER = {
-	id: "e2e-test-user",
 	email: "e2e-test@example.com",
+	id: "e2e-test-user",
 	password: "e2e-test-password-123",
 }
 
@@ -12,7 +12,26 @@ const TEST_PROJECT = {
 	name: "E2E Test Project",
 }
 
-export default async (): Promise<void> => {
+type ProjectRow = {
+	id: string
+	name: string
+}
+
+type LayerRow = {
+	id: string
+	projectId: string
+}
+
+type SegmentRow = {
+	id: string
+	layerId: string
+}
+
+type LayerCountRow = {
+	cnt: number
+}
+
+const globalSetup = async (): Promise<void> => {
 	const databaseUrl = process.env.DATABASE_URL
 
 	if (!databaseUrl) {
@@ -83,26 +102,30 @@ export default async (): Promise<void> => {
 	await verify.connect()
 
 	try {
-		const { rows: projects } = await verify.query(
+		const { rows: projects } = await verify.query<ProjectRow>(
 			`SELECT id, name FROM "VideoProject" WHERE id = 'e2e-test-project'`,
 		)
-		console.log(`Seed project: ${JSON.stringify(projects[0])}`)
+		console.warn(`Seed project: ${JSON.stringify(projects[0])}`)
 
-		const { rows: layers } = await verify.query(
+		const { rows: layers } = await verify.query<LayerRow>(
 			`SELECT id, "projectId" FROM "TimelineLayer" WHERE id = 'e2e-test-layer'`,
 		)
-		console.log(`Seed layer: ${JSON.stringify(layers[0])}`)
+		console.warn(`Seed layer: ${JSON.stringify(layers[0])}`)
 
-		const { rows: segments } = await verify.query(
+		const { rows: segments } = await verify.query<SegmentRow>(
 			`SELECT id, "layerId" FROM "TimelineSegment" WHERE id = 'e2e-test-segment'`,
 		)
-		console.log(`Seed segment: ${JSON.stringify(segments[0])}`)
+		console.warn(`Seed segment: ${JSON.stringify(segments[0])}`)
 
-		const { rows: allLayers } = await verify.query(
+		const { rows: allLayers } = await verify.query<LayerCountRow>(
 			`SELECT count(*)::int as cnt FROM "TimelineLayer" WHERE "projectId" = 'e2e-test-project'`,
 		)
-		console.log(`Layers count for project: ${allLayers[0]?.cnt}`)
+		console.warn(
+			`Layers count for project: ${String(allLayers[0]?.cnt ?? 0)}`,
+		)
 	} finally {
 		await verify.end()
 	}
 }
+
+export default globalSetup

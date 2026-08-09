@@ -39,7 +39,7 @@ const defaultContextValue = {
 	recordingLayerId: "layer-1",
 	isPaused: false,
 	recordingElapsedMs: 65432,
-	recordingError: null,
+	recordingError: null as string | null,
 	recordingDurationSec: 65.432,
 	rawFramesDirectoryHandle: null,
 	rawFramesDirectoryName: null,

@@ -115,9 +115,13 @@ export const composeFrame = async (
 	if (canvasWidth < 1 || canvasHeight < 1) return
 
 	try {
-		ctx.clearRect(0, 0, canvasWidth, canvasHeight)
-
 		const sortedLayers = [...layers].sort((a, b) => a.zIndex - b.zIndex)
+
+		const activeLayers: {
+			active: ActiveSegmentResult
+			layer: GenericLayer
+			seekTime: number
+		}[] = []
 
 		let drewSomething = false
 
@@ -133,39 +137,50 @@ export const composeFrame = async (
 				currentTime,
 				active.timelineOffset,
 			)
+			activeLayers.push({ active, layer, seekTime })
+		}
+
+		const frames: {
+			active: ActiveSegmentResult
+			layer: GenericLayer
+			frame: FrameBuffer | null
+		}[] = []
+
+		for (const { active, layer, seekTime } of activeLayers) {
+			let frame: FrameBuffer | null = null
 
 			try {
-				const frame = await frameProvider.getFrame(
+				frame = await frameProvider.getFrame(
 					active.segment.fragmentId,
 					seekTime,
 				)
-
-				if (
-					frame?.canvas &&
-					frame.canvas.width > 0 &&
-					frame.canvas.height > 0
-				) {
-					ctx.drawImage(
-						frame.canvas,
-						0,
-						0,
-						frame.canvas.width,
-						frame.canvas.height,
-						0,
-						0,
-						canvasWidth,
-						canvasHeight,
-					)
-				} else {
-					onMissingFragment(
-						ctx,
-						active.segment.fragmentId,
-						layer.zIndex,
-						canvasWidth,
-						canvasHeight,
-					)
-				}
 			} catch {
+				frame = null
+			}
+
+			frames.push({ active, frame, layer })
+		}
+
+		ctx.clearRect(0, 0, canvasWidth, canvasHeight)
+
+		for (const { active, frame, layer } of frames) {
+			if (
+				frame?.canvas &&
+				frame.canvas.width > 0 &&
+				frame.canvas.height > 0
+			) {
+				ctx.drawImage(
+					frame.canvas,
+					0,
+					0,
+					frame.canvas.width,
+					frame.canvas.height,
+					0,
+					0,
+					canvasWidth,
+					canvasHeight,
+				)
+			} else {
 				onMissingFragment(
 					ctx,
 					active.segment.fragmentId,

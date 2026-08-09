@@ -17,7 +17,7 @@ const getCenterPixel = (page: import("@playwright/test").Page) =>
 		const cy = Math.floor(canvas.height / 2)
 		const data = ctx.getImageData(cx, cy, 1, 1).data
 
-		return { r: data[0], g: data[1], b: data[2], a: data[3] }
+		return { a: data[3], b: data[2], g: data[1], r: data[0] }
 	})
 
 test.describe("Video playback", () => {
@@ -32,25 +32,17 @@ test.describe("Video playback", () => {
 		await loginAs(page)
 
 		// Inject error check into the test context
-		;(page as unknown as { __errors: string[] }).__errors = errors
+		;(page as unknown as { errors: string[] }).errors = errors
 	})
 
 	test("renders video frames on the canvas when playing", async ({
 		page,
 	}) => {
-		const errors = (page as unknown as { __errors: string[] }).__errors
+		const errors = (page as unknown as { errors: string[] }).errors
 
 		await page.goto(EDITOR_URL, { waitUntil: "networkidle" })
 		await expect(page).toHaveURL(/\/editor\//)
 		await page.waitForTimeout(2000)
-
-		// Debug: check what the page received for timeline data
-		const debugInfo = await page.evaluate(() => {
-			const el = document.querySelector("[data-timeline-debug]")
-
-			return el?.getAttribute("data-timeline-debug") ?? "no debug element"
-		})
-		console.log("Debug:", debugInfo)
 
 		const canvas = page.locator("canvas")
 		const canvasCount = await canvas.count()
@@ -65,7 +57,7 @@ test.describe("Video playback", () => {
 						.filter((e) => e.name.includes("timeline"))
 						.map(
 							(e) =>
-								`${e.name}: ${(e as unknown as { responseStatus?: number }).responseStatus}`,
+								`${e.name}: ${String((e as unknown as { responseStatus?: number }).responseStatus)}`,
 						),
 				)),
 			]
@@ -92,7 +84,7 @@ test.describe("Video playback", () => {
 	})
 
 	test("pause keeps the current frame visible", async ({ page }) => {
-		const errors = (page as unknown as { __errors: string[] }).__errors
+		const errors = (page as unknown as { errors: string[] }).errors
 
 		await page.goto(EDITOR_URL, { waitUntil: "networkidle" })
 		await expect(page).toHaveURL(/\/editor\//)
@@ -130,7 +122,7 @@ test.describe("Video playback", () => {
 	})
 
 	test("canvas shows non-black pixels after loading", async ({ page }) => {
-		const errors = (page as unknown as { __errors: string[] }).__errors
+		const errors = (page as unknown as { errors: string[] }).errors
 
 		await page.goto(EDITOR_URL, { waitUntil: "networkidle" })
 		await expect(page).toHaveURL(/\/editor\//)
@@ -150,6 +142,6 @@ test.describe("Video playback", () => {
 
 		const pixel = await getCenterPixel(page)
 		expect(pixel).not.toBeNull()
-		expect(pixel!.a).toBe(255)
+		expect(pixel?.a).toBe(255)
 	})
 })
